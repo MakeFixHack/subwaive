@@ -67,7 +67,7 @@ networks:
     external: true
 ```
 
-Docuseal also needs to have its networks updated. The `postgres` service needs to be added to the `mfh` network for us to run SQL against that database. The `app` service needs to be added so we can make API requests against it and so it can `POST` webhooks.
+Docuseal also needs to have its networks updated. The `app` service needs to be added so we can make API requests against it and so it can `POST` webhooks.
 
 ```
 services:

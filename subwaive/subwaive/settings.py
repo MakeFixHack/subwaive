@@ -88,16 +88,6 @@ DATABASES = {
          'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
          'PORT': os.getenv('DATABASE_PORT', 5432),
      },
-     'docuseal': {
-         'ENGINE': 'django.db.backends.{}'.format(
-             os.getenv('DATABASE_ENGINE_DOCUSEAL', 'sqlite3')
-         ),
-         'NAME': os.getenv('DATABASE_NAME_DOCUSEAL', 'polls'),
-         'USER': os.getenv('DATABASE_USERNAME_DOCUSEAL', 'myprojectuser'),
-         'PASSWORD': os.getenv('DATABASE_PASSWORD_DOCUSEAL', 'password'),
-         'HOST': os.getenv('DATABASE_HOST_DOCUSEAL', '127.0.0.1'),
-         'PORT': os.getenv('DATABASE_PORT_DOCUSEAL', 5432),
-     }
  }
 
 
