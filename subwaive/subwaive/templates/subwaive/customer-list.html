@@ -1,0 +1,67 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>Stripe Customer List</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+{% include 'subwaive/templates/buttons.html' %}
+
+{% if stripe_customers %}
+{% for result in stripe_customers %}
+{% ifchanged result.name %}
+{% if forloop.counter != 1 %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ result.name }}</h5>
+{% endifchanged %}
+{% ifchanged result.email %}
+            <div>Email: <a href="mailto:{{ result.email }}">{{ result.email }}</a></div>
+{% endifchanged %}
+            <div>
+                {% for subscription_status in result.subscription_statuses %}
+                <ul>{{ subscription_status }}</ul>
+                {% endfor %}
+            </div>
+            <div><a href="{{ result.url}}">View on Stripe</a></div>
+{% endfor %}
+{% endif %}
+
+{% for customer in customer_list %}
+{% ifchanged customer.email %}
+{% if forloop.counter != 1 %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ customer.email }}</h5>
+{% endifchanged %}
+{% ifchanged customer.phone %}
+            <div>Phone: <a href="tel:{{ customer.phone }}">{{ customer.phone }}</a></div>
+{% endifchanged %}
+
+    <div class="card-body">
+        <div>Document: {{ customer.name }}</div>
+        <div>Completed: {{ customer.completed_at }}</div>
+    </div>
+{% endfor %}
+</div>
+</div>
+
+{% endblock %}

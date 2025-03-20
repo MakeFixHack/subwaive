@@ -1,0 +1,47 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>{{ page_title }} - {{ status|capfirst }}</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+{% include 'subwaive/templates/buttons.html' %}
+
+{% if subscriptions %}
+{% for subscription in subscriptions %}
+{% ifchanged subscription.customer.name %}
+{% if forloop.counter != 1 %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ subscription.customer.name }}</h5>
+{% endifchanged %}
+{% ifchanged subscription.customer.email %}
+            <div>Email: <a href="mailto:{{ subscription.customer.email }}">{{ subscription.customer.email }}</a></div>
+{% endifchanged %}
+            <p>
+                <div>Subscriber: <strong>{{ subscription.name }}</strong></div>
+                <div>Status: <strong>{{ subscription.status }}</strong></div>
+                <div>Since: {{ subscription.date_start }}</div>
+                <div>Until: {{ subscription.date_renew }}</div>
+                <div><a href="{{ subscription.url}}">View on Stripe</a></div>
+            </p>
+{% endfor %}
+{% endif %}
+    </div>
+</div>
+
+{% endblock %}

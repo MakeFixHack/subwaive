@@ -1,0 +1,52 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>People</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ merge_child.name }}</h5>
+        
+        <div>
+            <div>Associated emails:</div>
+            {% for email in merge_parent.emails %}
+            <div>{{ email }}</div>
+            {% endfor %}
+        </div>
+        
+        <div>Select a person below to merge this person into.</div>
+    </div>
+</div>
+
+{% for merge_parent in merge_parents %}
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ merge_parent.name }}</h5>
+
+        <div>
+            <button class="btn btn-success" onclick="window.location='{% url 'merge_people' merge_child_id=merge_child.id merge_parent_id=merge_parent.id %}'; return false;">Merge</button>
+        </div>
+
+        <div>
+            <div>Associated emails:</div>
+            {% for email in merge_parent.emails %}
+            <div>{{ email }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

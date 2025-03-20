@@ -1,0 +1,74 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>{{ person.name }}</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ person.name }}</h5>
+        
+        <div>
+            <button class="btn btn-info" onclick="window.location='{% url 'person_edit' person.id %}'; return false;">Edit</button>
+            <button class="btn btn-info" onclick="window.location='{% url 'person_docuseal' person.id %}'; return false;">Docuseal</button>
+            <button class="btn btn-info" onclick="window.location='{% url 'person_stripe' person.id %}'; return false;">Stripe</button>
+        </div>
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">Check-in</h5>
+        <div>Signed a waiver: {{ has_waiver }}</div>
+        <div>Current membership: {{ has_membership }}</div>
+        <div>Last check-in: {% if last_check_in %}{{ last_check_in.event }} @ {{ last_check_in.date }}{% endif %}</div>
+        <div><button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person.id %}'; return false;">Check-in</button></div>
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">Important Fields</h5>
+        <div>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Values</th>
+                </tr>
+                {% for field in important_fields %}
+                <tr>
+                    <td>{{ field.field }}</td>
+                    <td>{{ field.value }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">Email Addresses</h5>
+
+        <div>Email: <a href="mailto:{{ person.preferred_email.email }}">{{ person.preferred_email.email }}</a></div>
+        
+        <div>Linked email addresses:
+            {% for other_email in other_emails %}
+            <ul>{{ other_email.email }}</ul>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

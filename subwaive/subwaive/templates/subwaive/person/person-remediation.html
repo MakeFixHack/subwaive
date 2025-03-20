@@ -1,0 +1,47 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>Check-in Remediation</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ person.name }}</h5>
+
+        Check-in failed because:
+        {% if not waiver_check %}
+        <div>They do not have a current, completed waiver.</div>
+        <div>Ask them to completed a waiver: <br />
+            <a href="{% url 'docuseal_link_list' %}">Waivers</a>
+        </div>
+        {% endif %}
+        
+        {% if not membership_status %}
+        <div>They do not have a membership and have no purchased a day-pass.</div>
+        <div>Suggest membership or a "pay-what-you-can" day-pass.</div>
+        {% endif %}
+        
+        {% if has_prior_check_in %}
+        <div>They are already checked-in.</div>
+        <div>Do you need to check them in again?</div>
+        {% endif %}
+        
+        <div>
+            <div>If you wish to check them in anyways:</div>
+            <button class="btn btn-warning" onclick="window.location='{% url 'force_member_check_in' person.id %}'; return false;">Force Check-in</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

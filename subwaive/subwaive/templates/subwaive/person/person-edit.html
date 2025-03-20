@@ -1,0 +1,73 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>{{ person.name }}</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ person.name }}</h5>
+
+        <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View card</button></div>
+
+        <div>
+            Names used in Docuseal:
+
+            {% for field in important_fields %}
+            <div>{{ field.value }} <button class="btn btn-success" onclick="window.location='{% url 'set_name' person_id=person.id important_field_id=field.id %}'; return false;">Use</button></div>
+            {% empty %}
+            <div>No known aliases</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">Check-in history</h5>
+        {% for check_in in check_ins %}
+        <div>{{ check_in.event }} @ {{ check_in.date }} <button class="btn btn-danger" onclick="window.location='{% url 'delete_member_check_in' check_in.id %}'; return false;">Delete</button></div>
+        {% empty %}
+        <div>No check-in history</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">Email Addresses</h5>
+        <div>
+            <table>
+                <tr>
+                    <th>Email</th>
+                    <th>Preferred?</th>
+                    <th>Actions</th>
+                </tr>
+            {% for other_email in other_emails %}
+                <tr>
+                    <td>{{ other_email.email }}</td>
+                    <td>{% if other_email == person.preferred_email %}True{% endif %}</td>
+                    <td>
+                        <button class="btn btn-warning" onclick="window.location='{% url 'unmerge_people' other_email.id %}';return false;">Unmerge</button>
+                        {% if other_email != person.preferred_email %}<button class="btn btn-success" onclick="window.location='{% url 'set_preferred_email' other_email.id %}';return false;">Prefer</button>{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </div>
+
+        <div><button class="btn btn-warning" onclick="window.location='{% url 'merge_people' person.id %}';return false;">Merge</button></div>
+    </div>
+</div>
+
+{% endblock %}

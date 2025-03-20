@@ -1,0 +1,59 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>{{ person.name }}</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ person.name }}</h5>
+        
+        <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View Card</button></div>
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{% include 'subwaive/img/Stripe-wordmark.svg' %}</h5>
+        <div>
+            <h5 class="card-title">Subscriptions</h5>
+            {% for subscription in stripe_subscriptions %}
+            {% ifchanged subscription.name %}
+            <h5>{{ subscription.name }}</h5>
+            {% endifchanged %}
+            <div>
+                <div>Status: {{ subscription.status }}</div>
+                <div>Good through: {{ subscription.date_renew }}</div>
+                <div><a href="{{ subscription.url }}">View in Stripe</a></div>
+            </div>
+            {% endfor %}
+        </div>
+        <div>
+            <h5 class="card-title">One-Time Payments</h5>
+            {% for payment in stripe_onetime_payments %}
+                <div>{{ payment.description }}</div>
+                <div>{{ payment.date }}</div>
+                <div><a href="{{ payment.url }}">View in Stripe</a></div>
+            {% endfor %}
+        </div>
+        <h5 class="card-title">Donor Status</h5>
+        <div>
+            {% for donor_status in stripe_donor_status %}
+            <div>{{ donor_status }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

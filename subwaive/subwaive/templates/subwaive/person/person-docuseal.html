@@ -1,0 +1,51 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>{{ person.name }}</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ person.name }}</h5>
+        
+        <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View Card</button></div>
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{% include 'subwaive/img/Docuseal-logo.svg' %}</h5>
+        {% for document in docuseal_documents %}
+        {% ifchanged document.folder_name %}
+        <h5>{{ document.folder_name }}</h5>
+        {% endifchanged %}
+        <div>
+            <div>{{ document.template_name }}</div>
+            <div>{{ document.status|capfirst }}</div>
+            <div>{{ document.completed_at }}</div>
+            {% if document.important_fields %}
+            <div>
+                Important fields:
+                {% for field in document.important_fields %}
+                <ul>{{ field.field }}: {{ field.value }}</ul>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div><a href="{{ document.url }}">View in Docuseal</a></div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

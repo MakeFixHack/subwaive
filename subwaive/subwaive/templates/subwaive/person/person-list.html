@@ -1,0 +1,34 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+<!-- tabs for stripe/docuseal/app -->
+
+<div class="container-fluid">
+    <h1>People</h1>
+</div>
+
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->
+
+{% for person in persons %}
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">{{ person.name }}</h5>
+
+        <div>Last check-in: {{ person.last_check_in }}</div>
+        <div>
+            <button class="btn btn-info" onclick="window.location='{{ person.person_card }}'; return false;">Details</button>
+            <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person.id %}'; return false;">Check-in</button>
+        </div>
+
+        <div>Preferred email: <a href="mailto:{{ person.preferred_email }}">{{ person.preferred_email }}</a></div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
