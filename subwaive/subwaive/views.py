@@ -37,9 +37,15 @@ def person_list(request):
         else:
             p['last_check_in'] = None
 
+    button_dict = [
+            {'url': reverse('person_list'), 'anchor': 'List', 'active': True},
+            {'url': reverse('person_search'), 'anchor': 'Search'},
+    ]
+
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
         'persons': persons,
+        'buttons': button_dict,
     }
 
     return render(request, f'subwaive/person/person-list.html', context)
@@ -95,10 +101,16 @@ def person_search(request):
     if search_term:
         results = Person.search(search_term)
 
+    button_dict = [
+            {'url': reverse('person_list'), 'anchor': 'List'},
+            {'url': reverse('person_search'), 'anchor': 'Search', 'active': True},
+    ]
+
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
         'search_term': search_term,
         'results': results,
+        'buttons': button_dict,
     }
 
     return render(request, f'subwaive/search.html', context)
