@@ -27,10 +27,13 @@
                 color: black;
                 text-decoration: underline;
             }
-            nav {
-                background-color: slategray;
+            nav.padded {
+                background-color: powderblue;
                 width: 100%; 
-                padding-left: 1rem;
+                padding: 0.5em 0.5em 0.5em 1em;
+            }
+            #main-nav {
+                background-color: lightblue;
             }
             nav a {
                 margin-right: 1rem;
@@ -51,14 +54,20 @@
     </head>
     <body>
         <!--- Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-expand-md navbar-expand-sm navbar-light alert alert-success">
-            <div id="main-nav" class="navbar-nav">
+        <nav id="main-nav" class="navbar navbar-expand navbar-light padded">
+            <div class="navbar-nav">
                 <a class="nav-item nav-link" href="{% url 'custom_link_list' %}">Links</a>
-                <a class="nav-item nav-link" href="{% url 'person_search' %}">Search</a>
-                <a class="nav-item nav-link" href="{% url 'person_list' %}">Customers</a>
-                <a class="nav-item nav-link" href="{% url 'stripe_refresh' %}">stripe_refresh</a>
-                <a class="nav-item nav-link" href="{% url 'docuseal_refresh' %}">docuseal_refresh</a>
-                <a class="nav-item nav-link" href="/admin/">Admin</a>
+                <a class="nav-item nav-link" href="{% url 'person_list' %}">People</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Admin
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="nav-item nav-link" href="{% url 'stripe_refresh' %}">Refresh Stripe</a></li>
+                        <li><a class="nav-item nav-link" href="{% url 'docuseal_refresh' %}">Refresh Docuseal</a></li>
+                        <li><a class="nav-item nav-link" href="/admin/">Admin Console</a></li>
+                    </ul>
+                </li>
             </div>
         </nav>
         <!-- /Navigation -->
