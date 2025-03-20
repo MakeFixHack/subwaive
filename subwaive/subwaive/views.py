@@ -113,7 +113,7 @@ def person_search(request):
         'buttons': button_dict,
     }
 
-    return render(request, f'subwaive/search.html', context)
+    return render(request, f'subwaive/person/person-search.html', context)
 
 @login_required
 def person_card(request, person_id):
