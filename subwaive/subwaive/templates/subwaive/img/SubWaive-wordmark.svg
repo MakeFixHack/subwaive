@@ -1,0 +1,9 @@
+<svg width="10em" height="3em" viewBox="0 0 300 40" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+  </style>
+  
+  <text x="50%" y="50%" font-family="'VT323', monospace" font-size="90" text-anchor="middle" dominant-baseline="middle">
+    <tspan fill="#4682B4">Sub</tspan><tspan fill="#1E90FF">Waive</tspan>
+  </text>
+</svg>
