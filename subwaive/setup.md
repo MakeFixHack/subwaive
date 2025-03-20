@@ -42,9 +42,7 @@ python manage.py createsuperuser
 python manage.py loaddata initial
 ```
 
-# Docker network connections
-
-This probably isn't needed at the point where something is publicly accessible.
+## Docker network connections
 
 Create the Docker network with:
 
@@ -84,7 +82,7 @@ services:
   default:
 ```
 
-# View Docker network
+### View Docker network
 
 To see if each container is attached to the network you defined:
 
@@ -98,7 +96,7 @@ This will also give the name of the containers you should use as hostnames in yo
 * Database hostname
 * DJANGO_ALLOWED_HOSTS
 
-# Expected Docuseal configurations
+## Expected Docuseal configurations
 
 * Waivers live in a folder called "Waivers"
 
