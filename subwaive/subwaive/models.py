@@ -86,6 +86,7 @@ class DocusealSubmission(models.Model):
         """ Create a new instance """
         template = DocusealTemplate.objects.get(template_id=template_id)
         doc_sub = DocusealSubmission.objects.create(submission_id=submission_id, slug=slug, status=status, completed_at=completed_at, template=template)
+        Log.objects.create(description="Create DocusealSubmission", json={'submission_id': submission_id})
         if submitters:
             DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=doc_sub, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters])
 
@@ -147,6 +148,7 @@ class DocusealSubmitter(models.Model):
     def new(submitter_id, email, slug):
         """ Create a new instance and auto_associate """
         doc_sub = DocusealSubmitter.objects.create(submitter_id=submitter_id, email=email, slug=slug)
+        Log.objects.create(description="Create DocusealSubmitter", json={'submitter_id': submitter_id})
         doc_sub._auto_associate()
 
     def search(email):
@@ -222,6 +224,7 @@ class DocusealTemplate(models.Model):
     def new(template_id, folder_name, name, slug):
         """ Create a new instance and auto_associate """
         DocusealTemplate.objects.create(template_id=template_id, folder_name=folder_name, name=name, slug=slug)
+        Log.objects.create(description="Create DocusealTemplate", json={'template_id': template_id})
 
     def refresh():
         """ clear out existing records and repopulate them from the API """
@@ -555,18 +558,22 @@ class StripeCustomer(models.Model):
 
     def create_and_or_return(stripe_id):
         """ return a record if it exists, else create and return it """
+        json = {'stripe_id': stripe_id}
+
         customer_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
         if customer_qs.exists():
             customer = customer_qs.first()
         else:
             api_record = stripe.Customer.retrieve(stripe_id)
             customer = StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
-            Log.objects.create(description="Create StripeCustomer")
+            Log.objects.create(description="Create StripeCustomer", json=json)
 
         return customer
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
+        json = {'stripe_id': stripe_id}
+
         customer_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
         api_record = stripe.Customer.retrieve(stripe_id)
 
@@ -575,10 +582,10 @@ class StripeCustomer(models.Model):
             customer.name = api_record.name
             customer.email = api_record.email
             customer.save()
-            Log.objects.create(description="Update StripeCustomer")
+            Log.objects.create(description="Update StripeCustomer", json=json)
         else:
             StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
-            Log.objects.create(description="Create StripeCustomer")
+            Log.objects.create(description="Create StripeCustomer", json=json)
 
 
     def get_url(self):
@@ -587,6 +594,7 @@ class StripeCustomer(models.Model):
 
     def new(stripe_id, name, email):
         sc = StripeCustomer.objects.create(stripe_id=stripe_id, name=name, email=email)
+        Log.objects.create(description="Create StripeCustomer", json={'stripe_id': stripe_id})
         sc._auto_associate()
 
     def search(name, email):
@@ -647,13 +655,15 @@ class StripePaymentLink(models.Model):
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
+        json = {'stripe_id': stripe_id}
+
         payment_link_qs = StripePaymentLink.objects.filter(stripe_id=stripe_id)
         if payment_link_qs.exists():
             payment_link = payment_link_qs
             payment_link.create_or_update_children()
         else:
             plink = StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url)
-            Log.objects.create(description="Create StripePaymentLink")
+            Log.objects.create(description="Create StripePaymentLink", json=json)
             plink.create_or_update_children()
 
     def create_or_update_children(self):
@@ -672,6 +682,8 @@ class StripePaymentLink(models.Model):
         StripePaymentLink.objects.all().delete()
         for payment_link in stripe.PaymentLink.list(active=True).auto_paging_iter():
             StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url)
+            Log.objects.create(description="Create StripePaymentLink", json={'stripe_id': payment_link.id})
+
 
 
 class StripePaymentLinkPrice(models.Model):
@@ -723,6 +735,8 @@ class StripePrice(models.Model):
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
+        json = {'stripe_id': stripe_id}
+
         price_qs = StripePrice.objects.filter(stripe_id=stripe_id)
         api_record = StripePrice.fetch_api_data(stripe_id)
         api_prc = StripePrice.dict_from_api(api_record)
@@ -735,10 +749,10 @@ class StripePrice(models.Model):
             product = StripeProduct.create_or_update(api_prc.product)
             price.product = product
             price.save()
-            Log.objects.create(description="Update StripePrice")
+            Log.objects.create(description="Update StripePrice", json=json)
         else:
             StripePrice.objects.create(stripe_id=stripe_id, product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
-            Log.objects.create(description="Create StripePrice")
+            Log.objects.create(description="Create StripePrice", json=json)
 
     def fetch_api_data(stripe_id):
         """ fetch api data """
@@ -774,6 +788,7 @@ class StripePrice(models.Model):
                 product = StripeProduct.objects.get(stripe_id=price.product)
                 api_prc = StripePrice.dict_from_api(price)
                 StripePrice.objects.create(stripe_id=api_prc['stripe_id'], product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
+                Log.objects.create(description="Create StripePrice", json={'stripe_id': api_prc['stripe_id']})
 
 
 class StripeProduct(models.Model):
@@ -790,11 +805,13 @@ class StripeProduct(models.Model):
 
     def create_and_or_return(stripe_id):
         """ create a StripeProduct if one does not already exist """
+        json = {'stripe_id': stripe_id}
+
         product_qs = StripeProduct.objects.filter(stripe_id=stripe_id)
         if not product_qs.exists():
             api_prd = stripe.Product.retrieve(stripe_id)
             product = StripeProduct.objects.create(stripe_id=stripe_id, name=api_prd.name, description=api_prd.description)
-            Log.objects.create(description="Create StripeProduct")
+            Log.objects.create(description="Create StripeProduct", json=json)
         else:
             product = product_qs.first()
         
@@ -802,6 +819,8 @@ class StripeProduct(models.Model):
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
+        json = {'stripe_id': stripe_id}
+        
         product_qs = StripeProduct.objects.filter(stripe_id=stripe_id).first()
         api_prd = stripe.Product.retrieve(stripe_id)
         if product_qs.exists():
@@ -809,10 +828,10 @@ class StripeProduct(models.Model):
             product.name = api_prd.name
             product.description = api_prd.description
             product.save()
-            Log.objects.create(description="Update StripeProduct")
+            Log.objects.create(description="Update StripeProduct", json=json)
         else:
             StripeProduct.objects.create(stripe_id=stripe_id, name=api_prd.name, description=api_prd.description)
-            Log.objects.create(description="Create StripeProduct")
+            Log.objects.create(description="Create StripeProduct", json=json)
 
     def get_url(self):
         """ URL for a hyperlink """
@@ -824,6 +843,7 @@ class StripeProduct(models.Model):
         StripeProduct.objects.all().delete()
         for product in stripe.Product.list(active=True).auto_paging_iter():
             StripeProduct.objects.create(stripe_id=product.id, name=product.name, description=product.description)
+            Log.objects.create(description="Create StripeProduct", json={'stripe_id': product.id})
 
 
 class StripeSubscription(models.Model):
@@ -844,6 +864,8 @@ class StripeSubscription(models.Model):
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
+        json = {'stripe_id': stripe_id}
+
         subscription_qs = StripeSubscription.objects.filter(stripe_id=stripe_id)
         api_record = stripe.Subscription.retrieve(stripe_id)
         api_dict = StripeSubscription.get_api_dict(api_record)
@@ -869,6 +891,7 @@ class StripeSubscription(models.Model):
                 subscription.name = name
                 subscription.product = product
                 subscription.save()
+                Log.objects.create(description="Update StripeSubscription", json=json)
         elif status != 'canceled':
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
             Log.objects.create(description="Create StripeSubscription")
@@ -927,4 +950,4 @@ class StripeSubscription(models.Model):
             product = StripeProduct.create_and_or_return(product_stripe_id)
 
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
-
+            Log.objects.create(description="Create StripeSubscription", json={'stripe_id': stripe_id})
