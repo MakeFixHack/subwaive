@@ -15,44 +15,62 @@
 {% endif %}
 <!-- /Determination of confidentiality -->
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{{ person.name }}</h5>
-        
-        <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View Card</button></div>
+<div class="section section-heading">
+    <h5>{{ person.name }}</h5>
+    
+    <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View Card</button></div>
+</div>
+
+<div class="section section-heading">
+    <h5>{% include 'subwaive/img/Stripe-wordmark.svg' %}</h5>
+    <h5>Active subscriptions</h5>
+</div>
+
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for subscription in stripe_subscriptions %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">{{ subscription.name }}</h5>
+                <div>
+                    <div>Status: {{ subscription.status }}</div>
+                    <div>Good through: {{ subscription.date_renew }}</div>
+                    <div><a href="{{ subscription.url }}">View in Stripe</a></div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{% include 'subwaive/img/Stripe-wordmark.svg' %}</h5>
-        <div>
-            <h5 class="card-title">Subscriptions</h5>
-            {% for subscription in stripe_subscriptions %}
-            {% ifchanged subscription.name %}
-            <h5>{{ subscription.name }}</h5>
-            {% endifchanged %}
-            <div>
-                <div>Status: {{ subscription.status }}</div>
-                <div>Good through: {{ subscription.date_renew }}</div>
-                <div><a href="{{ subscription.url }}">View in Stripe</a></div>
-            </div>
-            {% endfor %}
-        </div>
-        <div>
-            <h5 class="card-title">One-Time Payments</h5>
-            {% for payment in stripe_onetime_payments %}
-                <div>{{ payment.description }}</div>
+<div class="section section-heading">
+    <h5>{% include 'subwaive/img/Stripe-wordmark.svg' %}</h5>
+    <h5 class="card-title">One-Time Payments</h5>
+</div>
+
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for payment in stripe_onetime_payments %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">{{ payment.description }}</h5>
                 <div>{{ payment.date }}</div>
                 <div><a href="{{ payment.url }}">View in Stripe</a></div>
-            {% endfor %}
+            </div>
         </div>
-        <h5 class="card-title">Donor Status</h5>
-        <div>
-            {% for donor_status in stripe_donor_status %}
-            <div>{{ donor_status }}</div>
-            {% endfor %}
-        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="section section-heading">
+    <h5>{% include 'subwaive/img/Stripe-wordmark.svg' %}</h5>
+    <h5 class="card-title">Donor Status</h5>
+    <div>
+        {% for donor_status in stripe_donor_status %}
+        <p>{{ donor_status }}</p>
+        {% empty %}
+        <p>Not yet</p>
+        {% endfor %}
     </div>
 </div>
 

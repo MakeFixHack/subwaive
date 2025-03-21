@@ -25,40 +25,46 @@
 {% endif %}
 </ul>
 
-<!-- tap QR code to raise in modal as full screen -->
-
 <!-- Tab content -->
 <div class="tab-content" id="myTabContent">
 {% for category in categories %}
     <div class="tab-pane fade{% if forloop.counter == 1 %}show active{% endif %}" id="{{ category.baseid }}-pane" role="tabpanel">
-        <div class="container">
+        <div class="section section-heading">
             <h2>{{ category.name }}</h2>
+        </div>
+
+        <div class="container">
+            <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
 {% for qr_code in qr_list %}
 {% if category.name == qr_code.category %}
-            <div class="container-fluid">
-                <h3>{{ qr_code.name }}</h3>
-                        <!-- Trigger Modal Button -->
-        <a data-bs-toggle="modal" data-bs-target="#imageModal{{ qr_code.id }}">
-            {{ qr_code.svg_small|safe }}
-        </a>
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ qr_code.name }}</h5>
 
-        <!-- Modal -->
-        <div class="modal fade" id="imageModal{{ qr_code.id }}" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-              <div class="modal-body">
-                <h3>{{ qr_code.name }}</h3>
-                {{ qr_code.svg_large|safe }}
-              </div>
-            </div>
-          </div>
-        </div>
-{% if qr_code.url %}
-                <div><a href="{{ qr_code.url }}">Link</a></div>
-{% endif %}
-            </div>
+                        <!-- Trigger Modal Button -->
+                        <a data-bs-toggle="modal" data-bs-target="#imageModal{{ qr_code.id }}">
+                            {{ qr_code.svg_small|safe }}
+                        </a>
+
+                        <!-- Modal for full screen-ish QR -->
+                        <div class="modal fade" id="imageModal{{ qr_code.id }}" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-body">
+                                        <h3>{{ qr_code.name }}</h3>
+                                        {{ qr_code.svg_large|safe }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    {% if qr_code.url %}
+                        <div><a href="{{ qr_code.url }}">Link</a></div>
+    {% endif %}
+                    </div>
+                </div>
 {% endif %}
 {% endfor %}
+            </div>
         </div>
     </div>
 {% endfor %}

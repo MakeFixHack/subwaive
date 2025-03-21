@@ -17,15 +17,18 @@
 
 {% include 'subwaive/templates/buttons.html' %}
 
-{% for dataset in datasets %}
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{{ dataset.description }}</h5>
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for dataset in datasets %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">{{ dataset.description }}</h5>
 
-        <div>Last updated: {{ dataset.last_refresh }}</div>
+                <div>Last updated: {{ dataset.last_refresh }}</div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
-{% endfor %}
-
 
 {% endblock %}

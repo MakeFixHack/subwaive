@@ -15,59 +15,60 @@
 {% endif %}
 <!-- /Determination of confidentiality -->
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{{ person.name }}</h5>
+<div class="section section-heading">
+    <h5 class="card-title">{{ person.name }}</h5>
 
-        <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View card</button></div>
+    <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View card</button></div>
 
-        <div>
-            Names used in Docuseal:
+    <div>
+        Names used in Docuseal:
 
-            {% for field in important_fields %}
-            <div>{{ field.value }} <button class="btn btn-success" onclick="window.location='{% url 'set_name' person_id=person.id important_field_id=field.id %}'; return false;">Use</button></div>
-            {% empty %}
-            <div>No known aliases</div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">Check-in history</h5>
-        {% for check_in in check_ins %}
-        <div>{{ check_in.event }} @ {{ check_in.date }} <button class="btn btn-danger" onclick="window.location='{% url 'delete_member_check_in' check_in.id %}'; return false;">Delete</button></div>
+        {% for field in important_fields %}
+        <div>{{ field.value }} <button class="btn btn-success" onclick="window.location='{% url 'set_name' person_id=person.id important_field_id=field.id %}'; return false;">Use</button></div>
         {% empty %}
-        <div>No check-in history</div>
+        <div>No known aliases</div>
         {% endfor %}
     </div>
 </div>
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">Email Addresses</h5>
-        <div>
-            <table>
-                <tr>
-                    <th>Email</th>
-                    <th>Preferred?</th>
-                    <th>Actions</th>
-                </tr>
-            {% for other_email in other_emails %}
-                <tr>
-                    <td>{{ other_email.email }}</td>
-                    <td>{% if other_email == person.preferred_email %}True{% endif %}</td>
-                    <td>
-                        <button class="btn btn-warning" onclick="window.location='{% url 'unmerge_people' other_email.id %}';return false;">Unmerge</button>
-                        {% if other_email != person.preferred_email %}<button class="btn btn-success" onclick="window.location='{% url 'set_preferred_email' other_email.id %}';return false;">Prefer</button>{% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Check-in history</h5>
+                {% for check_in in check_ins %}
+                <div>{{ check_in.event }} @ {{ check_in.date }} <button class="btn btn-danger" onclick="window.location='{% url 'delete_member_check_in' check_in.id %}'; return false;">Delete</button></div>
+                {% empty %}
+                <div>No check-in history</div>
+                {% endfor %}
+            </div>
         </div>
-
-        <div><button class="btn btn-warning" onclick="window.location='{% url 'merge_people' person.id %}';return false;">Merge</button></div>
     </div>
 </div>
+
+<div class="section">
+    <h5 class="card-title">Email Addresses</h5>
+    <div>
+        <table>
+            <tr>
+                <th>Email</th>
+                <th>Preferred?</th>
+                <th>Actions</th>
+            </tr>
+        {% for other_email in other_emails %}
+            <tr>
+                <td>{{ other_email.email }}</td>
+                <td>{% if other_email == person.preferred_email %}True{% endif %}</td>
+                <td>
+                    <button class="btn btn-warning" onclick="window.location='{% url 'unmerge_people' other_email.id %}';return false;">Unmerge</button>
+                    {% if other_email != person.preferred_email %}<button class="btn btn-success" onclick="window.location='{% url 'set_preferred_email' other_email.id %}';return false;">Prefer</button>{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </div>
+
+    <div><button class="btn btn-warning" onclick="window.location='{% url 'merge_people' person.id %}';return false;">Merge</button></div>
+</div>
+
 
 {% endblock %}
