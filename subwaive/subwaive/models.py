@@ -857,16 +857,19 @@ class StripeSubscription(models.Model):
         product = StripeProduct.create_and_or_return(product_stripe_id)
 
         if subscription_qs.exists():
-            subscription = subscription_qs.first()
-            subscription.customer = StripeCustomer.create_and_or_return(customer)
-            subscription.created = created
-            subscription.current_period_end = current_period_end
-            subscription.status = status
-            subscription.name = name
-            subscription.product = product
-            subscription.save()
-            Log.objects.create(description="Update StripeSubscription")
-        else:
+            if status == 'canceled':
+                subscription_qs.delete()
+                Log.objects.create(description="Cancel StripeSubscription", json=json)
+            else:
+                subscription = subscription_qs.first()
+                subscription.customer = StripeCustomer.create_and_or_return(customer)
+                subscription.created = created
+                subscription.current_period_end = current_period_end
+                subscription.status = status
+                subscription.name = name
+                subscription.product = product
+                subscription.save()
+        elif status != 'canceled':
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
             Log.objects.create(description="Create StripeSubscription")
 
