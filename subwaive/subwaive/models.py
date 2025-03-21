@@ -846,7 +846,7 @@ class StripeSubscription(models.Model):
     #     ordering = ('category', 'name',)
 
     def __str__(self):
-        return f"""{ self.stripe_id } / { self.status } / { self.date_renew }"""
+        return f"""{ self.stripe_id } / { self.status } / { self.current_period_end }"""
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
