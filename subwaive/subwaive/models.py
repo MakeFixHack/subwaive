@@ -814,12 +814,6 @@ class StripeProduct(models.Model):
             StripeProduct.objects.create(stripe_id=stripe_id, name=api_prd.name, description=api_prd.description)
             Log.objects.create(description="Create StripeProduct")
 
-    # def get_payment_links(self):
-    #     """ return a list of payment links """
-    #     links = StripePaymentLink.objects.filter(price__product=self)
-
-    #     return links
-
     def get_url(self):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/products/{ self.stripe_id }"
