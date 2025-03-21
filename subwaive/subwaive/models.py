@@ -405,7 +405,7 @@ class Person(models.Model):
                     {
                         'description': subscription.product.description, 
                         'status': subscription.status, 
-                        'date_renew': subscription.date_renew,
+                        'current_period_end': subscription.current_period_end,
                         'name': subscription.name,
                         'url': subscription.get_url(),
                         }
@@ -793,8 +793,8 @@ class StripeSubscription(models.Model):
     """ A Stripe Subscription """
     stripe_id = models.CharField(max_length=64)
     customer = models.ForeignKey("subwaive.StripeCustomer", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
-    date_start = models.DateTimeField(null=True, blank=True)
-    date_renew = models.DateTimeField(null=True, blank=True)
+    created = models.DateTimeField(null=True, blank=True)
+    current_period_end = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=64)
     name = models.CharField(max_length=128)
     product = models.ForeignKey("subwaive.StripeProduct", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
@@ -842,5 +842,5 @@ class StripeSubscription(models.Model):
                         matching_stripe_id = item.plan.product
             product = StripeProduct.objects.get(stripe_id=matching_stripe_id)
 
-            StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, date_start=date_start, date_renew=date_renew, status=status, product=product)
+            StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
 

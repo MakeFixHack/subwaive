@@ -94,5 +94,5 @@ class StripeProduct_Admin(admin.ModelAdmin):
 admin.site.register(StripeProduct, StripeProduct_Admin)
 
 class StripeSubscription_Admin(admin.ModelAdmin):
-    list_display = ('stripe_id', 'customer', 'status', 'date_start', 'date_renew',)
+    list_display = ('stripe_id', 'customer', 'status', 'created', 'current_period_end',)
 admin.site.register(StripeSubscription, StripeSubscription_Admin)
