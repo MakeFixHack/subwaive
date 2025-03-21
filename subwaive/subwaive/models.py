@@ -553,6 +553,34 @@ class StripeCustomer(models.Model):
                 person.preferred_email = email
                 person.save()
 
+    def create_and_or_return(stripe_id):
+        """ return a record if it exists, else create and return it """
+        customer_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
+        if customer_qs.exists():
+            customer = customer_qs.first()
+        else:
+            api_record = stripe.Customer.retrieve(stripe_id)
+            customer = StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
+            Log.objects.create(description="Create StripeCustomer")
+
+        return customer
+
+    def create_or_update(stripe_id):
+        """ updates an existing record, otherwise creates one """
+        customer_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
+        api_record = stripe.Customer.retrieve(stripe_id)
+
+        if customer_qs.exists():
+            customer = customer_qs.first()
+            customer.name = api_record.name
+            customer.email = api_record.email
+            customer.save()
+            Log.objects.create(description="Update StripeCustomer")
+        else:
+            StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
+            Log.objects.create(description="Create StripeCustomer")
+
+
     def get_url(self):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/customers/{ self.stripe_id }"
@@ -760,6 +788,18 @@ class StripeProduct(models.Model):
     def __str__(self):
         return f"""{ self.stripe_id } / { self.name } / { self.description[:50] }"""
 
+    def create_and_or_return(stripe_id):
+        """ create a StripeProduct if one does not already exist """
+        product_qs = StripeProduct.objects.filter(stripe_id=stripe_id)
+        if not product_qs.exists():
+            api_prd = stripe.Product.retrieve(stripe_id)
+            product = StripeProduct.objects.create(stripe_id=stripe_id, name=api_prd.name, description=api_prd.description)
+            Log.objects.create(description="Create StripeProduct")
+        else:
+            product = product_qs.first()
+        
+        return product
+
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
         product_qs = StripeProduct.objects.filter(stripe_id=stripe_id).first()
@@ -808,6 +848,66 @@ class StripeSubscription(models.Model):
     def __str__(self):
         return f"""{ self.stripe_id } / { self.status } / { self.date_renew }"""
 
+    def create_or_update(stripe_id):
+        """ updates an existing record, otherwise creates one """
+        subscription_qs = StripeSubscription.objects.filter(stripe_id=stripe_id)
+        api_record = stripe.Subscription.retrieve(stripe_id)
+        api_dict = StripeSubscription.get_api_dict(api_record)
+
+        customer = api_record.customer
+        created = datetime.datetime.fromtimestamp(api_record.created, tz=pytz.timezone(TIME_ZONE))
+        current_period_end = datetime.datetime.fromtimestamp(api_record.current_period_end, tz=pytz.timezone(TIME_ZONE))
+        status = api_record.status
+        name = StripeSubscription.get_api_name(stripe_id)
+        product_stripe_id = StripeSubscription.get_api_product_id(api_record)
+        product = StripeProduct.create_and_or_return(product_stripe_id)
+
+        if subscription_qs.exists():
+            subscription = subscription_qs.first()
+            subscription.customer = StripeCustomer.create_and_or_return(customer)
+            subscription.created = created
+            subscription.current_period_end = current_period_end
+            subscription.status = status
+            subscription.name = name
+            subscription.product = product
+            subscription.save()
+            Log.objects.create(description="Update StripeSubscription")
+        else:
+            StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
+            Log.objects.create(description="Create StripeSubscription")
+
+    def get_api_dict(api_record):
+        """ returns a dict of required values from an API record """
+        stripe_id = api_record.id
+        created = datetime.datetime.fromtimestamp(api_record.created, tz=pytz.timezone(TIME_ZONE))
+        current_period_end = datetime.datetime.fromtimestamp(api_record.current_period_end, tz=pytz.timezone(TIME_ZONE))
+
+    def get_api_name(stripe_id):
+        """ return a name if provided in the checkout, else "self" """
+        name = None
+
+        session = stripe.checkout.Session.list(subscription=stripe_id)
+        try:
+            name = session.data[0].custom_fields[0].text.value
+        except:
+            pass
+        if not name:
+            name = "self"
+        return name
+    
+    def get_api_product_id(api_subscription):
+        """ return the product stripe_id associated with an API subscription record """
+        product_stripe_id = None
+        if api_subscription.plan: # single-item subscriptions
+            if api_subscription.plan.product:
+                product_stripe_id = api_subscription.plan.product
+        elif 'items' in api_subscription.keys(): # multi-item subscriptions
+            for item in api_subscription['items']:
+                if item.plan.product:
+                    product_stripe_id = item.plan.product
+        
+        return product_stripe_id
+
     def get_url(self):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/subscriptions/{ self.stripe_id }"
@@ -820,30 +920,14 @@ class StripeSubscription(models.Model):
             customer = StripeCustomer.objects.get(stripe_id=subscription.customer)
 
             stripe_id = subscription['id']
-            name = None
-            session = stripe.checkout.Session.list(subscription=stripe_id)
-            if len(session.data) > 0:
-                session = session.data[0].to_dict_recursive()
-                try:
-                    name = session.custom_fields[0].text.value
-                except:
-                    pass
-            if not name:
-                name = "self"
+            name = StripeSubscription.get_api_name(stripe_id)
 
-            date_start = datetime.datetime.fromtimestamp(subscription.created, tz=pytz.timezone(TIME_ZONE))
-            date_renew = datetime.datetime.fromtimestamp(subscription.current_period_end, tz=pytz.timezone(TIME_ZONE))
+            created = datetime.datetime.fromtimestamp(subscription.created, tz=pytz.timezone(TIME_ZONE))
+            current_period_end = datetime.datetime.fromtimestamp(subscription.current_period_end, tz=pytz.timezone(TIME_ZONE))
             status = subscription.status
 
-            matching_stripe_id = None
-            if subscription.plan: # single-item subscriptions
-                if subscription.plan.product:
-                    matching_stripe_id = subscription.plan.product
-            elif 'items' in subscription.keys(): # multi-item subscriptions
-                for item in subscription['items']:
-                    if item.plan.product:
-                        matching_stripe_id = item.plan.product
-            product = StripeProduct.objects.get(stripe_id=matching_stripe_id)
+            product_stripe_id = StripeSubscription.get_api_product_id(subscription)
+            product = StripeProduct.create_and_or_return(product_stripe_id)
 
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
 
