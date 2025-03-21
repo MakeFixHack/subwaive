@@ -894,7 +894,7 @@ class StripeSubscription(models.Model):
                 Log.objects.create(description="Update StripeSubscription", json=json)
         elif status != 'canceled':
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
-            Log.objects.create(description="Create StripeSubscription")
+            Log.objects.create(description="Create StripeSubscription", json=json)
 
     def get_api_dict(api_record):
         """ returns a dict of required values from an API record """
