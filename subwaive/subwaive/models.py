@@ -619,8 +619,9 @@ class StripePaymentLink(models.Model):
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
-        payment_link = StripePaymentLink.objects.filter(stripe_id=stripe_id).first()
-        if payment_link.exists():
+        payment_link_qs = StripePaymentLink.objects.filter(stripe_id=stripe_id)
+        if payment_link_qs.exists():
+            payment_link = payment_link_qs
             payment_link.create_or_update_children()
         else:
             plink = StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url)
@@ -694,11 +695,12 @@ class StripePrice(models.Model):
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
-        price = StripePrice.objects.filter(stripe_id=stripe_id).first()
+        price_qs = StripePrice.objects.filter(stripe_id=stripe_id)
         api_record = StripePrice.fetch_api_data(stripe_id)
         api_prc = StripePrice.dict_from_api(api_record)
 
-        if price.exists():
+        if price_qs.exists():
+            price = price_qs.first()
             price.name = api_prc['name']
             price.interval = api_prc['interval']
             price.price = api_prc['price_amount']
@@ -760,9 +762,10 @@ class StripeProduct(models.Model):
 
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
-        product = StripeProduct.objects.filter(stripe_id=stripe_id).first()
+        product_qs = StripeProduct.objects.filter(stripe_id=stripe_id).first()
         api_prd = stripe.Product.retrieve(stripe_id)
-        if product.exists():
+        if product_qs.exists():
+            product = product_qs
             product.name = api_prd.name
             product.description = api_prd.description
             product.save()
