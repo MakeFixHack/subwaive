@@ -870,7 +870,7 @@ class StripeSubscription(models.Model):
         api_record = stripe.Subscription.retrieve(stripe_id)
         api_dict = StripeSubscription.get_api_dict(api_record)
 
-        customer = api_record.customer
+        customer_id = api_record.customer
         created = datetime.datetime.fromtimestamp(api_record.created, tz=pytz.timezone(TIME_ZONE))
         current_period_end = datetime.datetime.fromtimestamp(api_record.current_period_end, tz=pytz.timezone(TIME_ZONE))
         status = api_record.status
@@ -884,7 +884,7 @@ class StripeSubscription(models.Model):
                 Log.objects.create(description="Cancel StripeSubscription", json=json)
             else:
                 subscription = subscription_qs.first()
-                subscription.customer = StripeCustomer.create_and_or_return(customer)
+                subscription.customer = StripeCustomer.create_and_or_return(customer_id)
                 subscription.created = created
                 subscription.current_period_end = current_period_end
                 subscription.status = status
@@ -893,6 +893,7 @@ class StripeSubscription(models.Model):
                 subscription.save()
                 Log.objects.create(description="Update StripeSubscription", json=json)
         elif status != 'canceled':
+            customer = StripeCustomer.create_and_or_return(customer_id)
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
             Log.objects.create(description="Create StripeSubscription", json=json)
 
