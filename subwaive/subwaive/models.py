@@ -354,11 +354,11 @@ class Person(models.Model):
         donor_status = []
         if self.get_subscriptions("donation"):
             donor_status.append("Makes a recurring donation")
-        elif otp:
+        if otp:
             if len(otp) == 1:
-                donor_status.append(f"Made a donation")
+                donor_status.append(f"Made a one-time donation")
             else:
-                donor_status.append(f"Made { len(otp) } donations")
+                donor_status.append(f"Made { len(otp) } one-time donations")
 
         return donor_status
 
