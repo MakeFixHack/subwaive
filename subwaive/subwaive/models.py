@@ -403,17 +403,17 @@ class Person(models.Model):
         customers = PersonStripe.objects.filter(person=self).values_list('customer')
         stripe_customers = StripeCustomer.objects.filter(id__in=customers)
         products = StripeProduct.objects.filter(Q(name__icontains=description)|Q(description__icontains=description))
-        subscriptions_prelim = StripeSubscription.objects.filter(customer__in=stripe_customers, product__in=products).order_by('name')
+        subscription_item = StripeSubscriptionItem.objects.filter(subscription__customer__in=stripe_customers, price__product__in=products).order_by('subscription__name')
 
         subscriptions = [
                     {
-                        'description': subscription.product.description, 
-                        'status': subscription.status, 
-                        'current_period_end': subscription.current_period_end,
-                        'name': subscription.name,
-                        'url': subscription.get_url(),
+                        'description': item.price.product.description, 
+                        'status': item.subscription.status, 
+                        'current_period_end': item.subscription.current_period_end,
+                        'name': item.subscription.name,
+                        'url': item.subscription.get_url(),
                         }
-                        for subscription in subscriptions_prelim
+                        for item in subscription_item
                     ]
         return subscriptions
 
@@ -734,6 +734,21 @@ class StripePrice(models.Model):
         
         return f"{ description } { price }"
 
+    def create_and_or_return(stripe_id):
+        """ create a StripePrice if one does not already exist """
+        json = {'stripe_id': stripe_id}
+
+        price_qs = StripePrice.objects.filter(stripe_id=stripe_id)
+        if not price_qs.exists():
+            api_prc = stripe.Price.retrieve(stripe_id)
+            product = StripeProduct.create_or_update(api_prc.product)
+            price = StripePrice.objects.create(stripe_id=stripe_id, product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
+            Log.objects.create(description="Create StripePrice", json=json)
+        else:
+            price = price_qs.first()
+        
+        return price
+
     def create_or_update(stripe_id):
         """ updates an existing record, otherwise creates one """
         json = {'stripe_id': stripe_id}
@@ -741,13 +756,13 @@ class StripePrice(models.Model):
         price_qs = StripePrice.objects.filter(stripe_id=stripe_id)
         api_record = StripePrice.fetch_api_data(stripe_id)
         api_prc = StripePrice.dict_from_api(api_record)
+        product = StripeProduct.create_or_update(api_prc.product)
 
         if price_qs.exists():
             price = price_qs.first()
             price.name = api_prc['name']
             price.interval = api_prc['interval']
             price.price = api_prc['price_amount']
-            product = StripeProduct.create_or_update(api_prc.product)
             price.product = product
             price.save()
             Log.objects.create(description="Update StripePrice", json=json)
@@ -855,7 +870,6 @@ class StripeSubscription(models.Model):
     current_period_end = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=64)
     name = models.CharField(max_length=128)
-    product = models.ForeignKey("subwaive.StripeProduct", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
 
     # class Meta:
     #     ordering = ('category', 'name',)
@@ -869,15 +883,12 @@ class StripeSubscription(models.Model):
 
         subscription_qs = StripeSubscription.objects.filter(stripe_id=stripe_id)
         api_record = stripe.Subscription.retrieve(stripe_id)
-        api_dict = StripeSubscription.get_api_dict(api_record)
 
         customer_id = api_record.customer
-        created = datetime.datetime.fromtimestamp(api_record.created, tz=pytz.timezone(TIME_ZONE))
-        current_period_end = datetime.datetime.fromtimestamp(api_record.current_period_end, tz=pytz.timezone(TIME_ZONE))
+        created = StripeSubscription.transform_timestamp(api_record.created)
+        current_period_end = StripeSubscription.transform_timestamp(api_record.current_period_end)
         status = api_record.status
         name = StripeSubscription.get_api_name(stripe_id)
-        product_stripe_id = StripeSubscription.get_api_product_id(api_record)
-        product = StripeProduct.create_and_or_return(product_stripe_id)
 
         if subscription_qs.exists():
             if status == 'canceled':
@@ -890,19 +901,23 @@ class StripeSubscription(models.Model):
                 subscription.current_period_end = current_period_end
                 subscription.status = status
                 subscription.name = name
-                subscription.product = product
                 subscription.save()
+    
+                Log.objects.create(description="Delete StripeSubscriptionItem", json={'subscription.id': subscription.id})
+                StripeSubscriptionItem.objects.filter(subscription=subscription).delete()
+                StripeSubscriptionItem.create_if_needed(api_record)
                 Log.objects.create(description="Update StripeSubscription", json=json)
         elif status != 'canceled':
             customer = StripeCustomer.create_and_or_return(customer_id)
-            StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
+            subscription = StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
+            Log.objects.create(description="Delete StripeSubscriptionItem", json={'subscription.id': subscription.id})
+            StripeSubscriptionItem.objects.filter(subscription=subscription).delete()
+            StripeSubscriptionItem.create_if_needed(api_record)
             Log.objects.create(description="Create StripeSubscription", json=json)
 
-    def get_api_dict(api_record):
-        """ returns a dict of required values from an API record """
-        stripe_id = api_record.id
-        created = datetime.datetime.fromtimestamp(api_record.created, tz=pytz.timezone(TIME_ZONE))
-        current_period_end = datetime.datetime.fromtimestamp(api_record.current_period_end, tz=pytz.timezone(TIME_ZONE))
+    def transform_timestamp(timestamp):
+        """ transforms a timestamp to a datetime """
+        return datetime.datetime.fromtimestamp(timestamp, tz=pytz.timezone(TIME_ZONE))
 
     def get_api_name(stripe_id):
         """ return a name if provided in the checkout, else "self" """
@@ -916,19 +931,6 @@ class StripeSubscription(models.Model):
         if not name:
             name = "self"
         return name
-    
-    def get_api_product_id(api_subscription):
-        """ return the product stripe_id associated with an API subscription record """
-        product_stripe_id = None
-        if api_subscription.plan: # single-item subscriptions
-            if api_subscription.plan.product:
-                product_stripe_id = api_subscription.plan.product
-        elif 'items' in api_subscription.keys(): # multi-item subscriptions
-            for item in api_subscription['items']:
-                if item.plan.product:
-                    product_stripe_id = item.plan.product
-        
-        return product_stripe_id
 
     def get_url(self):
         """ URL for a hyperlink """
@@ -944,12 +946,34 @@ class StripeSubscription(models.Model):
             stripe_id = subscription['id']
             name = StripeSubscription.get_api_name(stripe_id)
 
-            created = datetime.datetime.fromtimestamp(subscription.created, tz=pytz.timezone(TIME_ZONE))
-            current_period_end = datetime.datetime.fromtimestamp(subscription.current_period_end, tz=pytz.timezone(TIME_ZONE))
+            created = StripeSubscription.transform_timestamp(subscription.created)
+            current_period_end = StripeSubscription.transform_timestamp(subscription.current_period_end)
             status = subscription.status
 
-            product_stripe_id = StripeSubscription.get_api_product_id(subscription)
-            product = StripeProduct.create_and_or_return(product_stripe_id)
-
-            StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status, product=product)
+            StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
+            StripeSubscriptionItem.create_if_needed(subscription)
             Log.objects.create(description="Create StripeSubscription", json={'stripe_id': stripe_id})
+
+class StripeSubscriptionItem(models.Model):
+    """ A Stripe SubscriptionItem """
+    stripe_id = models.CharField(max_length=64)
+    subscription = models.ForeignKey("subwaive.StripeSubscription", on_delete=models.CASCADE, help_text="What Stripe Price is being mapped?")
+    price = models.ForeignKey("subwaive.StripePrice", on_delete=models.CASCADE, help_text="What Stripe Price is being mapped?")
+
+    class Meta:
+        ordering = ('stripe_id', 'price',)
+
+    def __str__(self):
+        return f"""{ self.stripe_id } / { self.subscription } / { self.price }"""
+
+    def create_if_needed(api_sub):
+        """ loops through a Stripe API Subscription object and creates a SubscriptionItem if one does not already exist """
+        for item in api_sub['items']:
+            item_id = item.id
+            price_id = item.price.id
+            price = StripePrice.create_and_or_return(stripe_id=price_id)
+            subscription = StripeSubscription.objects.get(stripe_id=api_sub.id)
+            if not StripeSubscriptionItem.objects.filter(stripe_id=item_id, subscription=subscription, price=price).exists():
+                StripeSubscriptionItem.objects.create(stripe_id=item_id, subscription=subscription, price=price)
+                Log.objects.create(description="Create StripeSubscriptionItem")
+

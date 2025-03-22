@@ -3,7 +3,7 @@ from django.contrib import admin
 from subwaive.models import DocusealField,DocusealFieldStore,DocusealSubmission,DocusealSubmitter,DocusealSubmitterSubmission,DocusealTemplate
 from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonStripe
 from subwaive.models import Log,QRCategory,QRCustom
-from subwaive.models import StripePaymentLink,StripePrice,StripeProduct,StripeSubscription,StripeCustomer
+from subwaive.models import StripeCustomer,StripePaymentLink,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
 
 
 """
@@ -96,3 +96,7 @@ admin.site.register(StripeProduct, StripeProduct_Admin)
 class StripeSubscription_Admin(admin.ModelAdmin):
     list_display = ('stripe_id', 'customer', 'status', 'created', 'current_period_end',)
 admin.site.register(StripeSubscription, StripeSubscription_Admin)
+
+class StripeSubscriptionItem_Admin(admin.ModelAdmin):
+    list_display = ('stripe_id', 'subscription', 'price',)
+admin.site.register(StripeSubscriptionItem, StripeSubscriptionItem_Admin)
