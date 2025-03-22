@@ -36,6 +36,7 @@ def person_list(request):
             p['last_check_in'] = last_check_in.date()
         else:
             p['last_check_in'] = None
+        p['has_membership'] = check_membership_status(p['id'])
 
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'List', 'active': True},

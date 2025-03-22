@@ -22,6 +22,7 @@
         {% for person in persons %}
         <div class="card text-center">
             <div class="card-body">
+                {% if person.has_membership %}<div class="float-end"><img width="20px" src="https://www.svgrepo.com/show/13695/star.svg" /></div>{% endif %}
                 <h5 class="card-title">{{ person.name }}</h5>
 
                 <div>Last check-in: {{ person.last_check_in }}</div>
