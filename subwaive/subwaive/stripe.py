@@ -48,18 +48,11 @@ def payment_link_list(request):
         for indx,product in enumerate(set([sqc.price.product.name for sqc in stripe_qr_codes]))
     ]
 
-    button_dict = [
-            {'url': reverse('custom_link_list'), 'anchor': 'Custom'},
-            {'url': reverse('payment_link_list'), 'anchor': 'Stripe', 'active': True},
-            {'url': reverse('docuseal_link_list'), 'anchor': 'Docuseal'},
-    ]
-
     context = {
         'page_title': 'Links - Stripe',
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_PUBLIC,
         'categories': categories,
         'qr_list': stripe_qr_list,
-        'buttons': button_dict,
     }
 
     return render(request, f'subwaive/qr-links.html', context)

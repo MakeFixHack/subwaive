@@ -75,18 +75,11 @@ def custom_link_list(request):
         for category in set([(c.category.name, c.category.id) for c in user_qr_codes])
     ]
 
-    button_dict = [
-            {'url': reverse('custom_link_list'), 'anchor': 'Custom', 'active': True},
-            {'url': reverse('payment_link_list'), 'anchor': 'Stripe'},
-            {'url': reverse('docuseal_link_list'), 'anchor': 'Docuseal'},
-    ]
-
     context = {
         'page_title': 'Links',
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_PUBLIC,
         'categories': categories,
         'qr_list': user_qr_list,
-        'buttons': button_dict,
     }
 
     return render(request, f'subwaive/qr-links.html', context)

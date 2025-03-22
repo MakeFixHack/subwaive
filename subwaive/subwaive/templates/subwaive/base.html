@@ -78,7 +78,16 @@
         <!--- Navigation -->
         <nav id="main-nav" class="navbar navbar-expand navbar-light padded">
             <div class="navbar-nav">
-                <a class="nav-item nav-link" href="{% url 'custom_link_list' %}">Links</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      QR Codes
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="nav-item nav-link" href="{% url 'custom_link_list' %}">Links</a></li>
+                        <li><a class="nav-item nav-link" href="{% url 'payment_link_list' %}">Stripe</a></li>
+                        <li><a class="nav-item nav-link" href="{% url 'docuseal_link_list' %}">Docuseal</a></li>
+                    </ul>
+                </li>
                 <a class="nav-item nav-link" href="{% url 'person_list' %}">People</a>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

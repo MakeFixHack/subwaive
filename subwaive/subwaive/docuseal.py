@@ -35,18 +35,11 @@ def qr_links(request):
         for idx,folder_name in enumerate(set([t.folder_name for t in templates]))
     ]
 
-    button_dict = [
-            {'url': reverse('custom_link_list'), 'anchor': 'Custom'},
-            {'url': reverse('payment_link_list'), 'anchor': 'Stripe'},
-            {'url': reverse('docuseal_link_list'), 'anchor': 'Docuseal', 'active': True},
-    ]
-
     context = {
         'page_title': 'Links - Docuseal',
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_PUBLIC,
         'qr_list': template_list,
         'categories': categories,
-        'buttons': button_dict,
     }
 
     return render(request, f'subwaive/qr-links.html', context)
