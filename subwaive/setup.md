@@ -37,16 +37,33 @@ Missing values are either secrets you need to collect/establish or setup-specifi
 Establish the initial data model and superuser:
 
 ```sh
+# create expected Docker network
+docker network create subwaive
+
+# create the container	
+docker build -t subwaive .
+
+# open a shell
+docker exec -it subwaive sh
+
+# migrate database changes know by Django but not yet by Postgres
 python manage.py migrate
+
+# create a superuser
 python manage.py createsuperuser
+
+# install initial database fixtures
 python manage.py loaddata initial
 ```
 
 ## Docker network connections
 
-Create the Docker network with:
+If you are running Docuseal in a Docker container, such as in a development environment, this section is required. If that is not required, you can choose not to create the network and remove the references to the `subwaive` network from `compose.yaml`.
+
+When initializing Django, we created the Docker network with:
 
 ```sh
+# as about
 docker network create subwaive
 ```
 
