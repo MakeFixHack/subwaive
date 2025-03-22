@@ -108,9 +108,10 @@ class DocusealSubmission(models.Model):
                 pagination_next = False
 
             for submission in submissions['data']:
-                submitters = [{'submitter_id': s['id'], 'status': s['status'], 'role': s['role']} for s in submission['submitters']]
-                if DocusealTemplate.objects.filter(template_id=submission['template']['id']).exists():
-                    DocusealSubmission.new(submission['id'], submission['slug'], submission['status'], submission['completed_at'], submission['template']['id'], submitters)
+                if submission['status'] == 'completed':
+                    submitters = [{'submitter_id': s['id'], 'status': s['status'], 'role': s['role']} for s in submission['submitters']]
+                    if DocusealTemplate.objects.filter(template_id=submission['template']['id']).exists():
+                        DocusealSubmission.new(submission['id'], submission['slug'], submission['status'], submission['completed_at'], submission['template']['id'], submitters)
 
     def get_url(self):
         """ URL for a hyperlink """
