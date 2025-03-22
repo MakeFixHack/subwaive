@@ -15,36 +15,39 @@
 {% endif %}
 <!-- /Determination of confidentiality -->
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{{ person.name }}</h5>
+<div class="section section-heading">
+    <h5 class="card-title">{{ person.name }}</h5>
         
-        <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View Card</button></div>
-    </div>
+    <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View Card</button></div>
 </div>
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{% include 'subwaive/img/Docuseal-logo.svg' %}</h5>
-        {% for document in docuseal_documents %}
-        {% ifchanged document.folder_name %}
-        <h5>{{ document.folder_name }}</h5>
-        {% endifchanged %}
-        <div>
-            <div>{{ document.template_name }}</div>
-            <div>{{ document.status|capfirst }}</div>
-            <div>{{ document.completed_at }}</div>
-            {% if document.important_fields %}
-            <div>
-                Important fields:
-                {% for field in document.important_fields %}
-                <ul>{{ field.field }}: {{ field.value }}</ul>
-                {% endfor %}
+<div class="section section-heading">
+    <h5>{% include 'subwaive/img/Docuseal-logo.svg' %}</h5>
+</div>
+
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+{% for document in docuseal_documents %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5>{{ document.folder_name }}</h5>
+                <div>
+                    <div>{{ document.template_name }}</div>
+                    <div>{{ document.status|capfirst }}</div>
+                    <div>{{ document.completed_at }}</div>
+                    {% if document.important_fields %}
+                    <div>
+                        Important fields:
+                        {% for field in document.important_fields %}
+                        <ul>{{ field.field }}: {{ field.value }}</ul>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div><a href="{{ document.url }}">View in Docuseal</a></div>
+                </div>
             </div>
-            {% endif %}
-            <div><a href="{{ document.url }}">View in Docuseal</a></div>
         </div>
-        {% endfor %}
+{% endfor %}
     </div>
 </div>
 
