@@ -175,3 +175,4 @@ cython_debug/
 
 subwaive/pg_data
 venv_*
+notes/
