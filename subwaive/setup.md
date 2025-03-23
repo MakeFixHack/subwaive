@@ -118,7 +118,7 @@ docker exec -it subwaive python manage.py loaddata initial
 The initial data loaded creates a super user called `admin` with a password of `makefixhack`. If you don't change that password immediately, you get what you deserve. 😄
 
 
-## Docuseal configuration
+## Docuseal integration
 
 Docuseal can be downloaded and installed from:
 
@@ -163,7 +163,7 @@ The relevant `.env` keys are:
 * DOCUSEAL_WWW_ENDPOINT - your Docuseal web address, for building URLs
 
 
-## Stripe configuration
+## Stripe integration
 
 * All sales options are represented by a payment link
 * All product prices have a price description
@@ -204,3 +204,7 @@ For production Stripe data:
 For test Stripe data:
 
 * STRIPE_WWW_ENDPOINT=https://dashboard.stripe.com/
+
+
+## Calendar integration
+
