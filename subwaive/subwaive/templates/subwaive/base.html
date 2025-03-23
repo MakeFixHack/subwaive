@@ -99,6 +99,7 @@
                       Admin
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="nav-item nav-link" href="{% url 'event_refresh' %}">Refresh Events</a></li>
                         <li><a class="nav-item nav-link" href="{% url 'stripe_refresh' %}">Refresh Stripe</a></li>
                         <li><a class="nav-item nav-link" href="{% url 'docuseal_refresh' %}">Refresh Docuseal</a></li>
                         <li><a class="nav-item nav-link" href="/admin/">Admin Console</a></li>
