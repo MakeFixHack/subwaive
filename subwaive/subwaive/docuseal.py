@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -118,6 +119,8 @@ def docuseal_refresh_page(request):
 def refresh_docuseal(request):
     """ force refresh Docuseal data """
     webhook_refresh()
+
+    messages.success(request, f'Docuseal data refreshed')
 
     return redirect('docuseal_refresh')
 

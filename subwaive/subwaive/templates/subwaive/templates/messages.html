@@ -1,0 +1,10 @@
+<div class="container-fluid" style="margin-top: 1em;">
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}danger{% else %}info{% endif %}" role="alert">
+            {{ message|safe }} - {% now "Y-m-d H:i:s" %}
+        </div>
+    {% endfor %}
+    {% endif %}
+    </div>
+        

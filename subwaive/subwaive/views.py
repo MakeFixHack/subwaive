@@ -277,18 +277,21 @@ def get_event():
 @login_required
 def merge_people(request, merge_child_id, merge_parent_id=None):
     """ a page for merging people """
+    merge_child = Person.objects.get(id=merge_child_id)
+    name = merge_child.name
+
     if merge_parent_id:
         merge_parent = Person.objects.get(id=merge_parent_id)
         merge_parent.merge(merge_child_id)
         return_object = redirect('person_card', merge_parent_id)
+    
+        messages.success(request, f'<em>{ name }</em> merged')
 
-    else:
-        person = Person.objects.get(id=merge_child_id)
-        
+    else:       
         merge_child = {
-            'id': person.id,
-            'name': person.name,
-            'emails': person.get_email_list(),
+            'id': merge_child.id,
+            'name': merge_child.name,
+            'emails': merge_child.get_email_list(),
             } 
         
         persons = Person.objects.exclude(id=merge_child_id)
@@ -321,6 +324,8 @@ def unmerge_people(request, email_id):
 
     merge_child = Person.search(email)[0]
 
+    messages.success(request, f'<em>{ email }</em> unmerged')
+
     return redirect('person_edit', merge_child.id)
 
 @login_required
@@ -331,6 +336,8 @@ def set_preferred_email(request, email_id):
     person.preferred_email = email
     person.save()
 
+    messages.success(request, f'<em>{ email }</em> set as preferred')
+
     return redirect('person_edit', person.id)
 
 @login_required
@@ -340,5 +347,7 @@ def set_name(request, person_id, important_field_id):
     name = DocusealFieldStore.objects.get(id=important_field_id).value
     person.name = name
     person.save()
+
+    messages.success(request, f'Name set to <em>{ name }</em>')
 
     return redirect('person_edit', person_id)
