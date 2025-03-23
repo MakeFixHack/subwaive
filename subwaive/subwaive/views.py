@@ -109,6 +109,10 @@ def person_search(request):
     if search_term:
         results = Person.search(search_term)
 
+    if results:
+        if len(results) == 1:
+            return redirect('person_card', results.first().id)
+
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'List'},
             {'url': reverse('person_search'), 'anchor': 'Search', 'active': True},
