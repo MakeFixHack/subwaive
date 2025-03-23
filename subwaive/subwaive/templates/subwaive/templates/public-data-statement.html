@@ -1,8 +1,21 @@
 {% block content %}
 
         <!-- Notice of public data -->
-        <div class="container-fluid alert alert-success">
-            <strong>This information is public and may be shared.</strong>
+        <!-- Trigger Modal Button -->
+        <button class="btn btn-success float-end" data-bs-toggle="modal" data-bs-target="#imageModal{{ qr_code.id }}">
+            PUBLIC
+        </button>
+
+        <!-- Modal for full screen-ish QR -->
+        <div class="modal fade" id="imageModal{{ qr_code.id }}" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body alert alert-success alert-no-margin">
+                        <h3>Public Information</h3>
+                        <p>This information is public and may be shared.</p>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- /Notice of public data -->
 

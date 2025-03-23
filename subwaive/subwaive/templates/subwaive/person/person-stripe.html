@@ -1,12 +1,6 @@
 {% extends 'subwaive/base.html' %}
 {% block content %}
 
-<!-- tabs for stripe/docuseal/app -->
-
-<div class="container-fluid">
-    <h1>{{ person.name }}</h1>
-</div>
-
 <!-- Determination of confidentiality -->
 {% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
     {% include 'subwaive/templates/public-data-statement.html' %}
@@ -14,6 +8,10 @@
     {% include 'subwaive/templates/confidentiality-statement.html' %}
 {% endif %}
 <!-- /Determination of confidentiality -->
+
+<div class="container-fluid">
+    <h1>{{ person.name }}</h1>
+</div>
 
 <div class="section section-heading">
     <h5>{{ person.name }}</h5>

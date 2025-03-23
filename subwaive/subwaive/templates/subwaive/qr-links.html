@@ -1,10 +1,6 @@
 {% extends 'subwaive/base.html' %}
 {% block content %}
 
-<div class="container-fluid">
-    <h1>{{ page_title }}</h1>
-</div>
-
 <!-- Determination of confidentiality -->
 {% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
     {% include 'subwaive/templates/public-data-statement.html' %}
@@ -12,6 +8,10 @@
     {% include 'subwaive/templates/confidentiality-statement.html' %}
 {% endif %}
 <!-- /Determination of confidentiality -->
+
+<div class="container-fluid">
+    <h1>{{ page_title }}</h1>
+</div>
 
 {% if categories %}
 <nav id="secondary-nav" class="navbar navbar-expand navbar-light padded">

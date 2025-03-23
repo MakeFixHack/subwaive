@@ -1,22 +1,29 @@
 {% block content %}
 
         <!-- Notice of confidentiality -->
-        <div class="container-fluid alert alert-danger">
-            <strong>This information is CONFIDENTIAL and must be protected.</strong>
-            <a class="btn-danger" data-bs-toggle="collapse" href="#confStatement" aria-expanded="false" aria-controls="confStatement">
-                More
-              </a>
-            <div class="collapse" id="confStatement">
-                <p>We never release information except:</p>
-                    <ul>About a membership to the named member</ul>
-                    <ul>About a membership to the payee</ul>
-                    <ul>Only the specifically requested information with a valid court order</ul>
-                <p>This includes whether or not somebody:</p>
-                    <ul>Is or has ever been a member</ul>
-                    <ul>Has signed any type of agreement except:
-                        <ul>Whether a board member has a current conflict of interest disclosure</ul>
-                        <ul>Whether an individual has a current volunteer agreement</ul>
-                    </ul>
+        <!-- Trigger Modal Button -->
+        <button class="btn btn-danger float-end" data-bs-toggle="modal" data-bs-target="#imageModal{{ qr_code.id }}">
+            CONFIDENTIAL
+        </button>
+
+        <!-- Modal for full screen-ish QR -->
+        <div class="modal fade" id="imageModal{{ qr_code.id }}" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body alert alert-danger alert-no-margin">
+                        <h3>Confidential Information</h3>
+                        <p>We never release information except:</p>
+                        <ul>About a membership to the named member</ul>
+                        <ul>About a membership to the payee</ul>
+                        <ul>Only the specifically requested information with a valid court order</ul>
+                        <p>This includes whether or not somebody:</p>
+                        <ul>Is or has ever been a member</ul>
+                        <ul>Has signed any type of agreement except:
+                            <ul>Whether a board member has a current conflict of interest disclosure</ul>
+                            <ul>Whether an individual has a current volunteer agreement</ul>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- /Notice of confidentiality -->
