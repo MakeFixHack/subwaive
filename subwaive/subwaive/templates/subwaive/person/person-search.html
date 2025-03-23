@@ -35,18 +35,36 @@
 <div class="row-container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
     {% for person in results %}
-        <div class="card card-md">
-            <div class="card-body">
-                <h5 class="card-title">{{ person.name }}</h5>
+    <div class="card text-center">
+        <div class="card-body">
+            {% if person.has_membership %}<div class="float-end"><img width="20px" src="https://www.svgrepo.com/show/13695/star.svg" /></div>{% endif %}
+            <h5 class="card-title">{{ person.name }}</h5>
 
-                <div>
-                    <button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">Details</button>
-                    <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person.id %}'; return false;">Check-in</button>
-                </div>
-
-                <div>Preferred email: <a href="mailto:{{ person.preferred_email.email }}">{{ person.preferred_email.email }}</a></div>
+            <div>
+                <button class="btn btn-info" onclick="window.location='{{ person.person_card }}'; return false;">View Card</button>
             </div>
+
+            <div>
+                {% if person.last_check_in %}
+                <div>Last check-in:</div>
+                <div>{{ person.last_check_in.event.start|date:"Y-m-d" }} / {{ person.last_check_in.event.summary }}</div>
+                {% else %}
+                <div>Never checked-in</div>
+                {% endif %}
+            </div>
+            
+            {% for event in check_in_events %}
+            <div>
+                {% if event.id not in person.last_check_in_event_id_list %}
+                <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person_id=person.id event_id=event.id  %}'; return false;">{{ event.summary }}</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div>Preferred email:</div>
+            <div><a href="mailto:{{ person.preferred_email }}">{{ person.preferred_email }}</a></div>
         </div>
+    </div>
     {% endfor %}
     {% else %}
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">

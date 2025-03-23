@@ -7,33 +7,61 @@
     <h1>Check-in Remediation</h1>
 </div>
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{{ person.name }}</h5>
+<div class="section section-heading">
+    <h2>{{ person.name }}</h2>
 
-        Check-in failed because:
-        {% if not waiver_check %}
-        <div>They do not have a current, completed waiver.</div>
-        <div>Ask them to completed a waiver: <br />
-            <a href="{% url 'docuseal_link_list' %}">Waivers</a>
-        </div>
-        {% endif %}
-        
-        {% if not membership_status %}
-        <div>They do not have a membership and have no purchased a day-pass.</div>
-        <div>Suggest membership or a "pay-what-you-can" day-pass.</div>
-        {% endif %}
-        
-        {% if has_prior_check_in %}
-        <div>They are already checked-in.</div>
-        <div>Do you need to check them in again?</div>
-        {% endif %}
-        
-        <div>
-            <div>If you wish to check them in anyways:</div>
-            <button class="btn btn-warning" onclick="window.location='{% url 'force_member_check_in' person.id %}'; return false;">Force Check-in</button>
+    <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View card</button></div>
+
+    <h2>{{ event.summary }}</h2>
+</div>
+
+{% if has_prior_check_in %}
+<div class="row-container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Already Checked-In</h5>
+
+                <div>A check-in for {{ person.name }} exists for this event.</div>
+            </div>
         </div>
     </div>
 </div>
+{% else %}
+<div class="row-container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% if not waiver_check %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Waiver Check</h5>
+
+                <div>{{ person.name }} does not have a current, completed waiver.</div>
+                <div>Ask them to completed a waiver: <br />
+                    <a href="{% url 'docuseal_link_list' %}">Waivers</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+                
+        {% if not membership_status %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Membership Check</h5>
+
+                <div>{{ person.name }} does not have a membership and have no purchased a day-pass.</div>
+                <div>Suggest membership or a "pay-what-you-can" day-pass.</div>
+            </div>
+        </div>
+        {% endif %}                
+    </div>
+</div>
+
+<div class="section">
+    <div>
+        <div>If you wish to check them in anyways:</div>
+        <button class="btn btn-warning" onclick="window.location='{% url 'force_member_check_in' person_id=person.id event_id=event.id %}'; return false;">Force Check-in</button>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}

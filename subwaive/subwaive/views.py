@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from subwaive.docuseal import check_waiver_status
 from subwaive.models import DocusealFieldStore
-from subwaive.models import Event
+from subwaive.models import Event, PersonEvent
 from subwaive.models import Log, Person, PersonEmail, QRCustom
 from subwaive.stripe import check_membership_status
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
@@ -27,17 +27,13 @@ def person_list(request):
             'id': p.id,
             'person_card': redirect('person_card', person_id=p.id).url,
             'preferred_email': p.preferred_email.email,
+            'last_check_in': p.get_last_check_in(),
+            'last_check_in_event_id_list': [ci.event.id for ci in PersonEvent.objects.filter(person=p, event__start__date=datetime.date.today())],
         }
         for p in persons_prelim
     ]
 
-    for p in persons:
-        last_check_in = get_last_check_in(p['id'])
-        if last_check_in:
-            p['last_check_in'] = last_check_in.date()
-        else:
-            p['last_check_in'] = None
-        p['has_membership'] = check_membership_status(p['id'])
+    check_in_events = Event.get_current_event()
 
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'List', 'active': True},
@@ -48,6 +44,7 @@ def person_list(request):
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'persons': persons,
         'buttons': button_dict,
+        'check_in_events': check_in_events,
     }
 
     return render(request, f'subwaive/person/person-list.html', context)
@@ -102,17 +99,32 @@ def custom_link_list(request, is_sensitive=False):
 @login_required
 @permission_required('subwaive.can_search_customers')
 def person_search(request):
-    """ Search for customers by name or email """
+    """ Search for people by name or email """
     search_term = request.POST.get('search_term', None)
 
+    results_prelim = None
     results = None
     if search_term:
-        results = Person.search(search_term)
+        results_prelim = Person.search(search_term)
 
-    if results:
-        if len(results) == 1:
-            return redirect('person_card', results.first().id)
+    if results_prelim:
+        if len(results_prelim) == 1:
+            return redirect('person_card', results_prelim.first().id)
+        else:
+            results = [
+                {
+                    'name': p.name,
+                    'id': p.id,
+                    'person_card': redirect('person_card', person_id=p.id).url,
+                    'preferred_email': p.preferred_email.email,
+                    'last_check_in': p.get_last_check_in(),
+                    'last_check_in_event_id_list': [ci.event.id for ci in PersonEvent.objects.filter(person=p, event__start__date=datetime.date.today())],
+                }
+                for p in results_prelim
+            ]
 
+    check_in_events = Event.get_current_event()
+       
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'List'},
             {'url': reverse('person_search'), 'anchor': 'Search', 'active': True},
@@ -123,6 +135,7 @@ def person_search(request):
         'search_term': search_term,
         'results': results,
         'buttons': button_dict,
+        'check_in_events': check_in_events,
     }
 
     return render(request, f'subwaive/person/person-search.html', context)
@@ -136,13 +149,8 @@ def person_card(request, person_id):
     has_waiver = check_waiver_status(person_id)
     has_membership = person.check_membership_status()
     
-    last_check_in_prelim = get_last_check_in(person_id)
-    last_check_in = None
-    if last_check_in_prelim:
-        last_check_in = {
-                'event': last_check_in_prelim.json['event'],
-                'date': last_check_in_prelim.date()
-            }
+    last_check_ins = PersonEvent.objects.filter(person=person, event__start__date=datetime.date.today())
+    check_in_events = Event.get_current_event()
 
     important_fields = DocusealFieldStore.objects.filter(submission__in=person.get_submissions())
 
@@ -152,8 +160,9 @@ def person_card(request, person_id):
         'other_emails': other_emails,
         'has_waiver': has_waiver,
         'has_membership': has_membership,
-        'last_check_in': last_check_in,
-        'important_fields': important_fields,
+        'last_check_ins': last_check_ins,
+        'last_check_in_event_id_list': [ci.event.id for ci in last_check_ins],
+        'check_in_events': check_in_events,
     }
 
     return render(request, f'subwaive/person/person-card.html', context)
@@ -214,27 +223,22 @@ def person_edit(request, person_id):
 
     return render(request, f'subwaive/person/person-edit.html', context)
 
-def get_last_check_in(person_id):
-    """ return a Log for the last time a person checked in """
-    return Log.get_last(description='Check-in', json={'person_id': person_id})
-
-def check_prior_check_in(person_id):
-    """ check if a person has already been checked in today """
-    last_check_in = get_last_check_in(person_id)
+def check_prior_check_in(person_id, event_id):
+    """ check if a person has already been checked in to an event """
+    last_check_in = PersonEvent.objects.filter(person__id=person_id, event__id=event_id)
     is_checked_in = False
-    if last_check_in:
-        if last_check_in.date() == datetime.date.today():
+    if last_check_in.exists():
             is_checked_in = True
     return is_checked_in
 
 @login_required
-def member_check_in(request, person_id, override_checks=False):
+def member_check_in(request, person_id, event_id, override_checks=False):
     """ A method logging a member was in the space. """
     waiver_check = check_waiver_status(person_id)
     print(waiver_check)
     membership_status = check_membership_status(person_id)
     print(membership_status)
-    has_prior_check_in = check_prior_check_in(person_id)
+    has_prior_check_in = check_prior_check_in(person_id, event_id)
     print(has_prior_check_in)
 
     clean_checks = False
@@ -245,27 +249,29 @@ def member_check_in(request, person_id, override_checks=False):
 
     if clean_checks:
         check_results = {'waiver_check': waiver_check, 'membership_status': membership_status, 'has_prior_check_in': has_prior_check_in, 'override_checks': override_checks}
-        payload = {'person_id': person_id, 'check_in_by': request.user.username, 'check_results': check_results, 'event': get_event()}
-        Log.objects.create(description="Check-in", json=payload)
-        print('checked-in')
+        check_in = Person.objects.get(id=person_id).check_in(event_id)
+        messages.success(request, f"Checked-in for { check_in.event.summary }")
+
         return redirect('person_card', person_id)
     else:
         print('check-in checks failed')
-        return check_in_remediation(request=request, person_id=person_id, waiver_check=waiver_check, membership_status=membership_status, has_prior_check_in=has_prior_check_in)
+        return check_in_remediation(request=request, person_id=person_id, event_id=event_id, waiver_check=waiver_check, membership_status=membership_status, has_prior_check_in=has_prior_check_in)
 
 @login_required
-def force_member_check_in(request, person_id):
+def force_member_check_in(request, person_id, event_id):
     """ force a member check-in in spite of failed checks """
-    return member_check_in(request=request, person_id=person_id, override_checks=True)
+    return member_check_in(request=request, person_id=person_id, event_id=event_id, override_checks=True)
 
 @login_required
-def check_in_remediation(request, person_id, waiver_check, membership_status, has_prior_check_in):
+def check_in_remediation(request, person_id, event_id, waiver_check, membership_status, has_prior_check_in):
     """ A person failed one or more checks for check-in, provide details on how to clear the checks """
     person = Person.objects.get(id=person_id)
+    event = Event.objects.get(id=event_id)
 
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
+        'event': event,
         'waiver_check': waiver_check,
         'membership_status': membership_status,
         'has_prior_check_in': has_prior_check_in,
@@ -286,11 +292,6 @@ def delete_member_check_in(request, log_id):
     log.save()
 
     return redirect('person_edit', person_id)
-
-def get_event():
-    """ return the name of the current event from the RSS calendar feed """
-    #!!! need to link calendar
-    return "Unknown event"
 
 @login_required
 def merge_people(request, merge_child_id, merge_parent_id=None):

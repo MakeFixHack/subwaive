@@ -208,3 +208,13 @@ For test Stripe data:
 
 ## Calendar integration
 
+SubWaive reads in calendar events in order to provide a "check-in" feature for monitoring attendance. Check-ins allow you to view a person's history with events and the attendance at events.
+
+This provides a away to:
+
+* Compare, and monitor over time, the popularity of events
+* Watch for members who are not visiting as much (low engagement => cancellation risk)
+
+The relevant `.env` keys are:
+
+* CALENDAR_URL - the local used to download the ical file containing the calendar

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from subwaive.models import DocusealField,DocusealFieldStore,DocusealSubmission,DocusealSubmitter,DocusealSubmitterSubmission,DocusealTemplate
 from subwaive.models import Event,Log,QRCategory,QRCustom
-from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonStripe
+from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonEvent,PersonStripe
 from subwaive.models import StripeCustomer,StripePaymentLink,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
 
 
@@ -50,6 +50,10 @@ admin.site.register(PersonDocuseal, PersonDocuseal_Admin)
 class PersonEmail_Admin(admin.ModelAdmin):
     list_display = ('person', 'email',)
 admin.site.register(PersonEmail, PersonEmail_Admin)
+
+class PersonEvent_Admin(admin.ModelAdmin):
+    list_display = ('person', 'event',)
+admin.site.register(PersonEvent, PersonEvent_Admin)
 
 class PersonStripe_Admin(admin.ModelAdmin):
     list_display = ('person', 'customer_id',)

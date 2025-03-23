@@ -11,11 +11,15 @@
 
 <div class="section section-heading">
     <h5 class="card-title">{{ person.name }}</h5>
+                
+    <div>Signed a waiver: {{ has_waiver }}</div>
+                
+    <div>Current membership: {{ has_membership }}</div>
     
     <div>
-        <button class="btn btn-info" onclick="window.location='{% url 'person_edit' person.id %}'; return false;">Edit</button>
         <button class="btn btn-info" onclick="window.location='{% url 'person_docuseal' person.id %}'; return false;">Docuseal</button>
         <button class="btn btn-info" onclick="window.location='{% url 'person_stripe' person.id %}'; return false;">Stripe</button>
+        <button class="btn btn-success" onclick="window.location='{% url 'person_edit' person.id %}'; return false;">Edit</button>
     </div>
 </div>
 
@@ -23,14 +27,18 @@
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title">Check-in</h5>
-                <div>Signed a waiver: {{ has_waiver }}</div>
-                <div>Current membership: {{ has_membership }}</div>
-                <div>Last check-in: {% if last_check_in %}{{ last_check_in.event }} @ {{ last_check_in.date }}{% endif %}</div>
-                <div><button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person.id %}'; return false;">Check-in</button></div>
+                <h5 class="card-title">Check-in History</h5>
+
+                <div>Last 5 check-ins: </div>
+                {% for check_in in last_check_ins %}
+                {% ifchanged check_in.event.start|date:"Y-m-d" %}
+                <div>{{ check_in.event.start|date:"Y-m-d" }}</div>
+                {% endifchanged %}
+                <li>{{ check_in.event.summary }}</li>
+                {% endfor %}
             </div>
         </div>
-
+                
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title">Important Fields</h5>

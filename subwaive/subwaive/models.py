@@ -262,8 +262,8 @@ class Event(models.Model):
     UID = models.UUIDField()
     summary = models.CharField(max_length=512, help_text='What is the event summary?')
     description = models.TextField(max_length=2048, help_text='What is the event description?')
-    start = models.DateTimeField(auto_now_add=True, help_text='When does the event begin?')
-    end = models.DateTimeField(auto_now_add=True, help_text='When does the event finish?')
+    start = models.DateTimeField(help_text='When does the event begin?')
+    end = models.DateTimeField(help_text='When does the event finish?')
 
     class Meta:
         ordering = ('-start', 'summary',)
@@ -273,7 +273,7 @@ class Event(models.Model):
     
     def get_current_event():
         """ return any Event objects for events that are currently happening """
-        return Event.objects.filter(start__lte=datetime.datetime.now(), finish_gte=datetime.datetime.now())
+        return Event.objects.filter(start__lte=datetime.datetime.now(), end__gte=datetime.datetime.now())
 
     def refresh():
         """ Refresh events from ical file """
@@ -311,6 +311,7 @@ class Event(models.Model):
                 event = Event.objects.create(UID=uid, summary=summary, description=description, start=start, end=end)
                 Log.objects.create(description="Create Event", json={'uid': event.UID})
         Log.objects.create(description="Refresh Event")
+
 
 class Log(models.Model):
     """ Log activities """
@@ -366,9 +367,11 @@ class Person(models.Model):
     def __str__(self):
         return f"""{ self.name } / { self.preferred_email }"""
     
-    def check_in(self):
-        """ check the person into the space """
-        
+    def check_in(self, event_id):
+        """ check the person into an event """
+        event = Event.objects.get(id=event_id)
+        return PersonEvent.objects.create(person=self, event=event)
+
     def check_membership_status(self):
         """ return true if they have a current membership """
         has_membership = False
@@ -377,6 +380,10 @@ class Person(models.Model):
 
         return has_membership 
         
+    def get_last_check_in(self):
+        """ return the last check-in for a person """
+        return PersonEvent.objects.filter(person=self).order_by('-event__end').first()
+
     def get_submissions(self):
         """ fetch links to each document the person has signed """
         submitters = PersonDocuseal.objects.filter(person=self).values_list('submitter')
@@ -550,6 +557,18 @@ class PersonEmail(models.Model):
         for sc in StripeCustomer.objects.filter(email=email):
             print(sc)
             sc._auto_associate()
+
+
+class PersonEvent(models.Model):
+    """ A map between Person and Event """
+    person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, help_text="Who is the person associated with this Docuseal submitter?")
+    event = models.ForeignKey("subwaive.Event", on_delete=models.CASCADE, help_text="Who is the person associated with this Docuseal submitter?")
+
+    class Meta:
+        ordering = ('person', 'event',)
+
+    def __str__(self):
+        return f"""{ self.person } / { self.event }"""
 
 
 class PersonStripe(models.Model):
