@@ -15,38 +15,40 @@
 {% endif %}
 <!-- /Determination of confidentiality -->
 
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{{ merge_child.name }}</h5>
-        
-        <div>
-            <div>Associated emails:</div>
-            {% for email in merge_parent.emails %}
-            <div>{{ email }}</div>
-            {% endfor %}
-        </div>
-        
-        <div>Select a person below to merge this person into.</div>
+<div class="section section-heading">
+    <h5 class="card-title">{{ merge_child.name }}</h5>
+    
+    <div>
+        <div>Associated emails:</div>
+        {% for email in merge_parent.emails %}
+        <div>{{ email }}</div>
+        {% endfor %}
     </div>
+    
+    <div>Select a person below to merge this person into.</div>
 </div>
 
-{% for merge_parent in merge_parents %}
-<div class="card text-center">
-    <div class="card-body">
-        <h5 class="card-title">{{ merge_parent.name }}</h5>
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for merge_parent in merge_parents %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">{{ merge_parent.name }}</h5>
 
-        <div>
-            <button class="btn btn-success" onclick="window.location='{% url 'merge_people' merge_child_id=merge_child.id merge_parent_id=merge_parent.id %}'; return false;">Merge</button>
-        </div>
+                <div>
+                    <button class="btn btn-success" onclick="window.location='{% url 'merge_people' merge_child_id=merge_child.id merge_parent_id=merge_parent.id %}'; return false;">Merge</button>
+                </div>
 
-        <div>
-            <div>Associated emails:</div>
-            {% for email in merge_parent.emails %}
-            <div>{{ email }}</div>
-            {% endfor %}
+                <div>
+                    <div>Associated emails:</div>
+                    {% for email in merge_parent.emails %}
+                    <div>{{ email }}</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
+        {% endfor %}
     </div>
 </div>
-{% endfor %}
 
 {% endblock %}
