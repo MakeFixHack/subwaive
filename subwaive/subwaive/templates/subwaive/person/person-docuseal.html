@@ -1,13 +1,7 @@
 {% extends 'subwaive/base.html' %}
 {% block content %}
 
-<!-- Determination of confidentiality -->
-{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
-    {% include 'subwaive/templates/public-data-statement.html' %}
-{% else %}
-    {% include 'subwaive/templates/confidentiality-statement.html' %}
-{% endif %}
-<!-- /Determination of confidentiality -->
+{% include 'subwaive/templates/determination-of-confidentiality.html' %}
 
 <div class="container-fluid">
     <h1>{{ person.name }}</h1>
