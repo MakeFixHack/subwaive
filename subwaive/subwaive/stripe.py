@@ -2,6 +2,7 @@ import json
 import os
 
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -113,6 +114,8 @@ def refresh_product_and_price(request):
     """ force refresh Stripe payment links and associated data """
     webhook_refresh_product_and_price()
 
+    messages.success(request, f'Stripe Product and Price data refreshed')
+
     return redirect('stripe_refresh')
 
 def webhook_refresh_product_and_price():
@@ -125,6 +128,8 @@ def webhook_refresh_product_and_price():
 def refresh_subscription_and_customer(request):
     """ force refresh Stripe subscriptions and customers """
     webhook_subscription_and_customer()
+
+    messages.success(request, f'Stripe Subscription and Customer data refreshed')
 
     return redirect('stripe_refresh')
 
