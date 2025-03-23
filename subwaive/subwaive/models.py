@@ -350,9 +350,9 @@ class Permission(models.Model):
         permissions = [
             ("can_view_detail", "Can view detailed user data"),
             ("can_view_status", "Can tell if user is current"),
-            ("can_search_customers", "Can search for customers"),
-            ("can_list_customers", "Can view customer list"),
-            ("can_remove_check_in", "Can delete a customer check-in record"),
+            ("can_search_people", "Can search for people"),
+            ("can_list_people", "Can view people list"),
+            ("can_remove_check_in", "Can delete a check-in record"),
             ("can_refresh_data", "Can force Docuseal and Stripe data to refresh"),
         ]    
 

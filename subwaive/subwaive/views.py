@@ -15,7 +15,7 @@ from subwaive.models import Log, Person, PersonEmail, QRCustom
 from subwaive.stripe import check_membership_status
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
 
-@permission_required('subwaive.can_list_customers')
+@permission_required('subwaive.can_list_people')
 @login_required
 def person_list(request):
     """ List of people in the system """
@@ -97,7 +97,7 @@ def custom_link_list(request, is_sensitive=False):
     return render(request, f'subwaive/qr-links.html', context)
 
 @login_required
-@permission_required('subwaive.can_search_customers')
+@permission_required('subwaive.can_search_people')
 def person_search(request):
     """ Search for people by name or email """
     search_term = request.POST.get('search_term', None)
