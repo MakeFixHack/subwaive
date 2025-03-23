@@ -152,7 +152,6 @@ def person_card(request, person_id):
     last_check_ins = PersonEvent.objects.filter(person=person, event__start__date=datetime.date.today())
     check_in_events = Event.get_current_event()
 
-    important_fields = DocusealFieldStore.objects.filter(submission__in=person.get_submissions())
 
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
