@@ -508,12 +508,16 @@ class PersonStripe(models.Model):
 class QRCategory(models.Model):
     """ Categories for organizing QR codes """
     name = models.CharField(max_length=64, help_text="What is the name of the View?")
+    is_sensitive = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('is_sensitive', 'name',)
 
     def __str__(self):
-        return f"""{ self.name }"""
+        sensitivity_label = "PUBLIC"
+        if self.is_sensitive:
+            sensitivity_label = "SENSITIVE"
+        return f"""{ sensitivity_label } / { self.name }"""
 
 
 class QRCustom(models.Model):

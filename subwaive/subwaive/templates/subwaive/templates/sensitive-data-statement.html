@@ -1,0 +1,30 @@
+{% block content %}
+
+        <!-- Notice of confidentiality -->
+        <!-- Trigger Modal Button -->
+        <button class="btn btn-warning float-end" data-bs-toggle="modal" data-bs-target="#imageModal{{ qr_code.id }}">
+            SENSITIVE (&plus;)
+        </button>
+
+        <!-- Modal for sensitive data statement -->
+        <div class="modal fade" id="imageModal{{ qr_code.id }}" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-body alert alert-warning alert-no-margin">
+                        <h3>Sensitive Information</h3>
+                        
+                        <p>Sensitive information includes any information we do not make public but does not meet the personally identifying criteria for confidential data.</p>
+                        
+                        <p>This information may only be shared with people who have a valid volunteer agreement.
+                            <ul>
+                                <li>Links to non-member resources</li>
+                                <li>Non-public operational information</li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Notice of confidentiality -->
+
+{% endblock %}

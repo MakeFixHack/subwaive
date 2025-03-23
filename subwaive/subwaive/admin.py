@@ -65,11 +65,11 @@ class Log_Admin(admin.ModelAdmin):
 admin.site.register(Log, Log_Admin)
 
 class QRCategory_Admin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('is_sensitive', 'name',)
 admin.site.register(QRCategory, QRCategory_Admin)
 
 class QRCustom_Admin(admin.ModelAdmin):
-    list_display = ('category', 'name',)
+    list_display = ('category__is_sensitive', 'category', 'name',)
 admin.site.register(QRCustom, QRCustom_Admin)
 
 

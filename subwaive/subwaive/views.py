@@ -12,7 +12,7 @@ from subwaive.docuseal import check_waiver_status
 from subwaive.models import DocusealFieldStore
 from subwaive.models import Log, Person, PersonEmail, QRCustom
 from subwaive.stripe import check_membership_status
-from subwaive.utils import generate_qr_svg, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_HIGH, QR_SMALL, QR_LARGE
+from subwaive.utils import generate_qr_svg, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
 
 @permission_required('subwaive.can_list_customers')
 @login_required
@@ -44,7 +44,7 @@ def person_list(request):
     ]
 
     context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'persons': persons,
         'buttons': button_dict,
     }
@@ -52,9 +52,17 @@ def person_list(request):
     return render(request, f'subwaive/person/person-list.html', context)
 
 @login_required
-def custom_link_list(request):
+def public_link_list(request):
+    return custom_link_list(request, is_sensitive=False)
+
+@login_required
+def sensitive_link_list(request):
+    return custom_link_list(request, is_sensitive=True)
+
+@login_required
+def custom_link_list(request, is_sensitive=False):
     """ Build a list of links to QR codes """
-    user_qr_codes = QRCustom.objects.all().order_by('category','name')
+    user_qr_codes = QRCustom.objects.filter(category__is_sensitive=is_sensitive).order_by('category','name')
 
     user_qr_list = [
         {
@@ -76,9 +84,14 @@ def custom_link_list(request):
         for category in set([(c.category.name, c.category.id) for c in user_qr_codes])
     ]
 
+    if is_sensitive:
+        confidentiality_level = CONFIDENTIALITY_LEVEL_SENSITIVE
+    else:
+        confidentiality_level = CONFIDENTIALITY_LEVEL_PUBLIC
+
     context = {
         'page_title': 'Links',
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_PUBLIC,
+        'CONFIDENTIALITY_LEVEL': confidentiality_level,
         'categories': categories,
         'qr_list': user_qr_list,
     }
@@ -101,7 +114,7 @@ def person_search(request):
     ]
 
     context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'search_term': search_term,
         'results': results,
         'buttons': button_dict,
@@ -129,7 +142,7 @@ def person_card(request, person_id):
     important_fields = DocusealFieldStore.objects.filter(submission__in=person.get_submissions())
 
     context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
         'other_emails': other_emails,
         'has_waiver': has_waiver,
@@ -146,7 +159,7 @@ def person_docuseal(request, person_id):
     person = Person.objects.get(id=person_id)
 
     context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
         'docuseal_documents': person.get_documents(),
     }
@@ -159,7 +172,7 @@ def person_stripe(request, person_id):
     person = Person.objects.get(id=person_id)
 
     context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
         'stripe_subscriptions': person.get_memberships(),
         'stripe_onetime_payments': person.get_day_passes(),
@@ -187,7 +200,7 @@ def person_edit(request, person_id):
     ]
     
     context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
         'important_fields': important_fields,
         'check_ins': check_ins,
@@ -246,7 +259,7 @@ def check_in_remediation(request, person_id, waiver_check, membership_status, ha
     person = Person.objects.get(id=person_id)
 
     context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
         'waiver_check': waiver_check,
         'membership_status': membership_status,
@@ -308,7 +321,7 @@ def merge_people(request, merge_child_id, merge_parent_id=None):
         context = {
             'merge_parents': merge_parents,
             'merge_child': merge_child,
-            'CONFIDENTIALITY_LEVEL_HIGH': CONFIDENTIALITY_LEVEL_HIGH,
+            'CONFIDENTIALITY_LEVEL_CONFIDENTIAL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         }
 
         return_object = render(request, f'subwaive/person/person-merge.html', context)

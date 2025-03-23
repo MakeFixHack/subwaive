@@ -12,7 +12,7 @@ import stripe
 
 from subwaive.models import Person
 from subwaive.models import StripePaymentLink,StripePrice,StripeProduct,StripePaymentLinkPrice,StripeSubscription,StripeCustomer
-from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_HIGH, QR_SMALL, QR_LARGE
+from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
 
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
 STRIPE_ENDPOINT_SECRET = os.environ.get("STRIPE_ENDPOINT_SECRET")

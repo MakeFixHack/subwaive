@@ -1,0 +1,9 @@
+<!-- Determination of confidentiality -->
+{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+    {% include 'subwaive/templates/public-data-statement.html' %}
+{% elif CONFIDENTIALITY_LEVEL == 'SENSITIVE' %}
+    {% include 'subwaive/templates/sensitive-data-statement.html' %}
+{% else %}
+    {% include 'subwaive/templates/confidentiality-statement.html' %}
+{% endif %}
+<!-- /Determination of confidentiality -->

@@ -87,7 +87,8 @@
                       QR Codes
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="nav-item nav-link" href="{% url 'custom_link_list' %}">Links</a></li>
+                        <li><a class="nav-item nav-link" href="{% url 'public_link_list' %}">Links</a></li>
+                        <li><a class="nav-item nav-link" href="{% url 'sensitive_link_list' %}">Internal</a></li>
                         <li><a class="nav-item nav-link" href="{% url 'payment_link_list' %}">Stripe</a></li>
                         <li><a class="nav-item nav-link" href="{% url 'docuseal_link_list' %}">Docuseal</a></li>
                     </ul>

@@ -7,11 +7,12 @@ from subwaive import stripe
 
 #subwaive
 urlpatterns = [
-    path('', views.custom_link_list, name='custom_link_list'),
+    path('', views.public_link_list),
     path('admin/', admin.site.urls),
     path('email/<int:email_id>/unmerge/', views.unmerge_people, name='unmerge_people'),
     path('email/<int:email_id>/prefer/', views.set_preferred_email, name='set_preferred_email'),
-    path('links/', views.custom_link_list, name='custom_link_list'),
+    path('links/public/', views.public_link_list, name='public_link_list'),
+    path('links/internal/', views.sensitive_link_list, name='sensitive_link_list'),
     path('person/search/', views.person_search, name='person_search'),
     path('person/list/', views.person_list, name='person_list'),
     path('person/check-in/<int:log_id>/delete/', views.delete_member_check_in, name='delete_member_check_in'),

@@ -5,7 +5,8 @@ from subwaive.models import Log
 import qrcode
 import qrcode.image.svg
 
-CONFIDENTIALITY_LEVEL_HIGH = 'HIGH'
+CONFIDENTIALITY_LEVEL_CONFIDENTIAL = 'CONFIDENTIAL'
+CONFIDENTIALITY_LEVEL_SENSITIVE = 'SENSITIVE'
 CONFIDENTIALITY_LEVEL_PUBLIC = 'PUBLIC'
 
 QR_SMALL = 10
@@ -31,7 +32,7 @@ def refresh(request, log_descriptions, button_dict):
     context = {
         'datasets': datasets,
         'buttons': buttons,
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_HIGH,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
     }
 
     return render(request, f'subwaive/data-refresh.html', context)
