@@ -9,18 +9,20 @@
 
 {% include 'subwaive/templates/buttons.html' %}
 
-<div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
-    <div class="card card-md" style="margin: 0;">
-        <div class="card-body">
-            <h5 class="card-title">Search</h5>
-            <form action="{% url 'person_search' %}" method="post" style="margin: 0.5em;">
-                {% csrf_token %}
-                <p>
-                    <label for="search_term">Name/email: </label>
-                    <input name="search_term" placeholder="Name or email..." class="search_box" id="search_term" type="text" value="{% if search_term %}{{ search_term }}{% endif %}">
-                </p>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>    
+<div class="row-container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        <div class="card card-md">
+            <div class="card-body">
+                <h5 class="card-title">Search</h5>
+                <form action="{% url 'person_search' %}" method="post" style="margin: 0.5em;">
+                    {% csrf_token %}
+                    <p>
+                        <label for="search_term">Name/email: </label>
+                        <input name="search_term" placeholder="Name or email..." class="search_box" id="search_term" type="text" value="{% if search_term %}{{ search_term }}{% endif %}">
+                    </p>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>    
+            </div>
         </div>
     </div>
 </div>
@@ -30,30 +32,31 @@
 </div>
 
 {% if results %}
-<div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
-{% for person in results %}
-    <div class="card card-md">
-        <div class="card-body">
-            <h5 class="card-title">{{ person.name }}</h5>
+<div class="row-container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+    {% for person in results %}
+        <div class="card card-md">
+            <div class="card-body">
+                <h5 class="card-title">{{ person.name }}</h5>
 
-            <div>
-                <button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">Details</button>
-                <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person.id %}'; return false;">Check-in</button>
+                <div>
+                    <button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">Details</button>
+                    <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person.id %}'; return false;">Check-in</button>
+                </div>
+
+                <div>Preferred email: <a href="mailto:{{ person.preferred_email.email }}">{{ person.preferred_email.email }}</a></div>
             </div>
-
-            <div>Preferred email: <a href="mailto:{{ person.preferred_email.email }}">{{ person.preferred_email.email }}</a></div>
         </div>
+    {% endfor %}
+    {% else %}
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">No people found</h5>
+            </div>
+        </div>
+    {% endif %}
     </div>
 </div>
-{% endfor %}
-{% else %}
-<div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
-    <div class="card text-center">
-        <div class="card-body">
-            <h5 class="card-title">No people found</h5>
-        </div>
-    </div>
-</div>
-{% endif %}
 
 {% endblock %}
