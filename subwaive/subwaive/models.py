@@ -1,5 +1,7 @@
 import datetime
+import icalendar
 import os
+from pathlib import Path
 import pytz #!!! your sometimes adding local and sometimes adding utc, if they are tz-aware does it mater?
 
 from django.db import models
@@ -8,6 +10,8 @@ from django.db.models import Q
 from docuseal import docuseal
 
 import stripe
+
+from subwaive.settings import BASE_DIR
 
 # https://www.docuseal.com/docs/api
 DOCUSEAL_API_KEY = os.environ.get("DOCUSEAL_API_KEY")
@@ -252,6 +256,61 @@ class DocusealTemplate(models.Model):
         """ URL for a hyperlink """
         return f"{ DOCUSEAL_WWW_ENDPOINT }/d/{ self.slug }"
     
+
+class Event(models.Model):
+    """ An event from an ical file """
+    UID = models.UUIDField()
+    summary = models.CharField(max_length=512, help_text='What is the event summary?')
+    description = models.TextField(max_length=2048, help_text='What is the event description?')
+    start = models.DateTimeField(auto_now_add=True, help_text='When does the event begin?')
+    end = models.DateTimeField(auto_now_add=True, help_text='When does the event finish?')
+
+    class Meta:
+        ordering = ('-start', 'summary',)
+
+    def __str__(self):
+        return f"""{ self.summary[:50] } / { self.start } / { self.end }"""
+    
+    def get_current_event():
+        """ return any Event objects for events that are currently happening """
+        return Event.objects.filter(start__lte=datetime.datetime.now(), finish_gte=datetime.datetime.now())
+
+    def refresh():
+        """ Refresh events from ical file """
+        ics_path = Path(BASE_DIR / "subwaive/templates/subwaive/CrNecAGiRtwrK5Ap-2025-03-20.ics")
+        calendar = icalendar.Calendar.from_ical(ics_path.read_bytes())
+
+        for event in calendar.events:
+            uid = event.get("UID")
+            summary = event.get("SUMMARY").__str__()
+            description = event.get("DESCRIPTION").__str__()[:2048]
+            start = event.start
+            end = event.end
+            
+            event_qs = Event.objects.filter(UID=uid)
+            if event_qs.exists():
+                event = event_qs.first()
+                is_updated = False
+                if event.summary != summary:
+                    is_updated = True
+                    event.summary = summary
+                if event.description != description:
+                    is_updated = True
+                    event.description = description
+                if event.start != start:
+                    is_updated = True
+                    event.start = start
+                if event.end != end:
+                    is_updated = True
+                    event.end = end
+                if is_updated:
+                    event.save()
+                Log.objects.create(description="Update Event", json={'uid': uid})
+
+            else:
+                event = Event.objects.create(UID=uid, summary=summary, description=description, start=start, end=end)
+                Log.objects.create(description="Create Event", json={'uid': event.UID})
+        Log.objects.create(description="Refresh Event")
 
 class Log(models.Model):
     """ Log activities """

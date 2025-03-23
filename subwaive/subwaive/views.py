@@ -10,9 +10,10 @@ from django.urls import reverse
 
 from subwaive.docuseal import check_waiver_status
 from subwaive.models import DocusealFieldStore
+from subwaive.models import Event
 from subwaive.models import Log, Person, PersonEmail, QRCustom
 from subwaive.stripe import check_membership_status
-from subwaive.utils import generate_qr_svg, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
+from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
 
 @permission_required('subwaive.can_list_customers')
 @login_required
@@ -364,3 +365,29 @@ def set_name(request, person_id, important_field_id):
     messages.success(request, f'Name set to <em>{ name }</em>')
 
     return redirect('person_edit', person_id)
+
+@login_required
+def event_refresh_page(request):
+    """ a page for initiating ical Event data refreshes """
+    log_descriptions = [
+        "Refresh Event",
+    ]
+
+    button_dict = [
+            {'url_name': 'refresh_event', 'anchor': 'Refresh Event'},
+    ]
+
+    return refresh(request, log_descriptions, button_dict)
+
+@login_required
+def refresh_event(request):
+    """ force refresh ical Event data """
+    webhook_refresh()
+
+    messages.success(request, f'Event data refreshed')
+
+    return redirect('event_refresh')
+
+def webhook_refresh():
+    """ refresh data sets in order """
+    Event.refresh()

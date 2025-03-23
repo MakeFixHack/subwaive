@@ -11,6 +11,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('email/<int:email_id>/unmerge/', views.unmerge_people, name='unmerge_people'),
     path('email/<int:email_id>/prefer/', views.set_preferred_email, name='set_preferred_email'),
+    path('event/refresh/', views.event_refresh_page, name='event_refresh'),
+    path('event/refresh/all/', views.refresh_event, name='refresh_event'),
     path('links/public/', views.public_link_list, name='public_link_list'),
     path('links/internal/', views.sensitive_link_list, name='sensitive_link_list'),
     path('person/search/', views.person_search, name='person_search'),

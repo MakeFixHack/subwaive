@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 from subwaive.models import DocusealField,DocusealFieldStore,DocusealSubmission,DocusealSubmitter,DocusealSubmitterSubmission,DocusealTemplate
+from subwaive.models import Event,Log,QRCategory,QRCustom
 from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonStripe
-from subwaive.models import Log,QRCategory,QRCustom
 from subwaive.models import StripeCustomer,StripePaymentLink,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
 
 
@@ -59,6 +59,10 @@ admin.site.register(PersonStripe, PersonStripe_Admin)
 """
 Other
 """
+
+class Event_Admin(admin.ModelAdmin):
+    list_display = ('summary', 'start', 'end',)
+admin.site.register(Event, Event_Admin)
 
 class Log_Admin(admin.ModelAdmin):
     list_display = ('timestamp', 'description',)
