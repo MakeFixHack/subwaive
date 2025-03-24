@@ -3,6 +3,7 @@ import icalendar
 import os
 from pathlib import Path
 import pytz #!!! your sometimes adding local and sometimes adding utc, if they are tz-aware does it mater?
+import requests
 
 from django.db import models
 from django.db.models import Q
@@ -31,7 +32,8 @@ stripe.api_key = STRIPE_API_KEY
 #!!! manual way to refresh particular customers or products may be desirable
 
 TIME_ZONE = os.environ.get("TIME_ZONE")
-
+CALENDAR_URL = os.environ.get("CALENDAR_URL")
+CALENDAR_ICS_PATH = BASE_DIR / "subwaive/static/ics/calendar.ics"
 
 class DocusealField(models.Model):
     """ Fields titles flagged for  DocusealFieldStore """
@@ -271,13 +273,24 @@ class Event(models.Model):
     def __str__(self):
         return f"""{ self.summary[:50] } / { self.start } / { self.end }"""
     
+    def download_ics():
+        """ download from our calendar URL """
+        local_path = CALENDAR_ICS_PATH
+        response = requests.get(CALENDAR_URL, stream=True)
+        response.raise_for_status()
+
+        with open(local_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+                            
     def get_current_event():
         """ return any Event objects for events that are currently happening """
         return Event.objects.filter(start__lte=datetime.datetime.now(), end__gte=datetime.datetime.now())
 
     def refresh():
         """ Refresh events from ical file """
-        ics_path = Path(BASE_DIR / "subwaive/templates/subwaive/CrNecAGiRtwrK5Ap-2025-03-20.ics")
+        ics_path = Path(CALENDAR_ICS_PATH)
         calendar = icalendar.Calendar.from_ical(ics_path.read_bytes())
 
         for event in calendar.events:

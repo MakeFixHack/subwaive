@@ -394,4 +394,5 @@ def refresh_event(request):
 
 def webhook_refresh():
     """ refresh data sets in order """
+    Event.download_ics()
     Event.refresh()

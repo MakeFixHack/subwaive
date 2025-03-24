@@ -38,9 +38,10 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
     
-    
 # Copy the source code into the container.
 COPY . .
+
+RUN chown appuser.appuser subwaive/static/ics
 
 # MemberMatters solves this with nginx instead of gunicorn: https://github.com/membermatters/MemberMatters/blob/main/docker/Dockerfile
 RUN python3 manage.py collectstatic --noinput
