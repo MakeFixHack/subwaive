@@ -20,7 +20,7 @@ def generate_qr_svg(content, box_size=QR_SMALL):
     return svg
 
 @login_required
-def refresh(request, log_descriptions, button_dict):
+def refresh(request, log_descriptions, button_dict, description=None):
     """ a page for initiating data refreshes """
     datasets = [{'last_refresh': Log.get_last(d), 'description': d} for d in log_descriptions]
     for dataset in datasets:
@@ -30,6 +30,7 @@ def refresh(request, log_descriptions, button_dict):
     buttons = [{'url': redirect(b['url_name']).url, 'anchor': b['anchor']} for b in button_dict]
 
     context = {
+        'description': description,
         'datasets': datasets,
         'buttons': buttons,
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,

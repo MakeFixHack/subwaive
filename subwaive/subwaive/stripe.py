@@ -150,9 +150,11 @@ def stripe_refresh_page(request):
         "Refresh StripeSubscription"
     ]
 
+    description = ""
+
     button_dict = [
             {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh Products and Prices'},
             {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh Subscriptions and Customers'},
     ]
 
-    return refresh(request, log_descriptions, button_dict)
+    return refresh(request, log_descriptions, button_dict, description)

@@ -109,11 +109,13 @@ def docuseal_refresh_page(request):
         "Refresh DocusealFieldStore",
     ]
 
+    description = ""
+
     button_dict = [
             {'url_name': 'refresh_docuseal', 'anchor': 'Refresh Docuseal'},
     ]
 
-    return refresh(request, log_descriptions, button_dict)
+    return refresh(request, log_descriptions, button_dict, description)
 
 @login_required
 def refresh_docuseal(request):

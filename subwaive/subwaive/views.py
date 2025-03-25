@@ -377,11 +377,13 @@ def event_refresh_page(request):
         "Refresh Event",
     ]
 
+    description = ""
+
     button_dict = [
             {'url_name': 'refresh_event', 'anchor': 'Refresh Event'},
     ]
 
-    return refresh(request, log_descriptions, button_dict)
+    return refresh(request, log_descriptions, button_dict, description)
 
 @login_required
 def refresh_event(request):
