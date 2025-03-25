@@ -326,7 +326,7 @@ def merge_people(request, merge_child_id, merge_parent_id=None):
         context = {
             'merge_parents': merge_parents,
             'merge_child': merge_child,
-            'CONFIDENTIALITY_LEVEL_CONFIDENTIAL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+            'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         }
 
         return_object = render(request, f'subwaive/person/person-merge.html', context)
@@ -404,7 +404,7 @@ def event_list(request):
 
     context = {
         'events': events,
-        'CONFIDENTIALITY_LEVEL_CONFIDENTIAL': CONFIDENTIALITY_LEVEL_PUBLIC,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_PUBLIC,
     }
 
     return render(request, f'subwaive/event/event-list.html', context)
@@ -419,7 +419,7 @@ def event_details(request, event_id):
     context = {
         'event': event,
         'persons': persons,
-        'CONFIDENTIALITY_LEVEL_CONFIDENTIAL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
     }
 
     return render(request, f'subwaive/event/event-details.html', context)
