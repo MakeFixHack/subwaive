@@ -41,8 +41,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy the source code into the container.
 COPY . .
 
-RUN chown appuser.appuser subwaive/static/ics
-
 # MemberMatters solves this with nginx instead of gunicorn: https://github.com/membermatters/MemberMatters/blob/main/docker/Dockerfile
 RUN python3 manage.py collectstatic --noinput
 

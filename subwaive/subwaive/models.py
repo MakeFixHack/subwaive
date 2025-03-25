@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import pytz #!!! your sometimes adding local and sometimes adding utc, if they are tz-aware does it mater?
 import requests
+import caldav
 
 from django.db import models
 from django.db.models import Q
@@ -33,7 +34,7 @@ stripe.api_key = STRIPE_API_KEY
 
 TIME_ZONE = os.environ.get("TIME_ZONE")
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
-CALENDAR_ICS_PATH = BASE_DIR / "subwaive/static/ics/calendar.ics"
+
 
 class DocusealField(models.Model):
     """ Fields titles flagged for  DocusealFieldStore """
@@ -262,6 +263,13 @@ class DocusealTemplate(models.Model):
 class Event(models.Model):
     """ An event from an ical file """
     UID = models.UUIDField()
+    """ UIDs are shared by recurrences, which means they are useful individually as a key
+    Since RECURRENCE_ID can change when the SEQUENCE changes, we instead assume that the
+    order of recurrences is stable. When we load data, we sort the event list, since ICS 
+    event order is not stable, and assume that UID+our assigned ordinal will correctly 
+    identify the event we intend to update.
+    """
+    recurrence_order = models.IntegerField(default=1)
     summary = models.CharField(max_length=512, help_text='What is the event summary?')
     description = models.TextField(max_length=2048, help_text='What is the event description?')
     start = models.DateTimeField(help_text='When does the event begin?')
@@ -273,56 +281,71 @@ class Event(models.Model):
     def __str__(self):
         return f"""{ self.summary[:50] } / { self.start } / { self.end }"""
     
-    def download_ics():
-        """ download from our calendar URL """
-        local_path = CALENDAR_ICS_PATH
-        response = requests.get(CALENDAR_URL, stream=True)
-        response.raise_for_status()
-
-        with open(local_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-                            
     def get_current_event():
         """ return any Event objects for events that are currently happening """
         return Event.objects.filter(start__lte=datetime.datetime.now(), end__gte=datetime.datetime.now())
 
     def refresh():
         """ Refresh events from ical file """
-        ics_path = Path(CALENDAR_ICS_PATH)
-        calendar = icalendar.Calendar.from_ical(ics_path.read_bytes())
+        with caldav.DAVClient(url=CALENDAR_URL) as client:
+            principal = client.principal()
 
-        for event in calendar.events:
-            uid = event.get("UID")
-            summary = event.get("SUMMARY").__str__()
-            description = event.get("DESCRIPTION").__str__()[:2048]
-            start = event.start
-            end = event.end
-            
-            event_qs = Event.objects.filter(UID=uid)
-            if event_qs.exists():
-                event = event_qs.first()
-                is_updated = False
-                if event.summary != summary:
-                    is_updated = True
-                    event.summary = summary
-                if event.description != description:
-                    is_updated = True
-                    event.description = description
-                if event.start != start:
-                    is_updated = True
-                    event.start = start
-                if event.end != end:
-                    is_updated = True
-                    event.end = end
-                if is_updated:
-                    event.save()
-                Log.objects.create(description="Update Event", json={'uid': uid})
+            calendars = principal.calendars()
+            if calendars:
+                events = calendars[0].search(
+                    start=datetime.date.today()+datetime.timedelta(days=-30),
+                    end=datetime.date.today()+datetime.timedelta(days=60),
+                    event=True,
+                    expand=True)
+                
+                events = sorted(events, key=lambda x: x.icalendar_instance.events[0].start)
 
-            else:
-                event = Event.objects.create(UID=uid, summary=summary, description=description, start=start, end=end)
-                Log.objects.create(description="Create Event", json={'uid': event.UID})
+                uid_count = {}
+                for e in events:
+                    e = e.icalendar_instance.events[0]
+
+                    uid = e.get("UID")
+
+                    if uid in uid_count.keys():
+                        uid_count[uid] += 1
+                    else:
+                        uid_count[uid] = 1
+
+                    recurrence_order = uid_count[uid]
+                    recurrence_id = e.get("RECURRENCE-ID")
+                    summary = e.get("SUMMARY").__str__()
+                    description = e.get("DESCRIPTION").__str__()[:2048]
+                    start = e.start
+                    end = e.end
+                    if summary=='Mending Mondays':
+                        print(start, uid, recurrence_id, summary)
+
+                    event_qs = Event.objects.filter(UID=uid, recurrence_order=recurrence_order)
+                    
+                    if event_qs.exists():
+                        event_inst = event_qs.first()
+                        # print(event_inst,event_inst.UID,"exists")
+                        is_updated = False
+                        if event_inst.summary != summary:
+                            is_updated = True
+                            event_inst.summary = summary
+                        if event_inst.description != description:
+                            is_updated = True
+                            event_inst.description = description
+                        if event_inst.start != start:
+                            is_updated = True
+                            event_inst.start = start
+                        if event_inst.end != end:
+                            is_updated = True
+                            event_inst.end = end
+                        if is_updated:
+                            event_inst.save()
+                        Log.objects.create(description="Update Event", json={'uid': uid})
+
+                    else:
+                        event_inst = Event.objects.create(UID=uid, recurrence_order=recurrence_order, summary=summary, description=description, start=start, end=end)
+                        print(event_inst,"created")
+                        Log.objects.create(description="Create Event", json={'uid': event_inst.UID})
         Log.objects.create(description="Refresh Event")
 
 

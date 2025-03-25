@@ -8,3 +8,4 @@ stripe==11.6.0
 pytz==2025.1
 docuseal==1.0.4
 icalendar==6.1.2
+caldav==1.4.0
