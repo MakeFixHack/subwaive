@@ -1,0 +1,38 @@
+{% extends 'subwaive/base.html' %}
+{% block content %}
+
+{% include 'subwaive/templates/determination-of-confidentiality.html' %}
+
+<div class="container-fluid">
+    <h1>Events</h1>
+</div>
+
+{% include 'subwaive/templates/buttons.html' %}
+
+<div class="section section-heading">
+    <h5 class="card-title">{{ event.summary }}</h5>
+
+    <div>{{ event.summary }}</div>
+
+    <div>{{ event.description }}</div>
+
+    <div>{{ event.start }}</div>
+
+    <div>{{ event.end }}</div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for person in persons %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5>{{ person.name }}</h5>
+
+                <div>{{ person.preferred_email.email }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

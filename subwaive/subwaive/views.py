@@ -396,3 +396,30 @@ def webhook_refresh():
     """ refresh data sets in order """
     Event.download_ics()
     Event.refresh()
+
+@login_required
+def event_list(request):
+    """ List of events """
+    events = Event.objects.all().order_by('-end')
+
+    context = {
+        'events': events,
+        'CONFIDENTIALITY_LEVEL_CONFIDENTIAL': CONFIDENTIALITY_LEVEL_PUBLIC,
+    }
+
+    return render(request, f'subwaive/event/event-list.html', context)
+
+@login_required
+def event_details(request, event_id):
+    """ Details of events """
+    event = Event.objects.get(id=event_id)
+
+    persons = [p.person for p in PersonEvent.objects.filter(event=event).order_by('person__name')]
+
+    context = {
+        'event': event,
+        'persons': persons,
+        'CONFIDENTIALITY_LEVEL_CONFIDENTIAL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+    }
+
+    return render(request, f'subwaive/event/event-details.html', context)
