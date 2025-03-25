@@ -33,7 +33,7 @@ def refresh(request, log_descriptions, button_dict, description=None):
         'description': description,
         'datasets': datasets,
         'buttons': buttons,
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_SENSITIVE,
     }
 
     return render(request, f'subwaive/data-refresh.html', context)
