@@ -380,7 +380,7 @@ def event_refresh_page(request):
     description = ""
 
     button_dict = [
-            {'url_name': 'refresh_event', 'anchor': 'Refresh Event'},
+            {'url_name': 'refresh_event', 'anchor': 'Refresh Events'},
     ]
 
     return refresh(request, log_descriptions, button_dict, description)
