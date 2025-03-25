@@ -11,14 +11,12 @@
 
 <div class="section section-heading">
     <h5 class="card-title">{{ event.summary }}</h5>
-
-    <div>{{ event.summary }}</div>
-
+    
+        <div>{{ event.start }} / {{ event.end }}</div>
+    
     <div>{{ event.description }}</div>
+</div>
 
-    <div>{{ event.start }}</div>
-
-    <div>{{ event.end }}</div>
 <div>
     <form action="{% url 'event_details' event.id %}" method="POST">
         {% csrf_token %}
@@ -31,7 +29,7 @@
     </form>
 </div>
 
-<div class="container">
+<div class="row-container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
         {% for person in persons %}
         <div class="card text-center">
