@@ -414,11 +414,18 @@ def event_details(request, event_id):
     """ Details of events """
     event = Event.objects.get(id=event_id)
 
+    if request.POST:
+        person = Person.objects.get(id=request.POST.get("person_id"))
+        PersonEvent.objects.create(event=event, person=person)
+
     persons = [p.person for p in PersonEvent.objects.filter(event=event).order_by('person__name')]
+
+    possible_check_ins = Person.objects.exclude(id__in=[p.id for p in persons])
 
     context = {
         'event': event,
         'persons': persons,
+        'possible_check_ins': possible_check_ins,
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
     }
 

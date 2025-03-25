@@ -19,6 +19,16 @@
     <div>{{ event.start }}</div>
 
     <div>{{ event.end }}</div>
+<div>
+    <form action="{% url 'event_details' event.id %}" method="POST">
+        {% csrf_token %}
+        <select name="person_id">
+            {% for person in possible_check_ins %}
+            <option value="{{ person.id }}">{{ person.name }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-success">Check-in</button>
+    </form>
 </div>
 
 <div class="container">
