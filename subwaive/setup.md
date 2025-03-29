@@ -41,6 +41,12 @@ SubWaive will not load until the following keys are populated:
 * DJANGO_SECRET_KEY
 * DATABASE_PASSWORD
 
+`DJANGO_SECRET_KEY`, `DATABASE_PASSWORD`, and `DOCUSEAL_ENDPOINT_SECRET` can be generated with the following Python:
+
+```python
+from django.core.management.utils import get_random_secret_key  
+get_random_secret_key()
+```
 
 ## Docker network connections
 
