@@ -90,6 +90,9 @@ def receive_webhook(request):
 
                     email = payload['data']['email']
                     DocusealSubmitter.create_if_needed(email)
+
+                    submission_id = payload['data']['submission_id']
+                    DocusealSubmission.create_or_update(submission_id)
                 elif payload['event_type'] == 'submission.created':
                     # a form has email addresses added for signatures
                     print(payload)
@@ -100,6 +103,9 @@ def receive_webhook(request):
                         email = submitter['email']
                         print(f"email: {email}")
                         DocusealSubmitter.create_if_needed(email)
+
+                    submission_id = payload['data']['id']
+                    DocusealSubmission.create_or_update(submission_id)
 
                 elif payload['event_type'] == 'form.declined':
                     # an individual has declined to sign a form?
@@ -113,8 +119,11 @@ def receive_webhook(request):
 
                 elif payload['event_type'] == 'submission.archived':
                     # a submitted form is archived
+                    submission_id = payload['data']['id']
                     template_id = payload['data']['template']['id']
                     DocusealTemplate.create_or_update_by_id(template_id)
+                    DocusealSubmission.create_or_update(submission_id)
+
                 else:
                     # some other kind of webhook was received
                     print("unhandled webhook event_type")

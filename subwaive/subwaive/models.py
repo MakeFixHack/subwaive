@@ -91,6 +91,32 @@ class DocusealSubmission(models.Model):
     def __str__(self):
         return f"""{ self.submission_id } / { self.template } / { self.slug } / { self.status } / {self.completed_at }"""
 
+    def create_or_update(submission_id):
+        """ update a record if it exists, else create one """
+        json = {'submission_id': submission_id}
+
+        submission_api = docuseal.get_submission(submission_id)
+        submission_qs = DocusealSubmission.objects.filter(submission_id=submission_id)
+        submitters_api = [{'submitter_id': s['id'], 'email': s['email'], 'slug': s['slug'], 'status': s['status'], 'role': s['role']} for s in submission_api['submitters']]
+        if submission_qs.exists():
+            submission = submission_qs.first()
+            # assuming slug can't change
+            submission.status = submission_api['status']
+            submission.created_at = submission_api['created_at']
+            submission.completed_at = submission_api['completed_at']
+            if submission_api['archived_at']:
+                submission.archived_at = submission_api['archived_at']
+            submission.save()
+            submitters_db = DocusealSubmitterSubmission.objects.filter(submission=submission).values_list('id')
+            submitters_new = [s for s in submitters_api if s['submitter_id'] not in submitters_db]
+            if submitters_new:
+                for submitter in submitters_new:
+                    DocusealSubmitter.create_if_needed_by_id(submitter['submitter_id'])
+                DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=submission, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters_new])
+            Log.objects.create(description="Update DocusealSubmission", json={'submission_id': submission_id})
+        else:
+            DocusealSubmission.new(submission_id, submission_api['slug'], submission_api['status'], submission_api['created_at'], submission_api['completed_at'], submission_api['archived_at'], submission_api['template']['id'], submitters_api)
+            Log.objects.create(description="Create StripeCustomer", json=json)
     def new(submission_id, slug, status, created_at, completed_at, archived_at, template_id, submitters=None):
         """ Create a new instance """
         template = DocusealTemplate.objects.get(template_id=template_id)
