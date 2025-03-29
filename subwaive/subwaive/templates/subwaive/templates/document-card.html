@@ -1,0 +1,29 @@
+<div class="card text-center">
+    <div class="card-body">
+        <h5>{{ document.folder_name }}</h5>
+        <div>
+            <div>{{ document.template_name }}</div>
+
+            {% if document.archived_at %}
+            <div>ARCHIVED</div>
+            <div>{{ document.archived_at }}</div>
+            {% elif document.completed_at %}
+            <div>{{ document.status|capfirst }}</div>
+            <div>{{ document.archived_at }}</div>
+            {% else %}
+            <div>PENDING</div>
+            <div>{{ document.created_at }}</div>
+            {% endif %}
+
+            {% if document.important_fields %}
+            <div>
+                Important fields:
+                {% for field in document.important_fields %}
+                <ul>{{ field.field }}: {{ field.value }}</ul>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div><a href="{{ document.url }}">View in Docuseal</a></div>
+        </div>
+    </div>
+</div>

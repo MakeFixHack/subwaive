@@ -176,7 +176,9 @@ def person_docuseal(request, person_id):
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
-        'docuseal_documents': person.get_documents(),
+        'archived_documents': person.get_documents("archived"),
+        'pending_documents': person.get_documents("pending"),
+        'current_documents': person.get_documents("current"),
     }
 
     return render(request, f'subwaive/person/person-docuseal.html', context)

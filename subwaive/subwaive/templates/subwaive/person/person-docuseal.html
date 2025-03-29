@@ -17,30 +17,37 @@
     <h5>{% include 'subwaive/img/Docuseal-logo.svg' %}</h5>
 </div>
 
+{% if pending_documents %}
+<div class="section section-heading"><h5>Pending</h5></div>
 <div class="row-container">    
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
-{% for document in docuseal_documents %}
-        <div class="card text-center">
-            <div class="card-body">
-                <h5>{{ document.folder_name }}</h5>
-                <div>
-                    <div>{{ document.template_name }}</div>
-                    <div>{{ document.status|capfirst }}</div>
-                    <div>{{ document.completed_at }}</div>
-                    {% if document.important_fields %}
-                    <div>
-                        Important fields:
-                        {% for field in document.important_fields %}
-                        <ul>{{ field.field }}: {{ field.value }}</ul>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    <div><a href="{{ document.url }}">View in Docuseal</a></div>
-                </div>
-            </div>
-        </div>
-{% endfor %}
+        {% for document in pending_documents %}
+        {% include 'subwaive/templates/document-card.html' %}
+        {% endfor %}
     </div>
 </div>
+{% endif %}
+
+{% if current_documents %}
+<div class="section section-heading"><h5>Current</h5></div>
+<div class="row-container">    
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for document in current_documents %}
+        {% include 'subwaive/templates/document-card.html' %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if archived_documents %}
+<div class="section section-heading"><h5>Archived</h5></div>
+<div class="row-container">    
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for document in archived_documents %}
+        {% include 'subwaive/templates/document-card.html' %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}

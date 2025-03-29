@@ -524,23 +524,31 @@ class Person(models.Model):
         """ return the last check-in for a person """
         return PersonEvent.objects.filter(person=self).order_by('-event__end').first()
 
-    def get_submissions(self):
+    def get_submissions(self, lifecycle_state):
         """ fetch links to each document the person has signed """
         submitters = PersonDocuseal.objects.filter(person=self).values_list('submitter')
         dss = DocusealSubmitterSubmission.objects.filter(submitter__in=submitters).values_list('submission__id')
-        submissions = DocusealSubmission.objects.filter(id__in=dss).order_by('template__folder_name')
+        submissions = DocusealSubmission.objects.filter(id__in=dss)
+        if lifecycle_state == "archived":
+            submissions = submissions.filter(archived_at__isnull=False)
+        elif lifecycle_state == "pending":
+            submissions = submissions.filter(completed_at__isnull=True)
+        else:        
+            submissions = submissions.filter(archived_at__isnull=True)
 
-        return submissions
+        return submissions.order_by('template__folder_name')
         
-    def get_documents(self):
+    def get_documents(self, lifecycle_state):
         """ fetch links to each document the person has signed """
-        submissions = self.get_submissions()
+        submissions = self.get_submissions(lifecycle_state)
         
         documents = [
             {
                 'folder_name': doc.template.folder_name,
                 'template_name': doc.template.name,
                 'status': doc.status,
+                'archived_at': doc.archived_at,
+                'created_at': doc.created_at,
                 'completed_at': doc.completed_at,
                 'url': doc.get_url(),
                 'important_fields': [{'field': f.field, 'value': f.value} for f in DocusealFieldStore.objects.filter(submission=doc)]
