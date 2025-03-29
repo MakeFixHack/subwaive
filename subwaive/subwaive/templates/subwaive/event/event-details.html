@@ -29,6 +29,28 @@
     </form>
 </div>
 
+{% if check_in_issues %}
+<div class="row-container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for issue in check_in_issues %}
+        <div class="card text-center alert {% if issue.waiver %}alert-danger{% else %}alert-warning{% endif %}">
+            <div class="card-body">
+                <h5>{{ issue.person.name }}</h5>
+                
+                {% if issue.waiver %}
+                <li>Missing waiver</li>
+                {% endif %}
+
+                {% if issue.membership %}
+                <li>Missing membership</li>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <div class="row-container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
         {% for person in persons %}

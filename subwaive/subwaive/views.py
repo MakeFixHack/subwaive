@@ -435,12 +435,24 @@ def event_details(request, event_id):
 
     persons = [p.person for p in PersonEvent.objects.filter(event=event).order_by('person__name')]
 
+    check_in_issues = []
+    for p in persons:
+        issues = {}
+        if not p.check_membership_status():
+            issues['membership'] = True
+        if not p.check_waiver_status():
+            issues['waiver'] = True
+        if issues.keys():
+            issues['person'] = p
+            check_in_issues.append(issues)
+
     possible_check_ins = Person.objects.exclude(id__in=[p.id for p in persons])
 
     context = {
         'event': event,
         'persons': persons,
         'possible_check_ins': possible_check_ins,
+        'check_in_issues': check_in_issues,
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
     }
 
