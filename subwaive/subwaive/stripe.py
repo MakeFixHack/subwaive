@@ -18,14 +18,6 @@ STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
 STRIPE_ENDPOINT_SECRET = os.environ.get("STRIPE_ENDPOINT_SECRET")
 STRIPE_WWW_ENDPOINT = os.environ.get("STRIPE_WWW_ENDPOINT")
 
-def check_membership_status(person_id):
-    """ return true if they have a current membership """
-    has_membership = False
-    if Person.objects.filter(id=person_id).first().get_memberships():
-        has_membership = True
-
-    return has_membership 
-
 @login_required
 def payment_link_list(request):
     """ Show QR codes and details for Stripe PaymentLinks """

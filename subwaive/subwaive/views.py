@@ -8,11 +8,9 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from subwaive.docuseal import check_waiver_status
 from subwaive.models import DocusealFieldStore
 from subwaive.models import Event, PersonEvent
 from subwaive.models import Log, Person, PersonEmail, QRCustom
-from subwaive.stripe import check_membership_status
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
 
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
@@ -147,7 +145,7 @@ def person_card(request, person_id):
     person = Person.objects.get(id=person_id)
     other_emails = PersonEmail.objects.filter(person=person)
     
-    has_waiver = check_waiver_status(person_id)
+    has_waiver = person.check_waiver_status()
     has_membership = person.check_membership_status()
     
     last_check_ins = PersonEvent.objects.filter(person=person, event__start__date=datetime.date.today())
@@ -225,22 +223,14 @@ def person_edit(request, person_id):
 
     return render(request, f'subwaive/person/person-edit.html', context)
 
-def check_prior_check_in(person_id, event_id):
-    """ check if a person has already been checked in to an event """
-    last_check_in = PersonEvent.objects.filter(person__id=person_id, event__id=event_id)
-    is_checked_in = False
-    if last_check_in.exists():
-            is_checked_in = True
-    return is_checked_in
-
 @login_required
 def member_check_in(request, person_id, event_id, override_checks=False):
     """ A method logging a member was in the space. """
-    waiver_check = check_waiver_status(person_id)
-    print(waiver_check)
-    membership_status = check_membership_status(person_id)
+    waiver_check = Person.check_waiver_status_by_person_id(person_id)
+    # print(waiver_check)
+    membership_status = Person.check_membership_status(person_id)
     print(membership_status)
-    has_prior_check_in = check_prior_check_in(person_id, event_id)
+    has_prior_check_in = PersonEvent.check_prior_check_in(person_id, event_id)
     print(has_prior_check_in)
 
     clean_checks = False

@@ -512,6 +512,9 @@ class Person(models.Model):
         event = Event.objects.get(id=event_id)
         return PersonEvent.objects.create(person=self, event=event)
 
+    def check_membership_status_by_person_id(person_id):
+        return Person.objects.gets(id=person_id).check_membership_status()
+    
     def check_membership_status(self):
         """ return true if they have a current membership """
         has_membership = False
@@ -519,7 +522,20 @@ class Person(models.Model):
             has_membership = True
 
         return has_membership 
-        
+    
+    def check_waiver_status_by_person_id(person_id):
+        return Person.objects.gets(id=person_id).check_waiver_status()
+    
+    def check_waiver_status(self):
+        """ determine if a given person has a signed waiver """
+        submitters = PersonDocuseal.objects.filter(person=self).values_list('submitter')
+        waivers = DocusealSubmitterSubmission.objects.filter(
+            submitter__in=submitters,
+            submission__template__folder_name='Waivers',
+            submission__status='completed'
+            )
+        return waivers.exists()
+
     def get_last_check_in(self):
         """ return the last check-in for a person """
         return PersonEvent.objects.filter(person=self).order_by('-event__end').first()
@@ -718,6 +734,14 @@ class PersonEvent(models.Model):
     def __str__(self):
         return f"""{ self.person } / { self.event }"""
 
+    def check_prior_check_in(person_id, event_id):
+        """ check if a person has already been checked in to an event """
+        last_check_in = PersonEvent.objects.filter(person__id=person_id, event__id=event_id)
+        is_checked_in = False
+        if last_check_in.exists():
+                is_checked_in = True
+        return is_checked_in
+    
 
 class PersonStripe(models.Model):
     """ A map between Person and StripeCustomer """

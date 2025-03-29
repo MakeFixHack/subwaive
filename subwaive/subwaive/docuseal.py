@@ -49,16 +49,6 @@ def qr_links(request):
 
     return render(request, f'subwaive/qr-links.html', context)
 
-def check_waiver_status(person_id):
-    """ determine if a given person has a signed waiver """
-    submitters = PersonDocuseal.objects.filter(person__id=person_id).values_list('submitter')
-    waivers = DocusealSubmitterSubmission.objects.filter(
-        submitter__in=submitters,
-        submission__template__folder_name='Waivers',
-        submission__status='completed'
-        )
-    return waivers.exists()
-
 @csrf_exempt
 def receive_webhook(request):
     """ Handle a Docuseal webhook """
