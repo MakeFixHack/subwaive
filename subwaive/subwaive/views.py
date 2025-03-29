@@ -432,6 +432,7 @@ def event_details(request, event_id):
     if request.POST:
         person = Person.objects.get(id=request.POST.get("person_id"))
         PersonEvent.objects.create(event=event, person=person)
+        return redirect('event_details', event_id)
 
     persons = [p.person for p in PersonEvent.objects.filter(event=event).order_by('person__name')]
 
