@@ -231,6 +231,23 @@ class DocusealTemplate(models.Model):
     def __str__(self):
         return f"""{ self.template_id } / { self.folder_name } / { self.name } / { self.slug }"""
 
+    def create_or_update_by_id(template_id):
+        """ Create a template by Id instead of API row """
+        DocusealTemplate.create_or_update(template_api=docuseal.get_template(template_id))
+
+    def create_or_update(template_api):
+        """ Update a template by API row if it exists, otherwise create it """
+        template_id = template_api['id']
+        template_qs = DocusealTemplate.objects.filter(template_id=template_id)
+        if template_qs.exists():
+            template = template_qs.first()
+            template.name = template_api['name']
+            template.folder_name = template_api['folder_name']
+            template.save()
+            Log.objects.create(description="Update DocusealTemplate", json={'template_id': template_id})
+        else:
+            DocusealTemplate.new(template_api['id'], template_api['folder_name'], template_api['name'], template_api['slug'])
+
     def new(template_id, folder_name, name, slug):
         """ Create a new instance and auto_associate """
         DocusealTemplate.objects.create(template_id=template_id, folder_name=folder_name, name=name, slug=slug)
@@ -254,8 +271,7 @@ class DocusealTemplate(models.Model):
                 pagination_next = False
 
             for template in templates['data']:
-                if not template['archived_at']:
-                    DocusealTemplate.new(template['id'], template['folder_name'], template['name'], template['slug'])
+                DocusealTemplate.create_or_update(template)
 
     def get_url(self):
         """ URL for a hyperlink """

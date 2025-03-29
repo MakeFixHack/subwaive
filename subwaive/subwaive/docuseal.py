@@ -85,16 +85,29 @@ def receive_webhook(request):
                 if payload['event_type'] == 'form.completed':
                     # an individual has completed their portion of a form
                     print(payload)
+                    template_id = payload['data']['template']['id']
+                    DocusealTemplate.create_or_update_by_id(template_id)
 
                 elif payload['event_type'] == 'submission.created':
                     # a form has email addresses added for signatures
                     print(payload)
+                    template_id = payload['data']['template']['id']
+                    DocusealTemplate.create_or_update_by_id(template_id)
 
                 elif payload['event_type'] == 'form.declined':
                     # an individual has declined to sign a form?
                     #!!! we might want to know about declined or started forms at some point
                     pass
 
+                elif payload['event_type'] in ['template.created','template.updated']:
+                    # a new form is created or an existing one is altered
+                    template_id = payload['data']['id']
+                    DocusealTemplate.create_or_update_by_id(template_id)
+
+                elif payload['event_type'] == 'submission.archived':
+                    # a submitted form is archived
+                    template_id = payload['data']['template']['id']
+                    DocusealTemplate.create_or_update_by_id(template_id)
                 else:
                     # some other kind of webhook was received
                     print("unhandled webhook event_type")
