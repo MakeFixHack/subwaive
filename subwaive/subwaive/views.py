@@ -28,7 +28,6 @@ def person_list(request):
             'name': p.name,
             'id': p.id,
             'person_card': redirect('person_card', person_id=p.id).url,
-            'preferred_email': p.preferred_email.email,
             'last_check_in': p.get_last_check_in(),
             'last_check_in_event_id_list': [ci.event.id for ci in PersonEvent.objects.filter(person=p, event__start__date=datetime.date.today())],
         }
