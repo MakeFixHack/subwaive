@@ -13,6 +13,7 @@ from subwaive.models import DocusealFieldStore, DocusealSubmission, DocusealSubm
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, QR_SMALL, QR_LARGE
 
 DOCUSEAL_API_ENDPOINT = os.environ.get("DOCUSEAL_API_ENDPOINT")
+DOCUSEAL_ENDPOINT_SECRET = os.environ.get("DOCUSEAL_ENDPOINT_SECRET")
 
 @login_required
 def qr_links(request):
@@ -61,42 +62,51 @@ def check_waiver_status(person_id):
 @csrf_exempt
 def receive_webhook(request):
     """ Handle a Docuseal webhook """
-    #!!! should webhooks be more selective?
+
     print(f"request.method: {request.method}")
     # need to valid webhook came from trusted source
     if request.method == 'POST':
-        try:
-            payload = json.loads(request.body.decode('utf-8'))
+        signature = request.headers.get('X-Docuseal-Signature')
+        if not signature:
+            print(400, 'Missing signature')
+            return HttpResponse(status=400, reason="Missing signature")
 
-            Log.objects.create(description="Docuseal webhook", json=payload)
+        # Docuseal does not implement HMAC signatures as of v1.9.0
+        if signature == DOCUSEAL_ENDPOINT_SECRET:
+            try:
+                payload = json.loads(request.body.decode('utf-8'))
 
-            # if payload['event_type'] == 'form.completed':
-            #     print("form completed")
-            #     email = payload['data']['email']
-            #     print(f"email: {email}")
-            #     name = payload['data']['name']
-            #     print(f"name: {name}")
-            #     submission_id = payload['data']['submission_id']
-            #     print(f"submission_id: {submission_id}")
-            #     phone = payload['data']['phone']
-            #     print(f"phone: {phone}")
-            #     completed_at = payload['data']['completed_at']
-            #     print(f"completed_at: {completed_at}")
-            #     status = payload['data']['status']
-            #     print(f"status: {status}")
-            #     role = payload['data']['role']
-            #     print(f"role: {role}")
-            #     values = payload['data']['values']
-            #     print(f"values: {values}")
-            # else:
-            #     print("not a form completion webhook")
+                Log.objects.create(description="Docuseal webhook", json=payload)
 
-            webhook_refresh()
-        
-            return HttpResponse(status=200)
-        
-        except json.JSONDecodeError:
-            return HttpResponse(status=400, reason="Invalid JSON payload")
+                print("webhook type: ",payload['event_type'] )
+
+                # Probably not needed, but to prevent bad actors, we only accept information on 
+                # which records to address from the webhook. We use the API to do the actual updates.
+                if payload['event_type'] == 'form.completed':
+                    # an individual has completed their portion of a form
+                    print(payload)
+
+                elif payload['event_type'] == 'submission.created':
+                    # a form has email addresses added for signatures
+                    print(payload)
+
+                elif payload['event_type'] == 'form.declined':
+                    # an individual has declined to sign a form?
+                    #!!! we might want to know about declined or started forms at some point
+                    pass
+
+                else:
+                    # some other kind of webhook was received
+                    print("unhandled webhook event_type")
+            
+                return HttpResponse(status=200)
+            
+            except json.JSONDecodeError:
+                return HttpResponse(status=400, reason="Invalid JSON payload")
+        else:
+            print(401, 'Invalid signature')
+            return HttpResponse(status=401, reason="Invalid signature")
+
     else:
         return HttpResponse(status=405, reason="Method not allowed")
 

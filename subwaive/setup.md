@@ -27,6 +27,7 @@ STRIPE_ENDPOINT_SECRET=
 STRIPE_WWW_ENDPOINT=https://dashboard.stripe.com/
 
 DOCUSEAL_API_KEY=
+DOCUSEAL_ENDPOINT_SECRET=
 DOCUSEAL_API_ENDPOINT=
 DOCUSEAL_WWW_ENDPOINT=
 
@@ -145,6 +146,9 @@ The relevant `.env` keys are:
 ### Webhooks
 
 SubWaive can update Docuseal data in bulk or selectively. An initial bulk refresh is recommended, especially if a significant number of documents have been signed.
+
+> IMPORTANT
+> Webhooks should use HTTPS or internal networks to prevent snooping and impersonation, as Docuseal does not use HMAC signatures, and instead sends the secret as a plain-text header.
 
 For routine updates, configure Docuseal webhooks that point to the SubWaive-Docuseal webhook URL:
 
