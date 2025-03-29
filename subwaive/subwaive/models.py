@@ -135,6 +135,7 @@ class DocusealSubmission(models.Model):
         else:
             DocusealSubmission.new(submission_id, submission_api['slug'], submission_api['status'], submission_api['created_at'], submission_api['completed_at'], submission_api['archived_at'], submission_api['template']['id'], submitters_api)
             Log.objects.create(description="Create StripeCustomer", json=json)
+
     def new(submission_id, slug, status, created_at, completed_at, archived_at, template_id, submitters=None):
         """ Create a new instance """
         template = DocusealTemplate.objects.get(template_id=template_id)
@@ -147,6 +148,7 @@ class DocusealSubmission(models.Model):
         """ clear out existing records and repopulate them from the API """
         if new_only:
             Log.objects.create(description="Fetch new DocusealSubmission")
+            # capture changes to submission status/dates
             for submission in DocusealSubmission.objects.filter(completed_at__isnull=True).order_by('-created_at')[:20]:
                 DocusealSubmission.create_or_update(submission.submission_id)
             last_submission_id = DocusealSubmission.objects.all().order_by('-submission_id').first().submission_id
