@@ -19,7 +19,7 @@ class DocusealFieldStore_Admin(admin.ModelAdmin):
 admin.site.register(DocusealFieldStore, DocusealFieldStore_Admin)
 
 class DocusealSubmission_Admin(admin.ModelAdmin):
-    list_display = ('submission_id', 'slug', 'status', 'completed_at', 'template',)
+    list_display = ('submission_id', 'slug', 'status', 'created_at', 'completed_at', 'archived_at', 'template',)
 admin.site.register(DocusealSubmission, DocusealSubmission_Admin)
 
 class DocusealSubmitter_Admin(admin.ModelAdmin):
