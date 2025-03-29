@@ -44,6 +44,9 @@ COPY . .
 # MemberMatters solves this with nginx instead of gunicorn: https://github.com/membermatters/MemberMatters/blob/main/docker/Dockerfile
 RUN python3 manage.py collectstatic --noinput
 
+# We should migrate on startup in case there's been any db changes
+RUN python3 manage.py migrate
+
 # Switch to the non-privileged user to run the application.
 USER appuser
 
