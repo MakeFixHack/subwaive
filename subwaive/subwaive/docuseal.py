@@ -88,11 +88,18 @@ def receive_webhook(request):
                     template_id = payload['data']['template']['id']
                     DocusealTemplate.create_or_update_by_id(template_id)
 
+                    email = payload['data']['email']
+                    DocusealSubmitter.create_if_needed(email)
                 elif payload['event_type'] == 'submission.created':
                     # a form has email addresses added for signatures
                     print(payload)
                     template_id = payload['data']['template']['id']
                     DocusealTemplate.create_or_update_by_id(template_id)
+
+                    for submitter in payload['data']['submitters']:
+                        email = submitter['email']
+                        print(f"email: {email}")
+                        DocusealSubmitter.create_if_needed(email)
 
                 elif payload['event_type'] == 'form.declined':
                     # an individual has declined to sign a form?

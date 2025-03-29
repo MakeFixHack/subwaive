@@ -155,6 +155,19 @@ class DocusealSubmitter(models.Model):
                 person.preferred_email = email
                 person.save()
 
+    def create_if_needed_by_id(submitter_id):
+        """ Create a new DocusealSubmitter if one with this email doesn't exist already """
+        if not DocusealSubmitter.objects.filter(submitter_id=submitter_id).exists():
+            submitter = docuseal.get_submitter(submitter_id)
+            if submitter:
+                DocusealSubmitter.new(submitter['id'], submitter['email'], submitter['slug'])
+
+    def create_if_needed(email):
+        """ Create a new DocusealSubmitter if one with this email doesn't exist already """
+        if not DocusealSubmitter.objects.filter(email=email).exists():
+            for submitter in docuseal.list_submitters({'q': email})['data']:
+                DocusealSubmitter.new(submitter['id'], submitter['email'], submitter['slug'])
+
     def new(submitter_id, email, slug):
         """ Create a new instance and auto_associate """
         doc_sub = DocusealSubmitter.objects.create(submitter_id=submitter_id, email=email, slug=slug)
