@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -10,6 +11,8 @@ from django.urls import reverse
 from subwaive.models import DocusealFieldStore,DocusealSubmission,DocusealSubmitter,DocusealSubmitterSubmission,DocusealTemplate
 from subwaive.models import PersonDocuseal,Log
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, QR_SMALL, QR_LARGE
+
+DOCUSEAL_API_ENDPOINT = os.environ.get("DOCUSEAL_API_ENDPOINT")
 
 @login_required
 def qr_links(request):
@@ -109,7 +112,7 @@ def docuseal_refresh_page(request):
         "Refresh DocusealFieldStore",
     ]
 
-    description = ""
+    description = DOCUSEAL_API_ENDPOINT
 
     button_dict = [
             {'url_name': 'refresh_docuseal', 'anchor': 'Refresh Docuseal'},

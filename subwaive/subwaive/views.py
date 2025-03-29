@@ -15,6 +15,8 @@ from subwaive.models import Log, Person, PersonEmail, QRCustom
 from subwaive.stripe import check_membership_status
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
 
+CALENDAR_URL = os.environ.get("CALENDAR_URL")
+
 @permission_required('subwaive.can_list_people')
 @login_required
 def person_list(request):
@@ -377,7 +379,7 @@ def event_refresh_page(request):
         "Refresh Event",
     ]
 
-    description = ""
+    description = CALENDAR_URL
 
     button_dict = [
             {'url_name': 'refresh_event', 'anchor': 'Refresh Events'},

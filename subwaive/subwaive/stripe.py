@@ -16,6 +16,7 @@ from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLI
 
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
 STRIPE_ENDPOINT_SECRET = os.environ.get("STRIPE_ENDPOINT_SECRET")
+STRIPE_WWW_ENDPOINT = os.environ.get("STRIPE_WWW_ENDPOINT")
 
 def check_membership_status(person_id):
     """ return true if they have a current membership """
@@ -150,7 +151,7 @@ def stripe_refresh_page(request):
         "Refresh StripeSubscription"
     ]
 
-    description = ""
+    description = STRIPE_WWW_ENDPOINT
 
     button_dict = [
             {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh Products and Prices'},
