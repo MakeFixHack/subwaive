@@ -111,8 +111,11 @@ Establish the initial data model and superuser:
 # create expected Docker network
 docker network create subwaive
 
+# instantiate the container
+docker build -t subwaive .
+
 # create and run the container in detached mode
-docker compose up --build -d
+docker compose up --build --detach
 
 # migrate database changes know by Django but not yet by Postgres
 docker exec -it subwaive python manage.py migrate
