@@ -13,6 +13,7 @@ urlpatterns = [
     path('email/<int:email_id>/prefer/', views.set_preferred_email, name='set_preferred_email'),
     path('event/<int:event_id>/', views.event_details, name='event_details'),
     path('event/list/', views.event_list, name='event_list'),
+    path('event/list/<timeframe>/', views.event_list, name='event_list'),
     path('event/refresh/', views.event_refresh_page, name='event_refresh'),
     path('event/refresh/all/', views.refresh_event, name='refresh_event'),
     path('links/public/', views.public_link_list, name='public_link_list'),

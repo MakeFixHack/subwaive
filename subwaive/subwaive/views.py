@@ -401,12 +401,24 @@ def webhook_refresh():
     Event.refresh()
 
 @login_required
-def event_list(request):
+def event_list(request, timeframe="last-five"):
     """ List of events """
-    events = Event.objects.all().order_by('-end')
+    if timeframe == "last-five":
+        events = Event.objects.filter(start__lte=datetime.date.today()).order_by('-end')[:5]
+    elif timeframe == "future":
+        events = Event.objects.filter(start__gt=datetime.date.today()).order_by('start')
+    elif timeframe == "all":
+        events = Event.objects.all().order_by('-end')
+
+    button_dict = [
+            {'url': reverse('event_list'), 'anchor': 'Last 5', 'active': timeframe=="last-five"},
+            {'url': reverse('event_list', kwargs={'timeframe': 'future' }), 'anchor': 'Future', 'active': timeframe=="future"},
+            {'url': reverse('event_list', kwargs={'timeframe': 'all' }), 'anchor': 'All', 'active': timeframe=="all"},
+    ]
 
     context = {
         'events': events,
+        'buttons': button_dict,
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_PUBLIC,
     }
 
