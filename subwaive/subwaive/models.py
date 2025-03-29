@@ -116,6 +116,7 @@ class DocusealSubmission(models.Model):
         submission_api = docuseal.get_submission(submission_id)
         submission_qs = DocusealSubmission.objects.filter(submission_id=submission_id)
         submitters_api = [{'submitter_id': s['id'], 'email': s['email'], 'slug': s['slug'], 'status': s['status'], 'role': s['role']} for s in submission_api['submitters']]
+        # print(f"submitters_api: {submitters_api}")
         if submission_qs.exists():
             submission = submission_qs.first()
             # assuming slug can't change
@@ -126,7 +127,9 @@ class DocusealSubmission(models.Model):
                 submission.archived_at = submission_api['archived_at']
             submission.save()
             submitters_db = DocusealSubmitterSubmission.objects.filter(submission=submission).values_list('id')
+            # print(f"submitters_db: {submitters_db}")
             submitters_new = [s for s in submitters_api if s['submitter_id'] not in submitters_db]
+            # print(f"submitters_new: {submitters_new}")
             if submitters_new:
                 for submitter in submitters_new:
                     DocusealSubmitter.create_if_needed_by_id(submitter['submitter_id'])
