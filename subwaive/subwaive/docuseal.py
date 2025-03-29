@@ -93,6 +93,8 @@ def receive_webhook(request):
 
                     submission_id = payload['data']['submission_id']
                     DocusealSubmission.create_or_update(submission_id)
+                    DocusealFieldStore.re_extract(submission_id)
+
                 elif payload['event_type'] == 'submission.created':
                     # a form has email addresses added for signatures
                     print(payload)
@@ -106,6 +108,7 @@ def receive_webhook(request):
 
                     submission_id = payload['data']['id']
                     DocusealSubmission.create_or_update(submission_id)
+                    DocusealFieldStore.re_extract(submission_id)
 
                 elif payload['event_type'] == 'form.declined':
                     # an individual has declined to sign a form?
@@ -123,6 +126,7 @@ def receive_webhook(request):
                     template_id = payload['data']['template']['id']
                     DocusealTemplate.create_or_update_by_id(template_id)
                     DocusealSubmission.create_or_update(submission_id)
+                    DocusealFieldStore.re_extract(submission_id)
 
                 else:
                     # some other kind of webhook was received
