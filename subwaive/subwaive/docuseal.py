@@ -8,8 +8,8 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 
-from subwaive.models import PersonDocuseal,Log
 from subwaive.models import DocusealFieldStore, DocusealSubmission, DocusealSubmitter, DocusealSubmitterSubmission, DocusealTemplate
+from subwaive.models import PersonDocuseal, Log
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, QR_SMALL, QR_LARGE
 
 DOCUSEAL_API_ENDPOINT = os.environ.get("DOCUSEAL_API_ENDPOINT")
