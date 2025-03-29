@@ -78,7 +78,9 @@ class DocusealFieldStore(models.Model):
 class DocusealSubmission(models.Model):
     """ A Docuseal submission """
     submission_id = models.PositiveIntegerField()
+    created_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=16)
     slug = models.CharField(max_length=32)
     template = models.ForeignKey("subwaive.DocusealTemplate", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
