@@ -93,16 +93,16 @@ def receive_webhook(request):
     payload = event.data.object
     if event.type == 'customer.subscription.deleted':
         # StripeSubscription.objects.get(payload['id']).delete()
-        webhook_subscription_and_customer()
+        refresh_all_subscription_and_customer()
 
     elif event.type in ['invoice.paid','invoice.payment_failed']:
-        webhook_subscription_and_customer()
+        refresh_all_subscription_and_customer()
 
     elif event.type in ['payment_link.created','payment_link.updated']:
         # payment_link = StripePaymentLink.objects.get(payload['id'])
         # payment_link.whatever = some_val
         # payment_link.save()
-        webhook_refresh_product_and_price()
+        refresh_all_product_and_price()
 
     else:
         # need to handle everything we use
@@ -113,13 +113,13 @@ def receive_webhook(request):
 @login_required
 def refresh_product_and_price(request):
     """ force refresh Stripe payment links and associated data """
-    webhook_refresh_product_and_price()
+    refresh_all_product_and_price()
 
     messages.success(request, f'Stripe Product and Price data refreshed')
 
     return redirect('stripe_refresh')
 
-def webhook_refresh_product_and_price():
+def refresh_all_product_and_price():
     StripeProduct.refresh()
     StripePaymentLink.refresh()
     StripePrice.refresh()
@@ -128,13 +128,13 @@ def webhook_refresh_product_and_price():
 @login_required
 def refresh_subscription_and_customer(request):
     """ force refresh Stripe subscriptions and customers """
-    webhook_subscription_and_customer()
+    refresh_all_subscription_and_customer()
 
     messages.success(request, f'Stripe Subscription and Customer data refreshed')
 
     return redirect('stripe_refresh')
 
-def webhook_subscription_and_customer():
+def refresh_all_subscription_and_customer():
     StripeCustomer.refresh()
     StripeSubscription.refresh()
 
