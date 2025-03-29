@@ -155,22 +155,32 @@ def docuseal_refresh_page(request):
 
     button_dict = [
             {'url_name': 'refresh_docuseal', 'anchor': 'Refresh Docuseal'},
+            {'url_name': 'refresh_docuseal_new', 'anchor': 'Fetch New Docuseal'},
     ]
 
     return refresh(request, log_descriptions, button_dict, description)
 
 @login_required
-def refresh_docuseal(request):
+def refresh_docuseal_new(request):
+    """ force pull of new Docuseal docs """
+    print("refresh_docuseal_new")
+    return refresh_docuseal(request, new_only=True)
+
+@login_required
+def refresh_docuseal(request, new_only=False):
     """ force refresh Docuseal data """
-    webhook_refresh()
+    refresh_all(new_only)
 
     messages.success(request, f'Docuseal data refreshed')
 
     return redirect('docuseal_refresh')
 
-def webhook_refresh():
+def refresh_all(new_only=False):
     """ refresh data sets in order """
-    DocusealTemplate.refresh()
-    DocusealSubmitter.refresh()
-    DocusealSubmission.refresh()
-    DocusealFieldStore.refresh()
+    DocusealTemplate.refresh(new_only)
+    DocusealSubmitter.refresh(new_only)
+    max_existing_submission_id = None
+    if new_only:
+        max_existing_submission_id = DocusealSubmission.objects.all().order_by('-submission_id').first().submission_id
+    DocusealSubmission.refresh(new_only)
+    DocusealFieldStore.refresh(max_existing_submission_id)

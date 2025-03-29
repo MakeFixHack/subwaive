@@ -59,14 +59,18 @@ class DocusealFieldStore(models.Model):
     def __str__(self):
         return f"""{ self.field }"""
     
-    def refresh():
+    def refresh(max_existing_submission_id=None):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh DocusealFieldStore")
-        DocusealFieldStore.objects.all().delete()
+        if max_existing_submission_id:
+            submissions = DocusealSubmission.objects.filter(submission_id__gt=max_existing_submission_id)
+        else:
+            submissions = DocusealSubmission.objects.all()
+            Log.objects.create(description="Refresh DocusealFieldStore")
+            DocusealFieldStore.objects.all().delete()
 
         important_fields = DocusealField.objects.all()
 
-        for submission in DocusealSubmission.objects.all():
+        for submission in submissions:
             s = docuseal.get_submission(submission.submission_id)
             for field in important_fields:
                 for form_field in s['submitters'][0]['values']:
@@ -125,16 +129,27 @@ class DocusealSubmission(models.Model):
         if submitters:
             DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=doc_sub, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters])
 
-    def refresh():
+    def refresh(new_only=True):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh DocusealSubmission")
-        DocusealSubmission.objects.all().delete()
-        last_submission_id = None
+        if new_only:
+            Log.objects.create(description="Fetch new DocusealSubmission")
+            for submission in DocusealSubmission.objects.filter(completed_at__isnull=True).order_by('-created_at')[:20]:
+                DocusealSubmission.create_or_update(submission.submission_id)
+            last_submission_id = DocusealSubmission.objects.all().order_by('-submission_id').first().submission_id
+        else:
+            Log.objects.create(description="Refresh DocusealSubmission")
+            DocusealSubmission.objects.all().delete()
+            last_submission_id = None
+
         pagination_next = True
         while pagination_next:
             api_dict = {'limit': 100}
             if last_submission_id:
-                api_dict['after'] = last_submission_id
+                if new_only:
+                    sort_word = 'before'
+                else:
+                    sort_word = 'after'
+                api_dict[sort_word] = last_submission_id
             
             submissions = docuseal.list_submissions(api_dict)
             
@@ -222,16 +237,25 @@ class DocusealSubmitter(models.Model):
         
         return submitter_id_list
 
-    def refresh():
+    def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh DocusealSubmitter")
-        DocusealSubmitter.objects.all().delete()
-        last_submitter_id = None
+        if new_only:
+            Log.objects.create(description="Fetch new DocusealSubmitter")
+            last_submitter_id = DocusealSubmitter.objects.all().order_by('-submitter_id').first().submitter_id
+        else:
+            Log.objects.create(description="Refresh DocusealSubmitter")
+            DocusealSubmitter.objects.all().delete()
+            last_submitter_id = None
+
         pagination_next = True
         while pagination_next:
             api_dict = {'limit': 100}
             if last_submitter_id:
-                api_dict['after'] = last_submitter_id
+                if new_only:
+                    sort_word = 'before'
+                else:
+                    sort_word = 'after'
+                api_dict[sort_word] = last_submitter_id
             
             submitters = docuseal.list_submitters(api_dict)
             
@@ -292,16 +316,25 @@ class DocusealTemplate(models.Model):
         DocusealTemplate.objects.create(template_id=template_id, folder_name=folder_name, name=name, slug=slug)
         Log.objects.create(description="Create DocusealTemplate", json={'template_id': template_id})
 
-    def refresh():
+    def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh DocusealTemplate")
-        DocusealTemplate.objects.all().delete()
-        last_template_id = None
+        if new_only:
+            Log.objects.create(description="Fetch new DocusealTemplate")
+            last_template_id = DocusealTemplate.objects.all().order_by('-template_id').first().template_id
+        else:
+            Log.objects.create(description="Refresh DocusealTemplate")
+            last_template_id = None
+            DocusealTemplate.objects.all().delete()
+
         pagination_next = True
         while pagination_next:
             api_dict = {'limit': 100}
             if last_template_id:
-                api_dict['after'] = last_template_id
+                if new_only:
+                    sort_word = 'before'
+                else:
+                    sort_word = 'after'
+                api_dict[sort_word] = last_template_id
             
             templates = docuseal.list_templates(api_dict)
             
