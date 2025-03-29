@@ -1,5 +1,3 @@
-    
-
 # Setup for SubWaive
 
 ## The .env file
@@ -166,6 +164,16 @@ This address will trigger a selective update based on the payload provided by Do
 > Subwaive does not trust the information in webhooks. Instead, entity IDs are stripped out and the API is used to get data for performing database updates.
 
 Webhooks for Docuseal are also configured through the settings menu and require the webhook secret to be added to the `.env` file.
+
+In Docuseal, you must turn on webhooks in settings before you can add the secret. The webhooks currently handled by SubWaive are:
+
+* form.completed
+* template.created
+* template.updated
+* submission.created
+* submission.archived
+
+The webhook header key is `X-Docuseal-Signature`.
 
 ### Building links
 
