@@ -84,7 +84,7 @@ def receive_webhook(request):
                 # which records to address from the webhook. We use the API to do the actual updates.
                 if payload['event_type'] == 'form.completed':
                     # an individual has completed their portion of a form
-                    print(payload)
+                    # print(payload)
                     template_id = payload['data']['template']['id']
                     DocusealTemplate.create_or_update_by_id(template_id)
 
@@ -97,13 +97,12 @@ def receive_webhook(request):
 
                 elif payload['event_type'] == 'submission.created':
                     # a form has email addresses added for signatures
-                    print(payload)
+                    # print(payload)
                     template_id = payload['data']['template']['id']
                     DocusealTemplate.create_or_update_by_id(template_id)
 
                     for submitter in payload['data']['submitters']:
                         email = submitter['email']
-                        print(f"email: {email}")
                         DocusealSubmitter.create_if_needed(email)
 
                     submission_id = payload['data']['id']
