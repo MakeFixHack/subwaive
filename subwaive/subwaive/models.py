@@ -91,10 +91,10 @@ class DocusealSubmission(models.Model):
     def __str__(self):
         return f"""{ self.submission_id } / { self.template } / { self.slug } / { self.status } / {self.completed_at }"""
 
-    def new(submission_id, slug, status, completed_at, template_id, submitters=None):
+    def new(submission_id, slug, status, created_at, completed_at, archived_at, template_id, submitters=None):
         """ Create a new instance """
         template = DocusealTemplate.objects.get(template_id=template_id)
-        doc_sub = DocusealSubmission.objects.create(submission_id=submission_id, slug=slug, status=status, completed_at=completed_at, template=template)
+        doc_sub = DocusealSubmission.objects.create(submission_id=submission_id, slug=slug, status=status, created_at=created_at, completed_at=completed_at, archived_at=archived_at, template=template)
         Log.objects.create(description="Create DocusealSubmission", json={'submission_id': submission_id})
         if submitters:
             DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=doc_sub, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters])
@@ -120,7 +120,7 @@ class DocusealSubmission(models.Model):
                 if submission['status'] == 'completed':
                     submitters = [{'submitter_id': s['id'], 'status': s['status'], 'role': s['role']} for s in submission['submitters']]
                     if DocusealTemplate.objects.filter(template_id=submission['template']['id']).exists():
-                        DocusealSubmission.new(submission['id'], submission['slug'], submission['status'], submission['completed_at'], submission['template']['id'], submitters)
+                        DocusealSubmission.new(submission['id'], submission['slug'], submission['status'], submission['created_at'], submission['completed_at'], submission['archived_at'], submission['template']['id'], submitters)
 
     def get_url(self):
         """ URL for a hyperlink """
