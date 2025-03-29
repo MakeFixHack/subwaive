@@ -1,3 +1,5 @@
+    
+
 # Setup for SubWaive
 
 ## The .env file
@@ -96,7 +98,6 @@ This will also give the name of the containers you should use as hostnames in yo
 * Database hostname
 * DJANGO_ALLOWED_HOSTS
 
-
 ## Initializing Django
 
 Establish the initial data model and superuser:
@@ -117,7 +118,6 @@ docker exec -it subwaive python manage.py loaddata initial
 
 The initial data loaded creates a super user called `admin` with a password of `makefixhack`. If you don't change that password immediately, you get what you deserve. 😄
 
-
 ## Docuseal integration
 
 Docuseal can be downloaded and installed from:
@@ -133,7 +133,7 @@ SubWaive considers any document contained in a folder called `Waivers` to be a w
 
 To hide a document from SubWaive, archive it.
 
-### API 
+### API
 
 Docuseal has an API which requires an API key to be copied into the `.env` file. The API key can be found in the Docuseal settings menu, along with the API secret.
 
@@ -162,13 +162,12 @@ The relevant `.env` keys are:
 
 * DOCUSEAL_WWW_ENDPOINT - your Docuseal web address, for building URLs
 
-
 ## Stripe integration
 
 * All sales options are represented by a payment link
 * All product prices have a price description
 
-### API 
+### API
 
 Stripe has an API which requires an API key to be copied into the `.env` file. An API key for SubWaive should be created using the limited key option. The restricted key reduces the chances the access to the API key can result in unauthorized transaction.
 
@@ -191,7 +190,7 @@ The relevant `.env` keys are:
 
 TDB - which hooks do you need?
 
-* STRIPE_ENDPOINT_SECRET - 
+* STRIPE_ENDPOINT_SECRET -
 
 ### Building links
 
@@ -204,7 +203,6 @@ For production Stripe data:
 For test Stripe data:
 
 * STRIPE_WWW_ENDPOINT=https://dashboard.stripe.com/
-
 
 ## Calendar integration
 
