@@ -150,9 +150,8 @@ def person_card(request, person_id):
     has_waiver = person.check_waiver_status()
     has_membership = person.check_membership_status()
     
-    last_check_ins = PersonEvent.objects.filter(person=person, event__start__date=datetime.date.today())
+    last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
     check_in_events = Event.get_current_event()
-
 
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
