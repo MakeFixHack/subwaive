@@ -20,24 +20,7 @@
 
 <div class="container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
-        <div class="card text-center">
-            <div class="card-body">
-                <h5 class="card-title">Check-in History</h5>
-
-                <div>Last 5 check-ins: </div>
-                {% now "Y" as current_year %}
-                {% for check_in in last_check_ins %}
-                <div>
-                    {% if check_in.event.start|date:"Y" == current_year %}
-                    {{ check_in.event.start|date:"M j" }}
-                    {% else %}
-                    {{ check_in.event.start|date:"M j, Y" }}
-                    {% endif %}
-                    / {{ check_in.event.summary }}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+        {% include 'subwaive/templates/check-in-history.html' %}
                 
         <div class="card text-center">
             <div class="card-body">

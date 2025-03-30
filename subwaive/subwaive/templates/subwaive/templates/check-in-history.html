@@ -1,0 +1,22 @@
+<div class="card text-center">
+    <div class="card-body">
+        <h5 class="card-title">Check-in History</h5>
+
+        {% if last_check_in %}
+        <div>Last 5 check-ins: </div>
+        {% now "Y" as current_year %}
+        {% for check_in in last_check_ins %}
+        <div>
+            {% if check_in.event.start|date:"Y" == current_year %}
+            {{ check_in.event.start|date:"M j" }}
+            {% else %}
+            {{ check_in.event.start|date:"M j, Y" }}
+            {% endif %}
+            / {{ check_in.event.summary }}
+        </div>
+        {% endfor %}
+        {% else %}
+        <div>Never checked in</div>
+        {% endif %}
+    </div>
+</div>
