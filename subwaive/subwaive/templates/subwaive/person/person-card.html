@@ -8,6 +8,7 @@
 </div>
 
 {% include 'subwaive/templates/messages.html' %}
+{% include 'subwaive/templates/buttons.html' %}
 
 <div class="section section-heading">
     <h5 class="card-title">{{ person.name }}</h5>
@@ -15,12 +16,6 @@
     <div>Signed a waiver: {{ has_waiver }}</div>
                 
     <div>Current membership: {{ has_membership }}</div>
-    
-    <div>
-        <button class="btn btn-info" onclick="window.location='{% url 'person_docuseal' person.id %}'; return false;">Docuseal</button>
-        <button class="btn btn-info" onclick="window.location='{% url 'person_stripe' person.id %}'; return false;">Stripe</button>
-        <button class="btn btn-success" onclick="window.location='{% url 'person_edit' person.id %}'; return false;">Edit</button>
-    </div>
 </div>
 
 <div class="container">

@@ -3,7 +3,7 @@
     <div role="tablist" class="d-grid gap-2 col-12 d-md-block">
         {% for button in buttons %}
         <button 
-            class="btn {% if button.active %}btn-secondary{% else %}btn-outline-secondary{% endif %}" {% if button.active %}disable {% endif %}
+            class="btn {% if button.active %}btn-{% if button.class %}{{ button.class }}{% else %}secondary{% endif %}{% else %}btn-outline-{% if button.class %}{{ button.class }}{% else %}secondary{% endif %}{% endif %}" {% if button.active %}disable {% endif %}
             onclick='window.location="{{ button.url }}";'
             >{{ button.anchor }}</button>
         {% endfor %}

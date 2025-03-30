@@ -8,10 +8,10 @@
     <h1>{{ person.name }}</h1>
 </div>
 
+{% include 'subwaive/templates/buttons.html' %}
+
 <div class="section section-heading">
     <h5>{{ person.name }}</h5>
-    
-    <div><button class="btn btn-info" onclick="window.location='{% url 'person_card' person.id %}'; return false;">View Card</button></div>
 </div>
 
 <div class="section section-heading">

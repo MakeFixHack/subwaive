@@ -153,8 +153,15 @@ def person_card(request, person_id):
     last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
     check_in_events = Event.get_current_event()
 
+    button_dict = [
+        {'url': reverse('person_docuseal', kwargs={'person_id': person.id }), 'anchor': 'Docuseal', 'class': 'info', 'active': True},
+        {'url': reverse('person_stripe', kwargs={'person_id': person.id }), 'anchor': 'Stripe', 'class': 'info', 'active': True},
+        {'url': reverse('person_edit', kwargs={'person_id': person.id }), 'anchor': 'Edit', 'class': 'success', 'active': True },
+    ]        
+
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+        'buttons': button_dict,
         'person': person,
         'other_emails': other_emails,
         'has_waiver': has_waiver,
@@ -171,8 +178,13 @@ def person_docuseal(request, person_id):
     """ A page with info and links related to an individual """
     person = Person.objects.get(id=person_id)
 
+    button_dict = [
+        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View Card', 'class': 'info', 'active': True},
+    ]        
+
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+        'buttons': button_dict,
         'person': person,
         'archived_documents': person.get_documents("archived"),
         'pending_documents': person.get_documents("pending"),
@@ -186,8 +198,13 @@ def person_stripe(request, person_id):
     """ A page with info and links related to an individual """
     person = Person.objects.get(id=person_id)
 
+    button_dict = [
+        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View Card', 'class': 'info', 'active': True},
+    ]        
+
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+        'buttons': button_dict,
         'person': person,
         'stripe_subscriptions': person.get_memberships(),
         'stripe_onetime_payments': person.get_day_passes(),
