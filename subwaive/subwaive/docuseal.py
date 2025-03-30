@@ -38,6 +38,7 @@ def qr_links(request):
         }
         for idx,folder_name in enumerate(set([t.folder_name for t in templates]))
     ]
+    categories = sorted(categories, key=lambda x: x['name'])
 
     context = {
         'page_title': 'Links - Docuseal',

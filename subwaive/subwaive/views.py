@@ -81,6 +81,7 @@ def custom_link_list(request, is_sensitive=False):
         }
         for category in set([(c.category.name, c.category.id) for c in user_qr_codes])
     ]
+    categories = sorted(categories, key=lambda x: x['name'])
 
     if is_sensitive:
         confidentiality_level = CONFIDENTIALITY_LEVEL_SENSITIVE

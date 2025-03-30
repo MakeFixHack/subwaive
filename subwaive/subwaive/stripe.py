@@ -40,6 +40,7 @@ def payment_link_list(request):
         }
         for indx,product in enumerate(set([sqc.price.product.name for sqc in stripe_qr_codes]))
     ]
+    categories = sorted(categories, key=lambda x: x['name'])
 
     context = {
         'page_title': 'Links - Stripe',
