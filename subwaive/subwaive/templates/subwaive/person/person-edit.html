@@ -45,7 +45,8 @@
                 <td>{% if other_email == person.preferred_email %}True{% endif %}</td>
                 <td>
                     <button class="btn btn-warning" onclick="window.location='{% url 'unmerge_people' other_email.id %}';return false;">Unmerge</button>
-                    {% if other_email != person.preferred_email %}<button class="btn btn-success" onclick="window.location='{% url 'set_preferred_email' other_email.id %}';return false;">Prefer</button>{% endif %}
+                    <button class="btn btn-success" onclick="window.location='{% url 'set_preferred_email' other_email.id %}';return false;">Prefer</button>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
