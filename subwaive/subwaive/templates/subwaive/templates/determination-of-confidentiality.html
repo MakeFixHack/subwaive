@@ -1,9 +1,11 @@
 <!-- Determination of confidentiality -->
-{% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
-    {% include 'subwaive/templates/public-data-statement.html' %}
-{% elif CONFIDENTIALITY_LEVEL == 'SENSITIVE' %}
-    {% include 'subwaive/templates/sensitive-data-statement.html' %}
-{% else %}
-    {% include 'subwaive/templates/confidentiality-statement.html' %}
-{% endif %}
+<div style="margin: 0.25rem;">
+    {% if CONFIDENTIALITY_LEVEL == 'PUBLIC' %}
+        {% include 'subwaive/templates/public-data-statement.html' %}
+    {% elif CONFIDENTIALITY_LEVEL == 'SENSITIVE' %}
+        {% include 'subwaive/templates/sensitive-data-statement.html' %}
+    {% else %}
+        {% include 'subwaive/templates/confidentiality-statement.html' %}
+    {% endif %}
+</div>
 <!-- /Determination of confidentiality -->
