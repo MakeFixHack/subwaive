@@ -223,8 +223,13 @@ def person_edit(request, person_id):
 
     last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
     
+    button_dict = [
+        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View Card', 'class': 'info', 'active': True},
+    ]        
+
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+        'buttons': button_dict,
         'person': person,
         'important_fields': important_fields,
         'last_check_ins': last_check_ins,
