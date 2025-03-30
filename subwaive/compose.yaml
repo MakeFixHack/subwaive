@@ -37,10 +37,26 @@ services:
       - .env
     networks:
       - subwaive
+    volumes:
+      - staticfiles:/app/subwaive/static
     restart: unless-stopped
+
+  nginx:
+     build: ./nginx
+     volumes:
+       - staticfiles:/app/subwaive/static
+     ports:
+       - 80:80
+     image: nginx:django
+     depends_on:
+       - subwaive
+     restart: "on-failure"
+     networks:
+       - subwaive
 
 volumes:
    postgres_data:
+   staticfiles:
 networks:
   subwaive:
     external: true

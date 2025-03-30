@@ -30,7 +30,7 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
+# Download dependencies as a separate step to take advantage of Docker's caching.    
 # Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
 # Leverage a bind mount to requirements.txt to avoid having to copy them into
 # into this layer.
@@ -38,13 +38,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
     
-# Copy the source code into the container.
+# Copy the source code into the container.    
 COPY . .
 
-# MemberMatters solves this with nginx instead of gunicorn: https://github.com/membermatters/MemberMatters/blob/main/docker/Dockerfile
+# Migrate and collect static files on start
 RUN python3 manage.py collectstatic --noinput
-
-# We should migrate on startup in case there's been any db changes
 RUN python3 manage.py migrate
 
 # Switch to the non-privileged user to run the application.
