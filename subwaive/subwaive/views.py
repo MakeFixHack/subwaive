@@ -221,21 +221,13 @@ def person_edit(request, person_id):
     submissions = person.get_submissions()
     important_fields = DocusealFieldStore.objects.filter(submission__in=submissions, field__field__icontains='name')
 
-    check_in_prelim = Log.objects.filter(json__person_id=person_id,description="Check-in")[:5]
-    check_ins = [
-        {
-            'id': c.id,
-            'event': c.json['event'],
-            'date': c.date()
-        }
-        for c in check_in_prelim
-    ]
+    last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
     
     context = {
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
         'person': person,
         'important_fields': important_fields,
-        'check_ins': check_ins,
+        'last_check_ins': last_check_ins,
         'other_emails': other_emails,
     }
 
