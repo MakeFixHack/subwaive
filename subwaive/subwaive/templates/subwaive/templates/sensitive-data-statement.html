@@ -1,9 +1,10 @@
 {% block content %}
+{% load static %}
 
         <!-- Notice of confidentiality -->
         <!-- Trigger Modal Button -->
         <button class="btn btn-warning float-end" data-bs-toggle="modal" data-bs-target="#imageModal{{ qr_code.id }}">
-            SENSITIVE {% include 'subwaive/img/info-circle.svg' %}
+            SENSITIVE <img src="{% static 'img/info-circle.svg' %}">
         </button>
 
         <!-- Modal for sensitive data statement -->

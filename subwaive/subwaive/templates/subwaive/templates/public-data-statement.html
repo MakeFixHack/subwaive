@@ -1,9 +1,10 @@
 {% block content %}
+{% load static %}
 
         <!-- Notice of public data -->
         <!-- Trigger Modal Button -->
         <button class="btn btn-success float-end" data-bs-toggle="modal" data-bs-target="#imageModal{{ qr_code.id }}">
-            PUBLIC {% include 'subwaive/img/info-circle.svg' %}
+            PUBLIC <img src="{% static 'img/info-circle.svg' %}">
         </button>
 
         <!-- Modal for public data statement -->
