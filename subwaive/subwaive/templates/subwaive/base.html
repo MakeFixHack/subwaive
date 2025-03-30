@@ -15,35 +15,78 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     </head>
     <body>
-        <!--- Navigation -->
-        <nav id="main-nav" class="navbar navbar-expand navbar-light padded">
-            <div class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      QR Codes
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="nav-item nav-link" href="{% url 'public_link_list' %}">Links</a></li>
-                        <li><a class="nav-item nav-link" href="{% url 'sensitive_link_list' %}">Internal</a></li>
-                        <li><a class="nav-item nav-link" href="{% url 'payment_link_list' %}">Stripe</a></li>
-                        <li><a class="nav-item nav-link" href="{% url 'docuseal_link_list' %}">Docuseal</a></li>
-                    </ul>
-                </li>
-                <a class="nav-item nav-link" href="{% url 'person_list' %}">People</a>
-                <a class="nav-item nav-link" href="{% url 'event_list' %}">Events</a>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Admin
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <li><a class="nav-item nav-link" href="{% url 'event_refresh' %}">Refresh Events</a></li>
-                        <li><a class="nav-item nav-link" href="{% url 'stripe_refresh' %}">Refresh Stripe</a></li>
-                        <li><a class="nav-item nav-link" href="{% url 'docuseal_refresh' %}">Refresh Docuseal</a></li>
-                        <li><a class="nav-item nav-link" href="/admin/">Admin Console</a></li>
-                    </ul>
-                </li>
+        <!--- Navigation -->                
+        <nav id="main-nav" class="navbar navbar-expand-lg navbar-expand-md navbar-expand-sm  navbar-light padded">
+            <button class="navbar-toggler" type="button" data-bs-toggle="modal" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        QR Codes
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="nav-item nav-link" href="{% url 'public_link_list' %}">Links</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'sensitive_link_list' %}">Internal</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'payment_link_list' %}">Stripe</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'docuseal_link_list' %}">Docuseal</a></li>
+                        </ul>
+                    </li>
+                    <a class="nav-item nav-link" href="{% url 'person_list' %}">People</a>
+                    <a class="nav-item nav-link" href="{% url 'event_list' %}">Events</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Admin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="nav-item nav-link" href="{% url 'event_refresh' %}">Refresh Events</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'stripe_refresh' %}">Refresh Stripe</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'docuseal_refresh' %}">Refresh Docuseal</a></li>
+                            <li><a class="nav-item nav-link" href="/admin/">Admin Console</a></li>
+                        </ul>
+                    </li>
+                </div>
             </div>
         </nav>
+
+        <!-- Menu modal -->
+        <div class="modal fade" id="navMenu" tabindex="-1" role="dialog" aria-labelledby="menuModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content" style="background-color: whitesmoke;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="menuModalLabel">Navigation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5>QR Codes</h5>
+                        <p>
+                            <button class="btn btn-margin btn-success" type="button" onclick="window.location='{% url 'public_link_list' %}'">Links</button>
+                            <button class="btn btn-margin btn-warning" type="button" onclick="window.location='{% url 'sensitive_link_list' %}'">Internal</button>
+                            <button class="btn btn-margin btn-success" type="button" onclick="window.location='{% url 'payment_link_list' %}'">Stripe</button>
+                            <button class="btn btn-margin btn-success" type="button" onclick="window.location='{% url 'docuseal_link_list' %}'">Docuseal</button>
+                        </p>
+                        <h5>People</h5>
+                        <p>
+                            <button class="btn btn-margin btn-danger" type="button" onclick="window.location='{% url 'person_list' %}'">List</button>
+                            <button class="btn btn-margin btn-danger" type="button" onclick="window.location='{% url 'person_search' %}'">Search</button>
+                        </p>
+                        <h5>Events</h5>
+                        <p>
+                            <button class="btn btn-margin btn-success" type="button" onclick="window.location='{% url 'event_list' %}'">Events</button>
+                        </p>
+                        <h5>Data Refresh</h5>
+                        <p>
+                            <button class="btn btn-margin btn-warning" type="button" onclick="window.location='{% url 'event_refresh' %}'">Events</button>
+                            <button class="btn btn-margin btn-warning" type="button" onclick="window.location='{% url 'stripe_refresh' %}'">Stripe</button>
+                            <button class="btn btn-margin btn-warning" type="button" onclick="window.location='{% url 'docuseal_refresh' %}'">Docuseal</button>
+                        </p>
+                        <button class="btn btn-margin btn-secondary" type="button" onclick="window.location='/admin/'">Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Menu modal -->
         <!-- /Navigation -->
 
         <div id="site-name" class="float-end">{% include 'subwaive/img/SubWaive-wordmark.svg' %}</div>
@@ -52,6 +95,5 @@
 {% block content %}
 {% endblock %}
         </div>
-
     </body>
 </html>
