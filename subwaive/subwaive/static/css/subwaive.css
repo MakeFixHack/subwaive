@@ -13,13 +13,14 @@ a:visited {
 nav.padded {
     background-color: powderblue;
     width: 100%; 
-    padding: 0.5em 0.5em 0.5em 1em;
+    padding: 0.5em;
 }
 #secondary-nav {
     margin-bottom: 1rem;
 }
 #main-nav {
     background-color: lightblue;
+    margin-bottom: 0.25rem;
 }
 nav a {
     margin-right: 1rem;
@@ -46,10 +47,6 @@ div.section-heading {
 }
 .modal-backdrop {
     opacity:0.8 !important;
-}
-button {
-    margin-top: 0.5em;
-    margin-right: 1em;
 }
 #site-name {
     position: absolute;

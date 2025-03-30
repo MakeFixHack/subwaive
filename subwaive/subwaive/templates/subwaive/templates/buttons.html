@@ -1,9 +1,12 @@
 {% if buttons %}
-<nav id="secondary-nav" class="navbar navbar-expand navbar-light padded">
-    <div class="navbar-nav">
-{% for button in buttons %}
-        <button class="btn {% if button.active %}btn-secondary{% else %}btn-outline-secondary{% endif %}" {% if button.active %}disable {% endif %}onclick='window.location="{{ button.url }}";'>{{ button.anchor }}</button>
-{% endfor %}
+<nav id="secondary-nav" class="navbar navbar-expand navbar-light padded justify-content-md-start justify-content-center">
+    <div role="tablist" class="d-grid gap-2 col-12 d-md-block">
+        {% for button in buttons %}
+        <button 
+            class="btn {% if button.active %}btn-secondary{% else %}btn-outline-secondary{% endif %}" {% if button.active %}disable {% endif %}
+            onclick='window.location="{{ button.url }}";'
+            >{{ button.anchor }}</button>
+        {% endfor %}
     </div>
-</div>
+</nav>
 {% endif %}

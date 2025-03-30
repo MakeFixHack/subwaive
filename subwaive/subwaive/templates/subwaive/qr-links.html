@@ -8,9 +8,9 @@
 </div>
 
 {% if categories %}
-<nav id="secondary-nav" class="navbar navbar-expand navbar-light padded">
-    <div role="tablist" class="row justify-content-evenly row-cols-md-6 row-cols-1 g-md-3 g-2">
-{% for category in categories %}
+<nav id="secondary-nav" class="navbar navbar-expand navbar-light padded justify-content-md-start justify-content-center">
+    <div role="tablist" class="d-grid gap-2 col-12 d-md-block">
+        {% for category in categories %}
         <button role="tab"
             class="btn {% if forloop.counter == 1 %}active {% endif %}btn-outline-secondary" 
             {% if forloop.counter == 1 %}disable {% endif %}
@@ -19,9 +19,9 @@
             data-bs-target="#{{ category.baseid }}-pane" 
             aria-controls="{{ category.baseid }}-pane" 
             {% if forloop.counter == 1 %}aria-selected="true"{% endif %}>{{ category.name }}</button>
-{% endfor %}
+        {% endfor %}
     </div>
-</div>
+</nav>
 {% endif %}
 
 <!-- Tab content -->
