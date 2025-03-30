@@ -218,7 +218,7 @@ def person_edit(request, person_id):
     """ a page to edit a person's record """
     person = Person.objects.get(id=person_id)
     other_emails = PersonEmail.objects.filter(person=person)
-    submissions = person.get_submissions()
+    submissions = person.get_submissions("current")
     important_fields = DocusealFieldStore.objects.filter(submission__in=submissions, field__field__icontains='name')
 
     last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
