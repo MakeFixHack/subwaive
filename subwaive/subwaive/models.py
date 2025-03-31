@@ -676,7 +676,16 @@ class Person(models.Model):
 
     def search(search_term):
         """ search for a Person """
-        person_id_list = set([pe.person.id for pe in PersonEmail.objects.filter(Q(person__name__icontains=search_term)|Q(email__icontains=search_term))])
+        emails = PersonEmail.objects.filter(Q(person__name__icontains=search_term)|Q(email__icontains=search_term))
+
+        field_submissions = DocusealFieldStore.objects.filter(value__icontains=search_term).values_list('submission')
+        submitters = DocusealSubmitterSubmission.objects.filter(submission__in=field_submissions).values_list('submitter')
+        persons = PersonDocuseal.objects.filter(submitter__in=submitters)
+        
+        person_id_list = set(
+            [pe.person.id for pe in emails]
+            + [s.person.id for s in persons]
+            )
 
         return Person.objects.filter(id__in=person_id_list)
 
