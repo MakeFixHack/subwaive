@@ -518,7 +518,7 @@ class Person(models.Model):
         return PersonEvent.objects.create(person=self, event=event)
 
     def check_membership_status_by_person_id(person_id):
-        return Person.objects.gets(id=person_id).check_membership_status()
+        return Person.objects.get(id=person_id).check_membership_status()
     
     def check_membership_status(self):
         """ return true if they have a current membership """
@@ -529,7 +529,7 @@ class Person(models.Model):
         return has_membership 
     
     def check_waiver_status_by_person_id(person_id):
-        return Person.objects.gets(id=person_id).check_waiver_status()
+        return Person.objects.get(id=person_id).check_waiver_status()
     
     def check_waiver_status(self):
         """ determine if a given person has a signed waiver """

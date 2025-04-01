@@ -243,7 +243,7 @@ def member_check_in(request, person_id, event_id, override_checks=False):
     """ A method logging a member was in the space. """
     waiver_check = Person.check_waiver_status_by_person_id(person_id)
     # print(waiver_check)
-    membership_status = Person.check_membership_status(person_id)
+    membership_status = Person.check_membership_status_by_person_id(person_id)
     print(membership_status)
     has_prior_check_in = PersonEvent.check_prior_check_in(person_id, event_id)
     print(has_prior_check_in)
