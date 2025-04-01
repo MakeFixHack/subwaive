@@ -14,10 +14,20 @@
     <h5 class="card-title">{{ person.name }}</h5>
 
     <div>
+        Names used in Stripe:
+
+        {% for customer in stripe_customers %}
+        <div>{{ customer.name }} <button class="btn btn-success" onclick="window.location='{% url 'set_stripe_name' person_id=person.id stripe_id=customer.stripe_id %}'; return false;">Use</button></div>
+        {% empty %}
+        <div>No known aliases</div>
+        {% endfor %}
+    </div>
+
+    <div>
         Names used in Docuseal:
 
         {% for field in important_fields %}
-        <div>{{ field.value }} <button class="btn btn-success" onclick="window.location='{% url 'set_name' person_id=person.id important_field_id=field.id %}'; return false;">Use</button></div>
+        <div>{{ field.value }} <button class="btn btn-success" onclick="window.location='{% url 'set_docuseal_name' person_id=person.id important_field_id=field.id %}'; return false;">Use</button></div>
         {% empty %}
         <div>No known aliases</div>
         {% endfor %}

@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from subwaive.models import DocusealFieldStore
+from subwaive.models import DocusealFieldStore, StripeCustomer
 from subwaive.models import Event, PersonEvent
 from subwaive.models import Log, Person, PersonEmail, QRCustom
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
@@ -220,6 +220,7 @@ def person_edit(request, person_id):
     other_emails = PersonEmail.objects.filter(person=person)
     submissions = person.get_submissions("current")
     important_fields = DocusealFieldStore.objects.filter(submission__in=submissions, field__field__icontains='name')
+    stripe_customers = StripeCustomer.objects.filter(email__in=[e.email for e in other_emails]).order_by('name')
 
     last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
     
@@ -232,6 +233,7 @@ def person_edit(request, person_id):
         'buttons': button_dict,
         'person': person,
         'important_fields': important_fields,
+        'stripe_customers': stripe_customers,
         'last_check_ins': last_check_ins,
         'other_emails': other_emails,
     }
@@ -367,10 +369,22 @@ def set_preferred_email(request, email_id):
     return redirect('person_edit', person.id)
 
 @login_required
-def set_name(request, person_id, important_field_id):
+def set_docuseal_name(request, person_id, important_field_id):
     """ set the person name to a Docuseal important field value """
     person = Person.objects.get(id=person_id)
     name = DocusealFieldStore.objects.get(id=important_field_id).value
+    person.name = name
+    person.save()
+
+    messages.success(request, f'Name set to <em>{ name }</em>')
+
+    return redirect('person_edit', person_id)
+
+@login_required
+def set_stripe_name(request, person_id, stripe_id):
+    """ set the person name to a Stripe customer name """
+    person = Person.objects.get(id=person_id)
+    name = StripeCustomer.objects.get(stripe_id=stripe_id).name
     person.name = name
     person.save()
 
