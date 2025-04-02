@@ -61,6 +61,10 @@
                 <h5>{{ person.name }}</h5>
 
                 <div>{{ person.preferred_email.email }}</div>
+
+                <div>
+                    <button class="btn btn-danger" onclick="window.location='{% url 'delete_member_check_in' person_id=person.id event_id=event.id %}'; return false;">Remove Check-In</button>
+                </div>
             </div>
         </div>
         {% endfor %}

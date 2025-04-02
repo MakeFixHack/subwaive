@@ -290,17 +290,15 @@ def check_in_remediation(request, person_id, event_id, waiver_check, membership_
 
 @permission_required('subwaive.can_remove_check_in')
 @login_required
-def delete_member_check_in(request, log_id):
+def delete_member_check_in(request, person_id, event_id):
     """ A method for removing erroneous check-ins """
-    log = Log.objects.get(id=log_id)
-    person_id = log.json['person_id']
+    check_in = PersonEvent.objects.get(person__id=person_id, event__id=event_id)
+    
+    messages.success(request, f"Check-in for { check_in.person } to {check_in.event } removed")
 
-    log.description = f"DELETED - { log.description }"
-    log.json['deleted_by'] = request.user.username
-    log.json['deleted_on'] = datetime.datetime.now().astimezone(pytz.utc).strftime('%Y-%m-%d %H:%M:%S')
-    log.save()
+    check_in.delete()
 
-    return redirect('person_edit', person_id)
+    return redirect('event_details', event_id)
 
 @login_required
 def merge_people(request, merge_child_id, merge_parent_id=None):
