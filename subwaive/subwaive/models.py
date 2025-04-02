@@ -421,13 +421,11 @@ class Event(models.Model):
                         uid_count[uid] = 1
 
                     recurrence_order = uid_count[uid]
-                    recurrence_id = e.get("RECURRENCE-ID")
+                    # recurrence_id = e.get("RECURRENCE-ID")
                     summary = e.get("SUMMARY").__str__()
                     description = e.get("DESCRIPTION").__str__()[:2048]
                     start = e.start
                     end = e.end
-                    if summary=='Mending Mondays':
-                        print(start, uid, recurrence_id, summary)
 
                     event_qs = Event.objects.filter(UID=uid, recurrence_order=recurrence_order)
                     
@@ -453,7 +451,7 @@ class Event(models.Model):
 
                     else:
                         event_inst = Event.objects.create(UID=uid, recurrence_order=recurrence_order, summary=summary, description=description, start=start, end=end)
-                        print(event_inst,"created")
+                        # print(event_inst,"created")
                         Log.objects.create(description="Create Event", json={'uid': event_inst.UID})
         Log.objects.create(description="Refresh Event")
 
