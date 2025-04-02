@@ -868,7 +868,7 @@ class StripeCustomer(models.Model):
         """ search for a Stripe customer from the API """
         pass
 
-    def refresh():
+    def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         Log.objects.create(description="Refresh StripeCustomer")
         StripeCustomer.objects.all().delete()
@@ -943,7 +943,7 @@ class StripePaymentLink(models.Model):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/payment-links/{ self.stripe_id }"
 
-    def refresh():
+    def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         Log.objects.create(description="Refresh StripePaymentLink")
         StripePaymentLink.objects.all().delete()
@@ -1060,7 +1060,7 @@ class StripePrice(models.Model):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/prices/{ self.stripe_id }"
 
-    def refresh():
+    def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         Log.objects.create(description="Refresh StripePrice")
         StripePrice.objects.all().delete()
@@ -1119,7 +1119,7 @@ class StripeProduct(models.Model):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/products/{ self.stripe_id }"
 
-    def refresh():
+    def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         Log.objects.create(description="Refresh StripeProduct")
         StripeProduct.objects.all().delete()
@@ -1202,7 +1202,7 @@ class StripeSubscription(models.Model):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/subscriptions/{ self.stripe_id }"
 
-    def refresh():
+    def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         Log.objects.create(description="Refresh StripeSubscription")
         StripeSubscription.objects.all().delete()

@@ -111,10 +111,13 @@ def refresh_product_and_price(request):
 
     return redirect('stripe_refresh')
 
-def refresh_all_product_and_price():
-    StripeProduct.refresh()
-    StripePaymentLink.refresh()
-    StripePrice.refresh()
+def fetch_new_product_and_price():
+    refresh_all_product_and_price(True)
+    
+def refresh_all_product_and_price(new_only=False):
+    StripeProduct.refresh(new_only)
+    StripePaymentLink.refresh(new_only)
+    StripePrice.refresh(new_only)
     StripePaymentLinkPrice.refresh()
 
 @login_required
@@ -126,9 +129,12 @@ def refresh_subscription_and_customer(request):
 
     return redirect('stripe_refresh')
 
-def refresh_all_subscription_and_customer():
-    StripeCustomer.refresh()
-    StripeSubscription.refresh()
+def fetch_new_subscription_and_customer():
+    refresh_all_subscription_and_customer(True)
+
+def refresh_all_subscription_and_customer(new_only=False):
+    StripeCustomer.refresh(new_only)
+    StripeSubscription.refresh(new_only)
 
 @login_required
 def stripe_refresh_page(request):
@@ -148,6 +154,8 @@ def stripe_refresh_page(request):
     button_dict = [
             {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh Products and Prices'},
             {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh Subscriptions and Customers'},
+            {'url_name': 'fetch_new_product_and_price', 'anchor': 'Fetch New Products and Prices'},
+            {'url_name': 'fetch_new_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},
     ]
 
     return refresh(request, log_descriptions, button_dict, description)
