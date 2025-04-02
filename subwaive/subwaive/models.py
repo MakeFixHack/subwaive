@@ -424,8 +424,8 @@ class Event(models.Model):
                     # recurrence_id = e.get("RECURRENCE-ID")
                     summary = e.get("SUMMARY").__str__()
                     description = e.get("DESCRIPTION").__str__()[:2048]
-                    start = e.start
-                    end = e.end
+                    start = e.start.astimezone(pytz.timezone(TIME_ZONE))
+                    end = e.end.astimezone(pytz.timezone(TIME_ZONE))
 
                     event_qs = Event.objects.filter(UID=uid, recurrence_order=recurrence_order)
                     
