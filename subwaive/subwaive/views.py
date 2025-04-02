@@ -424,9 +424,9 @@ def webhook_refresh():
 def event_list(request, timeframe="last-five"):
     """ List of events """
     if timeframe == "last-five":
-        events = Event.objects.filter(start__lte=datetime.date.today()).order_by('-end')[:5]
+        events = Event.objects.filter(start__lte=datetime.datetime.now()).order_by('-end')[:5]
     elif timeframe == "future":
-        events = Event.objects.filter(start__gt=datetime.date.today()).order_by('start')
+        events = Event.objects.filter(start__gt=datetime.datetime.now()).order_by('start')
     elif timeframe == "all":
         events = Event.objects.all().order_by('-end')
 
