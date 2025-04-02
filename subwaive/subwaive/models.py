@@ -150,7 +150,7 @@ class DocusealSubmission(models.Model):
     def refresh(new_only=True):
         """ clear out existing records and repopulate them from the API """
         if new_only:
-            Log.objects.create(description="Fetch new DocusealSubmission")
+            Log.objects.create(description="Fetch New DocusealSubmission")
             # capture changes to submission status/dates
             for submission in DocusealSubmission.objects.filter(completed_at__isnull=True).order_by('-created_at')[:20]:
                 DocusealSubmission.create_or_update(submission.submission_id)
@@ -259,7 +259,7 @@ class DocusealSubmitter(models.Model):
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         if new_only:
-            Log.objects.create(description="Fetch new DocusealSubmitter")
+            Log.objects.create(description="Fetch New DocusealSubmitter")
             last_submitter_id = DocusealSubmitter.objects.all().order_by('-submitter_id').first().submitter_id
         else:
             Log.objects.create(description="Refresh DocusealSubmitter")
@@ -338,7 +338,7 @@ class DocusealTemplate(models.Model):
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         if new_only:
-            Log.objects.create(description="Fetch new DocusealTemplate")
+            Log.objects.create(description="Fetch New DocusealTemplate")
             last_template_id = DocusealTemplate.objects.all().order_by('-template_id').first().template_id
         else:
             Log.objects.create(description="Refresh DocusealTemplate")
