@@ -10,7 +10,8 @@ The expected key-value pairs in the `.env` file are:
 DEBUG=False
 DJANGO_SECRET_KEY=
 DJANGO_LOGLEVEL=info
-DJANGO_ALLOWED_HOSTS=localhost,sig-swipe
+DJANGO_ALLOWED_HOSTS=localhost,subwaive
+CSRF_TRUSTED_ORIGINS=http://localhost,http://subwaive
 TIME_ZONE=America/New_York
 
 DATABASE_ENGINE=postgresql_psycopg2
@@ -45,6 +46,9 @@ SubWaive will not load until the following keys are populated:
 from django.core.management.utils import get_random_secret_key  
 get_random_secret_key()
 ```
+
+You must update the `DJANGO_ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` keys for the frontend to not fail security checks. If you are using a Docker network to communicate between containers, you must include the hostname for SubWaive as an element in these lists.
+
 
 ## Docker network connections
 
