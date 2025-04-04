@@ -5,10 +5,14 @@ from subwaive import docuseal
 from subwaive import views
 from subwaive import stripe
 
-#subwaive
+# Admin
+urlpatterns = [
+    path('admin/', admin.site.urls),
+]
+
+# SubWaive
 urlpatterns = [
     path('', views.public_link_list),
-    path('admin/', admin.site.urls),
     path('email/<int:email_id>/unmerge/', views.unmerge_people, name='unmerge_people'),
     path('email/<int:email_id>/prefer/', views.set_preferred_email, name='set_preferred_email'),
     path('event/<int:event_id>/', views.event_details, name='event_details'),
