@@ -39,7 +39,7 @@ urlpatterns.extend([
     path('docuseal/links/', docuseal.qr_links, name='docuseal_link_list'),
     path('docuseal/refresh/', docuseal.docuseal_refresh_page, name='docuseal_refresh'),
     path('docuseal/refresh/all/', docuseal.refresh_docuseal, name='refresh_docuseal'),
-    path('docuseal/refresh/new/', docuseal.refresh_docuseal_new, name='refresh_docuseal_new'),
+    path('docuseal/refresh/new/', docuseal.fetch_new_docuseal, name='fetch_new_docuseal'),
     path('docuseal/webhook/', docuseal.receive_webhook, name='receive_webhook'),
 ])
 
