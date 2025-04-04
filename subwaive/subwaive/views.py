@@ -393,17 +393,22 @@ def set_stripe_name(request, person_id, stripe_id):
 @login_required
 def event_refresh_page(request):
     """ a page for initiating ical Event data refreshes """
-    log_descriptions = [
-        "Refresh Event",
+    page_title = 'Refresh Event Data'
+    data_source = CALENDAR_URL
+
+    tiles = [
+        {
+            'buttons': [
+                {'url_name': 'refresh_event', 'anchor': 'Refresh All Events'},
+            ],
+            'log_descriptions': [
+                {'description': 'Refresh Event'},
+            ]
+        },
+
     ]
 
-    description = CALENDAR_URL
-
-    button_dict = [
-            {'url_name': 'refresh_event', 'anchor': 'Refresh Events'},
-    ]
-
-    return refresh(request, log_descriptions, button_dict, description)
+    return refresh(request, page_title, data_source, tiles)
 
 @login_required
 def refresh_event(request):

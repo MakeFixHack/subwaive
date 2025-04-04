@@ -4,7 +4,7 @@
 {% include 'subwaive/templates/determination-of-confidentiality.html' %}
 
 <div class="container-fluid">
-    <h1>Stripe Customer List</h1>
+    <h1>{{ page_title }}</h1>
 </div>
 
 {% include 'subwaive/templates/buttons.html' %}
@@ -12,17 +12,28 @@
 {% include 'subwaive/templates/messages.html' %}
 
 {% if description %}
-<div class="section section-heading">{{ description|safe }}</div>
+<div class="section section-heading">{{ data_source|safe }}</div>
 {% endif %}
 
 <div class="container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
-        {% for dataset in datasets %}
+        {% for tile in tiles %}
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title">{{ dataset.description }}</h5>
-
-                <div>Last updated: {{ dataset.last_refresh }}</div>
+                {% for log in tile.log_descriptions %}
+                <p>
+                    <h5>{{ log.description }}</h5>
+                    <div>Last updated: {{ log.last_refresh|date:"" }}</div>
+                </p>
+                {% endfor %}
+                {% for button in tile.buttons %}
+                <p>
+                    <button 
+                        class="btn btn-success"
+                        onclick='window.location="{{ button.url }}";'
+                        >{{ button.anchor }}</button>
+                </p>
+                {% endfor %}
             </div>
         </div>
         {% endfor %}

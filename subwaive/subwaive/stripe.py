@@ -139,23 +139,31 @@ def refresh_all_subscription_and_customer(new_only=False):
 @login_required
 def stripe_refresh_page(request):
     """ a page for initiating Stripe data refreshes """
-    # list the types of data refreshes
-    # show last update from logs
-    log_descriptions = [
-        "Refresh StripeProduct",
-        "Refresh StripePrice",
-        "Refresh StripePaymentLink",
-        "Refresh StripeCustomer",
-        "Refresh StripeSubscription"
+    page_title = 'Refresh Stripe Data'
+    data_source = STRIPE_WWW_ENDPOINT
+
+    tiles = [
+        {
+            'buttons': [
+                {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh All Products and Prices'},
+                {'url_name': 'fetch_new_product_and_price', 'anchor': 'Fetch New Products and Prices'},
+            ],
+            'log_descriptions': [
+                {'description': 'Refresh StripeProduct'},
+                {'description': 'Refresh StripePrice'},
+                {'description': 'Refresh StripePaymentLink'},
+            ]
+        },
+        {
+            'buttons': [
+                {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh All Subscriptions and Customers'},
+                {'url_name': 'fetch_new_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},
+            ],
+            'log_descriptions': [
+                {'description': 'Refresh StripeCustomer'},
+                {'description': 'Refresh StripeSubscription'},
+            ]
+        },
     ]
 
-    description = STRIPE_WWW_ENDPOINT
-
-    button_dict = [
-            {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh Products and Prices'},
-            {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh Subscriptions and Customers'},
-            {'url_name': 'fetch_new_product_and_price', 'anchor': 'Fetch New Products and Prices'},
-            {'url_name': 'fetch_new_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},
-    ]
-
-    return refresh(request, log_descriptions, button_dict, description)
+    return refresh(request, page_title, data_source, tiles)

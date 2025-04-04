@@ -135,28 +135,31 @@ def receive_webhook(request):
 @login_required
 def docuseal_refresh_page(request):
     """ a page for initiating Docuseal data refreshes """
-    # list the types of data refreshes
-    # show last update from logs
-    log_descriptions = [
-        "Refresh DocusealTemplate",
-        "Refresh DocusealSubmitter",
-        "Refresh DocusealSubmission",
-        "Refresh DocusealFieldStore",
+    page_title = 'Refresh Docuseal Data'
+    data_source = DOCUSEAL_API_ENDPOINT
+
+    tiles = [
+        {
+            'buttons': [
+                {'url_name': 'refresh_docuseal', 'anchor': 'Refresh All Docuseal'},
+                {'url_name': 'fetch_new_docuseal', 'anchor': 'Fetch New Docuseal'},
+            ],
+            'log_descriptions': [
+                {'description': 'Refresh DocusealTemplate'},
+                {'description': 'Refresh DocusealSubmitter'},
+                {'description': 'Refresh DocusealSubmission'},
+                {'description': 'Refresh DocusealFieldStore'},
+            ]
+        },
+
     ]
 
-    description = DOCUSEAL_API_ENDPOINT
-
-    button_dict = [
-            {'url_name': 'refresh_docuseal', 'anchor': 'Refresh Docuseal'},
-            {'url_name': 'refresh_docuseal_new', 'anchor': 'Fetch New Docuseal'},
-    ]
-
-    return refresh(request, log_descriptions, button_dict, description)
+    return refresh(request, page_title, data_source, tiles)
 
 @login_required
-def refresh_docuseal_new(request):
+def fetch_new_docuseal(request):
     """ force pull of new Docuseal docs """
-    print("refresh_docuseal_new")
+    print("fetch_new_docuseal")
     return refresh_docuseal(request, new_only=True)
 
 @login_required
