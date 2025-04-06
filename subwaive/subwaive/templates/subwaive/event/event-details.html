@@ -68,7 +68,8 @@
                 <div>{{ person.preferred_email.email }}</div>
 
                 <div>
-                    <button class="btn btn-danger" onclick="window.location='{% url 'delete_member_check_in' person_id=person.id event_id=event.id %}'; return false;">Remove Check-In</button>
+                    <button class="btn btn-info" onclick="window.location='{% url 'person_card' person_id=person.id %}'; return false;">Details</button>
+                    <button class="btn btn-danger" onclick="window.location='{% url 'delete_member_check_in' person_id=person.id event_id=event.id %}'; return false;">Remove</button>
                 </div>
             </div>
         </div>
