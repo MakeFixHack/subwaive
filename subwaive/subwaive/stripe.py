@@ -17,6 +17,8 @@ STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
 STRIPE_ENDPOINT_SECRET = os.environ.get("STRIPE_ENDPOINT_SECRET")
 STRIPE_WWW_ENDPOINT = os.environ.get("STRIPE_WWW_ENDPOINT")
 
+DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
+
 @login_required
 def payment_link_list(request):
     """ Show QR codes and details for Stripe PaymentLinks """
@@ -101,6 +103,19 @@ def receive_webhook(request):
         print('Unhandled event type {}'.format(event.type))
 
     return HttpResponse(status=200)
+
+@csrf_exempt
+def refresh_stripe_by_token(request):
+    """ allow event refresh by token """
+    print(request)
+    print(request.headers)
+    if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
+        refresh_all_product_and_price()
+        refresh_all_subscription_and_customer()
+
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=401)
 
 @login_required
 def refresh_product_and_price(request):

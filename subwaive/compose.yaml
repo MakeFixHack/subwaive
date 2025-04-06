@@ -54,6 +54,16 @@ services:
      networks:
        - subwaive
 
+  cron:
+    build: ./cron
+    environment:
+      DATA_REFRESH_TOKEN: ${DATA_REFRESH_TOKEN}
+    depends_on:
+      - subwaive
+    restart: "on-failure"
+    networks:
+      - subwaive
+
 volumes:
    postgres_data:
    staticfiles:

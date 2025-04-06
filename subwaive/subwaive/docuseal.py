@@ -15,6 +15,8 @@ DOCUSEAL_API_ENDPOINT = os.environ.get("DOCUSEAL_API_ENDPOINT")
 DOCUSEAL_ENDPOINT_SECRET = os.environ.get("DOCUSEAL_ENDPOINT_SECRET")
 DOCUSEAL_WWW_ENDPOINT = os.environ.get("DOCUSEAL_WWW_ENDPOINT")
 
+DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
+
 @login_required
 def qr_links(request):
     """ Build a list of links with QR codes """
@@ -160,6 +162,18 @@ def docuseal_refresh_page(request):
     ]
 
     return refresh(request, page_title, data_source, tiles, button_dict)
+
+@csrf_exempt
+def refresh_docuseal_by_token(request):
+    """ allow event refresh by token """
+    print(request)
+    print(request.headers)
+    if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
+        refresh_all()
+
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=401)
 
 @login_required
 def fetch_new_docuseal(request):

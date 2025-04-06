@@ -5,8 +5,10 @@ import pytz
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from subwaive.models import DocusealFieldStore, StripeCustomer
 from subwaive.models import Event, PersonEvent
@@ -14,6 +16,8 @@ from subwaive.models import Log, Person, PersonEmail, QRCustom
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
 
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
+
+DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
 
 @permission_required('subwaive.can_list_people')
 @login_required
@@ -418,6 +422,18 @@ def refresh_event(request):
     messages.success(request, f'Event data refreshed')
 
     return redirect('event_refresh')
+
+@csrf_exempt
+def refresh_event_by_token(request):
+    """ allow event refresh by token """
+    print(request)
+    print(request.headers)
+    if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
+        webhook_refresh()
+
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=401)
 
 def webhook_refresh():
     """ refresh data sets in order """

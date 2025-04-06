@@ -14,6 +14,8 @@ DJANGO_ALLOWED_HOSTS=localhost,subwaive
 CSRF_TRUSTED_ORIGINS=http://localhost,http://subwaive
 TIME_ZONE=America/New_York
 
+DATA_REFRESH_TOKEN=
+
 DATABASE_ENGINE=postgresql_psycopg2
 DATABASE_NAME=subwaivedb
 DATABASE_USERNAME=subwaive
@@ -47,8 +49,19 @@ from django.core.management.utils import get_random_secret_key
 get_random_secret_key()
 ```
 
-You must update the `DJANGO_ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` keys for the frontend to not fail security checks. If you are using a Docker network to communicate between containers, you must include the hostname for SubWaive as an element in these lists.
+Since special characters can be a problem for capturing environmental variables for cronjobs, `DATA_REFRESH_TOKEN` should avoid characters like `#`. A more restrictive password could be generated using:
 
+```python
+import random
+import secrets
+import string
+
+characters = string.ascii_letters + string.digits + string.punctuation
+characters = characters.replace('#','')
+print(''.join(random.choice(characters) for i in range(32)))
+```
+
+You must update the `DJANGO_ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` keys for the frontend to not fail security checks. The Docker network for communicating between containers requires the hostname for SubWaive an element in these lists.
 
 ## Docker network connections
 
@@ -244,3 +257,12 @@ This provides a away to:
 The relevant `.env` keys are:
 
 * CALENDAR_URL - the local used to download the ical file containing the calendar
+
+
+## Cronjobs
+
+To maintain a reasonably current dataset, SubWaive uses `cron` to periodically update the external datasources. To verify that requests for updates are authorized, a secret key is stored in:
+
+* DATA_REFRESH_TOKEN -  a user provided token for authenticating requests for data refreshes
+
+Since SubWaive communicates these requests over its Docker network, no additional security is provided.

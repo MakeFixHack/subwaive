@@ -1,0 +1,5 @@
+#m h dom mo dow cmd
+
+56 * * * * /usr/bin/sh /app/data_refresh.sh $DATA_REFRESH_TOKEN event >> /var/log/cron.log 2>&1
+58 * * * * /usr/bin/sh /app/data_refresh.sh $DATA_REFRESH_TOKEN docuseal >> /var/log/cron.log 2>&1
+00 * * * * /usr/bin/sh /app/data_refresh.sh $DATA_REFRESH_TOKEN stripe >> /var/log/cron.log 2>&1
