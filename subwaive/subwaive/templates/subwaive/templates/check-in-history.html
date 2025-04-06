@@ -7,12 +7,14 @@
         {% now "Y" as current_year %}
         {% for check_in in last_check_ins %}
         <div>
-            {% if check_in.event.start|date:"Y" == current_year %}
-            {{ check_in.event.start|date:"M j" }}
-            {% else %}
-            {{ check_in.event.start|date:"M j, Y" }}
-            {% endif %}
-            / {{ check_in.event.summary }}
+            <a href="{% url 'event_details' check_in.event.id %}">
+                {% if check_in.event.start|date:"Y" == current_year %}
+                {{ check_in.event.start|date:"M j" }}
+                {% else %}
+                {{ check_in.event.start|date:"M j, Y" }}
+                {% endif %}
+                / {{ check_in.event.summary }}
+            </a>
         </div>
         {% endfor %}
         {% else %}
