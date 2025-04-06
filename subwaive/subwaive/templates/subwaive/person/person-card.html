@@ -1,4 +1,5 @@
 {% extends 'subwaive/base.html' %}
+{% load static %}
 {% block content %}
 
 {% include 'subwaive/templates/determination-of-confidentiality.html' %}
@@ -13,9 +14,18 @@
 <div class="section section-heading">
     <h5 class="card-title">{{ person.name }}</h5>
                 
-    <div>Signed a waiver: {{ has_waiver }}</div>
+    <div style="margin: 0.5rem">Signed a waiver: 
+        {% if has_waiver %}<span style="padding: 0.25rem" class="alert alert-success">{{ has_waiver }} <img src="{% static 'img/check-circle.svg' %}"></span>
+        {% else %}<span style="padding: 0.25rem" class="alert alert-danger">{{ has_waiver }} <img src="{% static 'img/exclamation-triangle.svg' %}"></span>
+        {% endif %}
+    </div>
                 
-    <div>Current membership: {{ has_membership }}</div>
+    <div style="margin: 0.5rem">Current membership:
+        {% if has_membership %}<span style="padding: 0.25rem" class="alert alert-success">{{ has_membership }} <img src="{% static 'img/check-circle.svg' %}"></span>
+        {% else %}<span style="padding: 0.25rem" class="alert alert-warning">{{ has_membership }} <img src="{% static 'img/exclamation-triangle.svg' %}"></span>
+        {% endif %}
+
+    </div>
 </div>
 
 <div class="container">
