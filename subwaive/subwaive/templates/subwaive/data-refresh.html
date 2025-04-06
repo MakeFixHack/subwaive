@@ -23,7 +23,7 @@
                 {% for log in tile.log_descriptions %}
                 <p>
                     <h5>{{ log.description }}</h5>
-                    <div>Last updated: {{ log.last_refresh|date:"" }}</div>
+                    <div>Last updated: {{ log.last_refresh }}</div>
                 </p>
                 {% endfor %}
                 {% for button in tile.buttons %}
