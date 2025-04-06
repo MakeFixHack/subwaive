@@ -150,10 +150,10 @@ def docuseal_refresh_page(request):
                 {'url_name': 'fetch_new_docuseal', 'anchor': 'Fetch New Docuseal'},
             ],
             'log_descriptions': [
-                {'description': 'Refresh DocusealTemplate'},
-                {'description': 'Refresh DocusealSubmitter'},
-                {'description': 'Refresh DocusealSubmission'},
-                {'description': 'Refresh DocusealFieldStore'},
+                {'description': 'DocusealTemplate'},
+                {'description': 'DocusealSubmitter'},
+                {'description': 'DocusealSubmission'},
+                {'description': 'DocusealFieldStore'},
             ]
         },
 

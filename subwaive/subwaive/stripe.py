@@ -153,9 +153,9 @@ def stripe_refresh_page(request):
                 {'url_name': 'fetch_new_product_and_price', 'anchor': 'Fetch New Products and Prices'},
             ],
             'log_descriptions': [
-                {'description': 'Refresh StripeProduct'},
-                {'description': 'Refresh StripePrice'},
-                {'description': 'Refresh StripePaymentLink'},
+                {'description': 'StripeProduct'},
+                {'description': 'StripePrice'},
+                {'description': 'StripePaymentLink'},
             ]
         },
         {
@@ -164,8 +164,8 @@ def stripe_refresh_page(request):
                 {'url_name': 'fetch_new_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},
             ],
             'log_descriptions': [
-                {'description': 'Refresh StripeCustomer'},
-                {'description': 'Refresh StripeSubscription'},
+                {'description': 'StripeCustomer'},
+                {'description': 'StripeSubscription'},
             ]
         },
     ]

@@ -402,7 +402,7 @@ def event_refresh_page(request):
                 {'url_name': 'refresh_event', 'anchor': 'Refresh All Events'},
             ],
             'log_descriptions': [
-                {'description': 'Refresh Event'},
+                {'description': 'Event'},
             ]
         },
 

@@ -24,7 +24,7 @@ def refresh(request, page_title, data_source, tiles, buttons=None):
     """ a page for initiating data refreshes """
     for tile in tiles:
         for d in tile['log_descriptions']:
-            d['last_refresh'] = Log.get_last(d['description']).timestamp
+            d['last_refresh'] = Log.get_last("Refresh "+d['description']).timestamp
         for b in tile['buttons']:
             b['url'] = redirect(b['url_name']).url
 
