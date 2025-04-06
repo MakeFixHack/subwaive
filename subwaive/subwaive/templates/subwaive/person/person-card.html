@@ -32,6 +32,7 @@
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
         {% include 'subwaive/templates/check-in-history.html' %}
                 
+        {% if check_in_events %}
         <div class="card text-center">
             <div class="card-body">
                 <h5 class="card-title">Events</h5>
@@ -49,6 +50,7 @@
                 {% endfor %}
             </div>
         </div>
+        {% endif %}
 
         <div class="card text-center">
             <div class="card-body">
