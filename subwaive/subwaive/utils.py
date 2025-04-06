@@ -20,7 +20,7 @@ def generate_qr_svg(content, box_size=QR_SMALL):
     return svg
 
 @login_required
-def refresh(request, page_title, data_source, tiles):
+def refresh(request, page_title, data_source, tiles, buttons=None):
     """ a page for initiating data refreshes """
     for tile in tiles:
         for d in tile['log_descriptions']:
@@ -31,6 +31,7 @@ def refresh(request, page_title, data_source, tiles):
     context = {
         'page_title': page_title,
         'data_source': data_source,
+        'buttons': buttons,
         'tiles': tiles,
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_SENSITIVE,
     }

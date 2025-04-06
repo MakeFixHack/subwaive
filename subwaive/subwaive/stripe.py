@@ -142,6 +142,10 @@ def stripe_refresh_page(request):
     page_title = 'Refresh Stripe Data'
     data_source = STRIPE_WWW_ENDPOINT
 
+    button_dict = [
+        {'url': STRIPE_WWW_ENDPOINT, 'anchor': 'Stripe Dashboard', 'class': 'info', 'active': True},
+    ]
+
     tiles = [
         {
             'buttons': [
@@ -166,4 +170,4 @@ def stripe_refresh_page(request):
         },
     ]
 
-    return refresh(request, page_title, data_source, tiles)
+    return refresh(request, page_title, data_source, tiles, button_dict)

@@ -13,6 +13,7 @@ from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLI
 
 DOCUSEAL_API_ENDPOINT = os.environ.get("DOCUSEAL_API_ENDPOINT")
 DOCUSEAL_ENDPOINT_SECRET = os.environ.get("DOCUSEAL_ENDPOINT_SECRET")
+DOCUSEAL_WWW_ENDPOINT = os.environ.get("DOCUSEAL_WWW_ENDPOINT")
 
 @login_required
 def qr_links(request):
@@ -138,6 +139,10 @@ def docuseal_refresh_page(request):
     page_title = 'Refresh Docuseal Data'
     data_source = DOCUSEAL_API_ENDPOINT
 
+    button_dict = [
+        {'url': DOCUSEAL_WWW_ENDPOINT, 'anchor': 'Docuseal', 'class': 'info', 'active': True},
+    ]
+
     tiles = [
         {
             'buttons': [
@@ -154,7 +159,7 @@ def docuseal_refresh_page(request):
 
     ]
 
-    return refresh(request, page_title, data_source, tiles)
+    return refresh(request, page_title, data_source, tiles, button_dict)
 
 @login_required
 def fetch_new_docuseal(request):
