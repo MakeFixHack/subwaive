@@ -13,9 +13,13 @@
     <h5 class="card-title">{{ event.summary }}</h5>
     
     <div>{{ event.start }} / {{ event.end }}</div>
+
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+        Description
+    </button>
 </div>
 
-<div class="section section-heading">
+<div class="section section-heading collapse" id="collapseExample">
     <div>{{ event.description }}</div>
 </div>
 
