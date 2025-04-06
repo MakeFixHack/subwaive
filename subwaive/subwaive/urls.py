@@ -11,7 +11,7 @@ urlpatterns = [
 ]
 
 # SubWaive
-urlpatterns = [
+urlpatterns.extend([
     path('', views.public_link_list),
     path('email/<int:email_id>/unmerge/', views.unmerge_people, name='unmerge_people'),
     path('email/<int:email_id>/prefer/', views.set_preferred_email, name='set_preferred_email'),
@@ -36,7 +36,7 @@ urlpatterns = [
     path('person/<int:merge_child_id>/merge/', views.merge_people, name='merge_people'),
     path('person/<int:merge_child_id>/merge/<int:merge_parent_id>/', views.merge_people, name='merge_people'),
     path('person/<int:person_id>/stripe/', views.person_stripe, name='person_stripe'),
-]
+])
 
 # Docuseal
 urlpatterns.extend([
