@@ -2,7 +2,7 @@
     <div class="card-body">
         <h5 class="card-title">Check-in History</h5>
 
-        {% if last_check_in %}
+        {% if last_check_ins %}
         <div>Last 5 check-ins: </div>
         {% now "Y" as current_year %}
         {% for check_in in last_check_ins %}
