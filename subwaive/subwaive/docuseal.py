@@ -136,7 +136,7 @@ def receive_webhook(request):
 @login_required
 def docuseal_refresh_page(request):
     """ a page for initiating Docuseal data refreshes """
-    page_title = 'Refresh Docuseal Data'
+    page_title = 'Docuseal Data'
     data_source = DOCUSEAL_API_ENDPOINT
 
     button_dict = [

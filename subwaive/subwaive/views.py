@@ -393,7 +393,7 @@ def set_stripe_name(request, person_id, stripe_id):
 @login_required
 def event_refresh_page(request):
     """ a page for initiating ical Event data refreshes """
-    page_title = 'Refresh Event Data'
+    page_title = 'Event Data'
     data_source = CALENDAR_URL
 
     tiles = [

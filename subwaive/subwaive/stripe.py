@@ -139,7 +139,7 @@ def refresh_all_subscription_and_customer(new_only=False):
 @login_required
 def stripe_refresh_page(request):
     """ a page for initiating Stripe data refreshes """
-    page_title = 'Refresh Stripe Data'
+    page_title = 'Stripe Data'
     data_source = STRIPE_WWW_ENDPOINT
 
     button_dict = [
