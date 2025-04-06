@@ -51,8 +51,8 @@ urlpatterns.extend([
 urlpatterns.extend([
     path('stripe/links/', stripe.payment_link_list, name='payment_link_list'),
     path('stripe/refresh/', stripe.stripe_refresh_page, name='stripe_refresh'),
-    path('stripe/fetch-new/payment-links/', stripe.fetch_new_product_and_price, name='fetch_new_product_and_price'),
-    path('stripe/fetch-new/subscriptions/', stripe.fetch_new_subscription_and_customer, name='fetch_new_subscription_and_customer'),
+    path('stripe/fetch-new/payment-links/', stripe.fetch_product_and_price, name='fetch_product_and_price'),
+    path('stripe/fetch-new/subscriptions/', stripe.fetch_subscription_and_customer, name='fetch_subscription_and_customer'),
     path('stripe/refresh/payment-links/', stripe.refresh_product_and_price, name='refresh_product_and_price'),
     path('stripe/refresh/subscriptions/', stripe.refresh_subscription_and_customer, name='refresh_subscription_and_customer'),
     path('stripe/webhook/', stripe.receive_webhook, name='receive_webhook'),

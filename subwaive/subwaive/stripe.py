@@ -111,6 +111,15 @@ def refresh_product_and_price(request):
 
     return redirect('stripe_refresh')
 
+@login_required
+def fetch_product_and_price(request):
+    """ force refresh Stripe payment links and associated data """
+    fetch_new_product_and_price()
+
+    messages.success(request, f'Fetched new Stripe Product and Price data')
+
+    return redirect('stripe_refresh')
+
 def fetch_new_product_and_price():
     refresh_all_product_and_price(True)
     
@@ -126,6 +135,15 @@ def refresh_subscription_and_customer(request):
     refresh_all_subscription_and_customer()
 
     messages.success(request, f'Stripe Subscription and Customer data refreshed')
+
+    return redirect('stripe_refresh')
+
+@login_required
+def fetch_subscription_and_customer(request):
+    """ force refresh Stripe subscriptions and customers """
+    fetch_new_subscription_and_customer()
+
+    messages.success(request, f'Fetched new Stripe Subscription and Customer data')
 
     return redirect('stripe_refresh')
 
@@ -150,7 +168,7 @@ def stripe_refresh_page(request):
         {
             'buttons': [
                 {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh All Products and Prices'},
-                {'url_name': 'fetch_new_product_and_price', 'anchor': 'Fetch New Products and Prices'},
+                {'url_name': 'fetch_product_and_price', 'anchor': 'Fetch New Products and Prices'},
             ],
             'log_descriptions': [
                 {'description': 'StripeProduct'},
@@ -161,7 +179,7 @@ def stripe_refresh_page(request):
         {
             'buttons': [
                 {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh All Subscriptions and Customers'},
-                {'url_name': 'fetch_new_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},
+                {'url_name': 'fetch_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},
             ],
             'log_descriptions': [
                 {'description': 'StripeCustomer'},
