@@ -376,8 +376,8 @@ class Event(models.Model):
     UID = models.UUIDField()
     """ UIDs are shared by recurrences, which means they are useful individually as a key
     Since RECURRENCE_ID can change when the SEQUENCE changes, we instead assume that the
-    order of recurrences is stable. When we load data, we sort the event list, since ICS 
-    event order is not stable, and assume that UID+our assigned ordinal will correctly 
+    order of recurrences is stable for past events. When we load data, we sort the event list, 
+    since ICS event order is not stable, and assume that UID+our assigned ordinal will correctly 
     identify the event we intend to update.
     """
     recurrence_order = models.IntegerField(default=1)
