@@ -25,9 +25,6 @@ STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
 STRIPE_WWW_ENDPOINT = os.environ.get("STRIPE_WWW_ENDPOINT")
 
 stripe.api_key = STRIPE_API_KEY
-#!!! overtime, the history being pulled from Stripe or Docuseal will get longer and longer
-#!!! updating selectively using webhooks is more desirable than batch refreshes once the history gets long
-#!!! manual way to refresh particular customers or products may be desirable
 
 TIME_ZONE = os.environ.get("TIME_ZONE")
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
