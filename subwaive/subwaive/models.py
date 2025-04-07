@@ -1221,9 +1221,9 @@ class StripeSubscription(models.Model):
             stripe_id = subscription['id']
             name = StripeSubscription.get_api_name(stripe_id)
 
-                created = fromtimestamp(subscription.created)
-                current_period_end = fromtimestamp(subscription.current_period_end)
-                status = subscription.status
+            created = fromtimestamp(subscription.created)
+            current_period_end = fromtimestamp(subscription.current_period_end)
+            status = subscription.status
 
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
             StripeSubscriptionItem.create_if_needed(subscription)
