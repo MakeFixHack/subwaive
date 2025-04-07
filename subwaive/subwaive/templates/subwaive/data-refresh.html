@@ -12,7 +12,10 @@
 {% include 'subwaive/templates/messages.html' %}
 
 {% if data_source %}
-<div class="section section-heading">{{ data_source|safe }}</div>
+<div class="section section-heading">
+    <h5>Data Source</h5>
+    {{ data_source|safe }}
+</div>
 {% endif %}
 
 <div class="container">
