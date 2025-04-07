@@ -4,12 +4,13 @@ FROM python:${PYTHON_VERSION}-slim AS base
 # install cron
 RUN apt-get update && apt-get -y install cron
 RUN apt-get update && apt-get -y install curl
+# RUN apt-get update && apt-get -y install procps
 
 WORKDIR /app
 COPY data_refresh.sh /app/
 RUN chmod 0644 /app/data_refresh.sh
 
-COPY refresh-data /etc/cron.d/crontab
+COPY crontab /etc/cron.d/crontab
 RUN chmod 0644 /etc/cron.d/crontab
 RUN crontab /etc/cron.d/crontab
 RUN touch /var/log/cron.log
