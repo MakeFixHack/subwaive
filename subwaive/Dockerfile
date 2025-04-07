@@ -52,4 +52,4 @@ USER appuser
 EXPOSE 8000
 
 # Run the application.
-CMD gunicorn 'subwaive.wsgi' --bind=0.0.0.0:8000
+ENTRYPOINT [ "gunicorn", "subwaive.wsgi", "--bind=0.0.0.0:8000"]
