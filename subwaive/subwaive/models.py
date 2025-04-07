@@ -33,6 +33,11 @@ TIME_ZONE = os.environ.get("TIME_ZONE")
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
 
 
+def fromtimestamp(timestamp):
+    """ transforms a timestamp to a datetime """
+    return datetime.datetime.fromtimestamp(timestamp, tz=pytz.timezone(TIME_ZONE))
+
+
 class DocusealField(models.Model):
     """ Fields titles flagged for  DocusealFieldStore """
     field = models.CharField(max_length=256)
@@ -621,7 +626,7 @@ class Person(models.Model):
                             otp.append(
                                 {
                                     'description': product.description, 
-                                    'date': datetime.datetime.fromtimestamp(charge.created, tz=pytz.timezone(TIME_ZONE)).date(),
+                                    'date': fromtimestamp(charge.created).date(),
                                     'url': f'{ STRIPE_WWW_ENDPOINT }/payments/{ charge.payment_intent }',
                                     }
                                 )
@@ -1148,8 +1153,8 @@ class StripeSubscription(models.Model):
         api_record = stripe.Subscription.retrieve(stripe_id)
 
         customer_id = api_record.customer
-        created = StripeSubscription.transform_timestamp(api_record.created)
-        current_period_end = StripeSubscription.transform_timestamp(api_record.current_period_end)
+        created = fromtimestamp(api_record.created)
+        current_period_end = fromtimestamp(api_record.current_period_end)
         status = api_record.status
         name = StripeSubscription.get_api_name(stripe_id)
 
@@ -1178,10 +1183,6 @@ class StripeSubscription(models.Model):
             StripeSubscriptionItem.create_if_needed(api_record)
             Log.objects.create(description="Create StripeSubscription", json=json)
 
-    def transform_timestamp(timestamp):
-        """ transforms a timestamp to a datetime """
-        return datetime.datetime.fromtimestamp(timestamp, tz=pytz.timezone(TIME_ZONE))
-
     def get_api_name(stripe_id):
         """ return a name if provided in the checkout, else "self" """
         name = None
@@ -1209,9 +1210,9 @@ class StripeSubscription(models.Model):
             stripe_id = subscription['id']
             name = StripeSubscription.get_api_name(stripe_id)
 
-            created = StripeSubscription.transform_timestamp(subscription.created)
-            current_period_end = StripeSubscription.transform_timestamp(subscription.current_period_end)
-            status = subscription.status
+                created = fromtimestamp(subscription.created)
+                current_period_end = fromtimestamp(subscription.current_period_end)
+                status = subscription.status
 
             StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
             StripeSubscriptionItem.create_if_needed(subscription)
