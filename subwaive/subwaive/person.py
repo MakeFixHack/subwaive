@@ -1,23 +1,14 @@
 import datetime
-import os
-import pytz
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.db.models import Q
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 
 from subwaive.models import DocusealFieldStore, StripeCustomer
 from subwaive.models import Event, PersonEvent
-from subwaive.models import Log, Person, PersonEmail, QRCustom
-from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
-
-CALENDAR_URL = os.environ.get("CALENDAR_URL")
-
-DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
+from subwaive.models import Person, PersonEmail
+from subwaive.utils import CONFIDENTIALITY_LEVEL_CONFIDENTIAL
 
 @permission_required('subwaive.can_list_people')
 @login_required
@@ -52,54 +43,6 @@ def person_list(request):
     }
 
     return render(request, f'subwaive/person/person-list.html', context)
-
-@login_required
-def public_link_list(request):
-    return custom_link_list(request, is_sensitive=False)
-
-@login_required
-def sensitive_link_list(request):
-    return custom_link_list(request, is_sensitive=True)
-
-@login_required
-def custom_link_list(request, is_sensitive=False):
-    """ Build a list of links to QR codes """
-    user_qr_codes = QRCustom.objects.filter(category__is_sensitive=is_sensitive).order_by('category','name')
-
-    user_qr_list = [
-        {
-            'id' : qr.id,
-            'category': qr.category.name,
-            'name': qr.name,
-            'svg_small': generate_qr_svg(qr.content, QR_SMALL),
-            'svg_large': generate_qr_svg(qr.content,QR_LARGE ),
-            'url': qr.content if 'https' in qr.content else None
-        }
-        for qr in user_qr_codes
-    ]
-
-    categories = [
-        {
-            'name': category[0],
-            'baseid': f'cat-{ category[1] }',
-        }
-        for category in set([(c.category.name, c.category.id) for c in user_qr_codes])
-    ]
-    categories = sorted(categories, key=lambda x: x['name'])
-
-    if is_sensitive:
-        confidentiality_level = CONFIDENTIALITY_LEVEL_SENSITIVE
-    else:
-        confidentiality_level = CONFIDENTIALITY_LEVEL_PUBLIC
-
-    context = {
-        'page_title': 'Links',
-        'CONFIDENTIALITY_LEVEL': confidentiality_level,
-        'categories': categories,
-        'qr_list': user_qr_list,
-    }
-
-    return render(request, f'subwaive/qr-links.html', context)
 
 @login_required
 @permission_required('subwaive.can_search_people')
@@ -158,9 +101,10 @@ def person_card(request, person_id):
     check_in_events = Event.get_current_event()
 
     button_dict = [
-        {'url': reverse('person_docuseal', kwargs={'person_id': person.id }), 'anchor': 'Docuseal', 'class': 'info', 'active': True},
-        {'url': reverse('person_stripe', kwargs={'person_id': person.id }), 'anchor': 'Stripe', 'class': 'info', 'active': True},
-        {'url': reverse('person_edit', kwargs={'person_id': person.id }), 'anchor': 'Edit', 'class': 'success', 'active': True },
+        {'url': reverse('person_docuseal', kwargs={'person_id': person.id }), 'anchor': 'Docuseal', 'class': 'secondary', 'active': False},
+        {'url': reverse('person_stripe', kwargs={'person_id': person.id }), 'anchor': 'Stripe', 'class': 'secondary', 'active': False},
+        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View', 'class': 'info', 'active': True },
+        {'url': reverse('person_edit', kwargs={'person_id': person.id }), 'anchor': 'Edit', 'class': 'success', 'active': False },
     ]        
 
     context = {
@@ -183,7 +127,10 @@ def person_docuseal(request, person_id):
     person = Person.objects.get(id=person_id)
 
     button_dict = [
-        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View Card', 'class': 'info', 'active': True},
+        {'url': reverse('person_docuseal', kwargs={'person_id': person.id }), 'anchor': 'Docuseal', 'class': 'info', 'active': True},
+        {'url': reverse('person_stripe', kwargs={'person_id': person.id }), 'anchor': 'Stripe', 'class': 'secondary', 'active': False},
+        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View', 'class': 'secondary', 'active': False },
+        {'url': reverse('person_edit', kwargs={'person_id': person.id }), 'anchor': 'Edit', 'class': 'success', 'active': False },
     ]        
 
     context = {
@@ -203,7 +150,10 @@ def person_stripe(request, person_id):
     person = Person.objects.get(id=person_id)
 
     button_dict = [
-        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View Card', 'class': 'info', 'active': True},
+        {'url': reverse('person_docuseal', kwargs={'person_id': person.id }), 'anchor': 'Docuseal', 'class': 'secondary', 'active': False},
+        {'url': reverse('person_stripe', kwargs={'person_id': person.id }), 'anchor': 'Stripe', 'class': 'info', 'active': True},
+        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View', 'class': 'secondary', 'active': False },
+        {'url': reverse('person_edit', kwargs={'person_id': person.id }), 'anchor': 'Edit', 'class': 'success', 'active': False },
     ]        
 
     context = {
@@ -229,7 +179,10 @@ def person_edit(request, person_id):
     last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
     
     button_dict = [
-        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View Card', 'class': 'info', 'active': True},
+        {'url': reverse('person_docuseal', kwargs={'person_id': person.id }), 'anchor': 'Docuseal', 'active': False},
+        {'url': reverse('person_stripe', kwargs={'person_id': person.id }), 'anchor': 'Stripe', 'active': False},
+        {'url': reverse('person_card', kwargs={'person_id': person.id }), 'anchor': 'View', 'active': False },
+        {'url': reverse('person_edit', kwargs={'person_id': person.id }), 'anchor': 'Edit', 'class': 'success', 'active': True },
     ]        
 
     context = {
@@ -243,66 +196,6 @@ def person_edit(request, person_id):
     }
 
     return render(request, f'subwaive/person/person-edit.html', context)
-
-@login_required
-def member_check_in(request, person_id, event_id, override_checks=False):
-    """ A method logging a member was in the space. """
-    waiver_check = Person.check_waiver_status_by_person_id(person_id)
-    # print(waiver_check)
-    membership_status = Person.check_membership_status_by_person_id(person_id)
-    print(membership_status)
-    has_prior_check_in = PersonEvent.check_prior_check_in(person_id, event_id)
-    print(has_prior_check_in)
-
-    clean_checks = False
-    if override_checks:
-        clean_checks = True
-    elif waiver_check and membership_status and not has_prior_check_in:
-        clean_checks = True
-
-    if clean_checks:
-        check_results = {'waiver_check': waiver_check, 'membership_status': membership_status, 'has_prior_check_in': has_prior_check_in, 'override_checks': override_checks}
-        check_in = Person.objects.get(id=person_id).check_in(event_id)
-        messages.success(request, f"Checked-in for { check_in.event.summary }")
-
-        return redirect('person_card', person_id)
-    else:
-        print('check-in checks failed')
-        return check_in_remediation(request=request, person_id=person_id, event_id=event_id, waiver_check=waiver_check, membership_status=membership_status, has_prior_check_in=has_prior_check_in)
-
-@login_required
-def force_member_check_in(request, person_id, event_id):
-    """ force a member check-in in spite of failed checks """
-    return member_check_in(request=request, person_id=person_id, event_id=event_id, override_checks=True)
-
-@login_required
-def check_in_remediation(request, person_id, event_id, waiver_check, membership_status, has_prior_check_in):
-    """ A person failed one or more checks for check-in, provide details on how to clear the checks """
-    person = Person.objects.get(id=person_id)
-    event = Event.objects.get(id=event_id)
-
-    context = {
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
-        'person': person,
-        'event': event,
-        'waiver_check': waiver_check,
-        'membership_status': membership_status,
-        'has_prior_check_in': has_prior_check_in,
-    }
-
-    return render(request, f'subwaive/person/person-remediation.html', context)
-
-@permission_required('subwaive.can_remove_check_in')
-@login_required
-def delete_member_check_in(request, person_id, event_id):
-    """ A method for removing erroneous check-ins """
-    check_in = PersonEvent.objects.get(person__id=person_id, event__id=event_id)
-    
-    messages.success(request, f"Check-in for { check_in.person } to {check_in.event } removed")
-
-    check_in.delete()
-
-    return redirect('event_details', event_id)
 
 @login_required
 def merge_people(request, merge_child_id, merge_parent_id=None):
@@ -393,107 +286,3 @@ def set_stripe_name(request, person_id, stripe_id):
     messages.success(request, f'Name set to <em>{ name }</em>')
 
     return redirect('person_edit', person_id)
-
-@login_required
-def event_refresh_page(request):
-    """ a page for initiating ical Event data refreshes """
-    page_title = 'Event Data'
-    data_source = CALENDAR_URL
-
-    tiles = [
-        {
-            'buttons': [
-                {'url_name': 'refresh_event', 'anchor': 'Refresh All Events'},
-            ],
-            'log_descriptions': [
-                {'description': 'Event'},
-            ]
-        },
-
-    ]
-
-    return refresh(request, page_title, data_source, tiles)
-
-@login_required
-def refresh_event(request):
-    """ force refresh ical Event data """
-    webhook_refresh()
-
-    messages.success(request, f'Event data refreshed')
-
-    return redirect('event_refresh')
-
-@csrf_exempt
-def refresh_event_by_token(request):
-    """ allow event refresh by token """
-    print(request)
-    print(request.headers)
-    if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
-        webhook_refresh()
-
-        return HttpResponse(status=200)
-    else:
-        return HttpResponse(status=401)
-
-def webhook_refresh():
-    """ refresh data sets in order """
-    Event.refresh()
-
-@login_required
-def event_list(request, timeframe="last-five"):
-    """ List of events """
-    if timeframe == "last-five":
-        events = Event.objects.filter(start__lte=datetime.datetime.now()).order_by('-end')[:5]
-    elif timeframe == "future":
-        events = Event.objects.filter(start__gt=datetime.datetime.now()).order_by('start')
-    elif timeframe == "all":
-        events = Event.objects.all().order_by('-end')
-
-    button_dict = [
-            {'url': reverse('event_list'), 'anchor': 'Last 5', 'active': timeframe=="last-five"},
-            {'url': reverse('event_list', kwargs={'timeframe': 'future' }), 'anchor': 'Future', 'active': timeframe=="future"},
-            {'url': reverse('event_list', kwargs={'timeframe': 'all' }), 'anchor': 'All', 'active': timeframe=="all"},
-    ]
-
-    context = {
-        'events': events,
-        'buttons': button_dict,
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_PUBLIC,
-    }
-
-    return render(request, f'subwaive/event/event-list.html', context)
-
-@login_required
-def event_details(request, event_id):
-    """ Details of events """
-    event = Event.objects.get(id=event_id)
-
-    if request.POST:
-        person = Person.objects.get(id=request.POST.get("person_id"))
-        PersonEvent.objects.create(event=event, person=person)
-        return redirect('event_details', event_id)
-
-    persons = [p.person for p in PersonEvent.objects.filter(event=event).order_by('person__name')]
-
-    check_in_issues = []
-    for p in persons:
-        issues = {}
-        if not p.check_membership_status():
-            issues['membership'] = True
-        if not p.check_waiver_status():
-            issues['waiver'] = True
-        if issues.keys():
-            issues['person'] = p
-            check_in_issues.append(issues)
-
-    possible_check_ins = Person.objects.exclude(id__in=[p.id for p in persons])
-
-    context = {
-        'event': event,
-        'persons': persons,
-        'possible_check_ins': possible_check_ins,
-        'check_in_issues': check_in_issues,
-        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
-    }
-
-    return render(request, f'subwaive/event/event-details.html', context)

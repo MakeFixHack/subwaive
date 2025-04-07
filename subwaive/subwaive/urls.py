@@ -2,41 +2,51 @@ from django.contrib import admin
 from django.urls import path
 
 from subwaive import docuseal
-from subwaive import views
 from subwaive import stripe
+from subwaive import person
+from subwaive import event
+from subwaive import link
 
 # Admin
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
-# SubWaive
+# Event
 urlpatterns.extend([
-    path('', views.public_link_list),
-    path('email/<int:email_id>/unmerge/', views.unmerge_people, name='unmerge_people'),
-    path('email/<int:email_id>/prefer/', views.set_preferred_email, name='set_preferred_email'),
-    path('event/<int:event_id>/', views.event_details, name='event_details'),
-    path('event/list/', views.event_list, name='event_list'),
-    path('event/list/<timeframe>/', views.event_list, name='event_list'),
-    path('event/refresh/', views.event_refresh_page, name='event_refresh'),
-    path('event/refresh/all/', views.refresh_event, name='refresh_event'),
-    path('event/refresh/by-token/', views.refresh_event_by_token, name='refresh_event_by_token'),
-    path('links/public/', views.public_link_list, name='public_link_list'),
-    path('links/internal/', views.sensitive_link_list, name='sensitive_link_list'),
-    path('person/search/', views.person_search, name='person_search'),
-    path('person/list/', views.person_list, name='person_list'),
-    path('person/<int:person_id>/check-in/<int:event_id>/delete/', views.delete_member_check_in, name='delete_member_check_in'),
-    path('person/<int:person_id>/', views.person_card, name='person_card'),
-    path('person/<int:person_id>/event/<int:event_id>/check-in/', views.member_check_in, name='member_check_in'),
-    path('person/<int:person_id>/event/<int:event_id>/check-in/force/', views.force_member_check_in, name='force_member_check_in'),
-    path('person/<int:person_id>/check-in/remediate/', views.check_in_remediation, name='check_in_remediation'),
-    path('person/<int:person_id>/docuseal/', views.person_docuseal, name='person_docuseal'),
-    path('person/<int:person_id>/edit/', views.person_edit, name='person_edit'),
-    path('person/<int:person_id>/name/<int:important_field_id>/docuseal/', views.set_docuseal_name, name='set_docuseal_name'),
-    path('person/<int:person_id>/name/<stripe_id>/stripe/', views.set_stripe_name, name='set_stripe_name'),
-    path('person/<int:merge_child_id>/merge/', views.merge_people, name='merge_people'),
-    path('person/<int:merge_child_id>/merge/<int:merge_parent_id>/', views.merge_people, name='merge_people'),
-    path('person/<int:person_id>/stripe/', views.person_stripe, name='person_stripe'),
+    path('event/<int:event_id>/', event.event_details, name='event_details'),
+    path('event/list/', event.event_list, name='event_list'),
+    path('event/list/<timeframe>/', event.event_list, name='event_list'),
+    path('event/refresh/', event.event_refresh_page, name='event_refresh'),
+    path('event/refresh/all/', event.refresh_event, name='refresh_event'),
+    path('event/refresh/by-token/', event.refresh_event_by_token, name='refresh_event_by_token'),
+    path('person/<int:person_id>/check-in/<int:event_id>/delete/', event.delete_member_check_in, name='delete_member_check_in'),
+    path('person/<int:person_id>/event/<int:event_id>/check-in/', event.member_check_in, name='member_check_in'),
+    path('person/<int:person_id>/event/<int:event_id>/check-in/force/', event.force_member_check_in, name='force_member_check_in'),
+    path('person/<int:person_id>/check-in/remediate/', event.check_in_remediation, name='check_in_remediation'),
+])
+
+# Link
+urlpatterns.extend([
+    path('', link.public_link_list),
+    path('links/public/', link.public_link_list, name='public_link_list'),
+    path('links/internal/', link.sensitive_link_list, name='sensitive_link_list'),
+])
+
+# Person
+urlpatterns.extend([
+    path('email/<int:email_id>/unmerge/', person.unmerge_people, name='unmerge_people'),
+    path('email/<int:email_id>/prefer/', person.set_preferred_email, name='set_preferred_email'),
+    path('person/search/', person.person_search, name='person_search'),
+    path('person/list/', person.person_list, name='person_list'),
+    path('person/<int:person_id>/', person.person_card, name='person_card'),
+    path('person/<int:person_id>/docuseal/', person.person_docuseal, name='person_docuseal'),
+    path('person/<int:person_id>/edit/', person.person_edit, name='person_edit'),
+    path('person/<int:person_id>/name/<int:important_field_id>/docuseal/', person.set_docuseal_name, name='set_docuseal_name'),
+    path('person/<int:person_id>/name/<stripe_id>/stripe/', person.set_stripe_name, name='set_stripe_name'),
+    path('person/<int:merge_child_id>/merge/', person.merge_people, name='merge_people'),
+    path('person/<int:merge_child_id>/merge/<int:merge_parent_id>/', person.merge_people, name='merge_people'),
+    path('person/<int:person_id>/stripe/', person.person_stripe, name='person_stripe'),
 ])
 
 # Docuseal
