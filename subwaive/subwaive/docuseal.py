@@ -165,9 +165,8 @@ def docuseal_refresh_page(request):
 
 @csrf_exempt
 def refresh_docuseal_by_token(request):
-    """ allow event refresh by token """
-    print(request)
-    print(request.headers)
+    """ allow Docuseal data refresh by token """
+
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
         refresh_all()
 

@@ -106,9 +106,8 @@ def receive_webhook(request):
 
 @csrf_exempt
 def refresh_stripe_by_token(request):
-    """ allow event refresh by token """
-    print(request)
-    print(request.headers)
+    """ allow Stripe data refresh by token """
+
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
         refresh_all_product_and_price()
         refresh_all_subscription_and_customer()
