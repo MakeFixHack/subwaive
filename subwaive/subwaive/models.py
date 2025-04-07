@@ -1,9 +1,6 @@
 import datetime
-import icalendar
 import os
-from pathlib import Path
 import pytz #!!! your sometimes adding local and sometimes adding utc, if they are tz-aware does it mater?
-import requests
 import caldav
 
 from django.db import models
