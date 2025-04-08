@@ -61,7 +61,8 @@ class DocusealFieldStore(models.Model):
     def re_extract(submission_id):
         """ re-extract field store values for a DocusealSubmission """
         Log.objects.create(description="Refresh DocusealFieldStore", json={'submission_id': submission_id})
-        DocusealFieldStore.objects.filter(submission__id=submission_id).delete()
+        submission = DocusealSubmission.objects.get(id=submission_id)
+        DocusealFieldStore.objects.filter(submission=submission).delete()
         important_fields = DocusealField.objects.all()
 
         s = docuseal.get_submission(submission_id)
@@ -69,7 +70,7 @@ class DocusealFieldStore(models.Model):
             for form_field in s['submitters'][0]['values']:
                 if form_field['field'].lower().strip() == field.field.lower().strip():
                     if form_field['value']:
-                        DocusealFieldStore.objects.create(submission__id=submission_id, field=field, value=form_field['value'])
+                        DocusealFieldStore.objects.create(submission=submission, field=field, value=form_field['value'])
 
     
     def refresh(max_existing_submission_id=None):
