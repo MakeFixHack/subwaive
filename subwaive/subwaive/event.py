@@ -3,6 +3,7 @@ import os
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -131,7 +132,8 @@ def event_list(request, timeframe="last-five"):
         events = Event.objects.filter(start__gt=datetime.datetime.now()).order_by('start')
     elif timeframe == "all":
         events = Event.objects.all().order_by('-end')
-
+    events = events.annotate(attendee_count=Count('attendee'))
+    
     button_dict = [
             {'url': reverse('event_list'), 'anchor': 'Last 5', 'active': timeframe=="last-five"},
             {'url': reverse('event_list', kwargs={'timeframe': 'future' }), 'anchor': 'Future', 'active': timeframe=="future"},

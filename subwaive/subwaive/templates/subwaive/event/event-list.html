@@ -14,9 +14,16 @@
         {% for event in events %}
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title">{{ event.summary }}</h5>
+                <h5 class="card-title">
+                    {{ event.summary }}
+                    {% if event.attendee_count %}
+                    <span class="badge text-bg-info">{{ event.attendee_count }}</span>
+                    {% endif %}
+                </h5>
 
-                <div><a href="{% url 'event_details' event.id %}">View Attendees</a></div>
+                <div>
+                    <a href="{% url 'event_details' event.id %}">View Attendees</a>
+                </div>
 
                 <div>{{ event.summary }}</div>
 

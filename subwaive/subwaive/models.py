@@ -751,7 +751,7 @@ class PersonEmail(models.Model):
 class PersonEvent(models.Model):
     """ A map between Person and Event """
     person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, help_text="Who is the person associated with this Docuseal submitter?")
-    event = models.ForeignKey("subwaive.Event", on_delete=models.CASCADE, help_text="Who is the person associated with this Docuseal submitter?")
+    event = models.ForeignKey("subwaive.Event", on_delete=models.CASCADE, related_name="attendee", help_text="Who is the person associated with this Docuseal submitter?")
 
     class Meta:
         ordering = ('person', 'event',)
