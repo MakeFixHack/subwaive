@@ -109,7 +109,9 @@ def refresh_stripe_by_token(request):
     """ allow Stripe data refresh by token """
 
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
+        print(datetime.datetime.now(), "Refreshing Stripe products and prices by token")
         refresh_all_product_and_price()
+        print(datetime.datetime.now(), "Refreshing Stripe subscriptions and customers by token")
         refresh_all_subscription_and_customer()
 
         return HttpResponse(status=200)

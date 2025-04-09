@@ -1,21 +1,9 @@
-ARG PYTHON_VERSION=3.11.9
-FROM python:${PYTHON_VERSION}-slim AS base
+FROM alpine:3.7
 
-# install cron
-RUN apt-get update && apt-get -y install cron
-RUN apt-get update && apt-get -y install curl
-# RUN apt-get update && apt-get -y install procps
+RUN apk --no-cache add curl
 
-WORKDIR /app
-COPY data_refresh.sh /app/
-RUN chmod 0644 /app/data_refresh.sh
+COPY crontab /tmp/crontab
+RUN cat /tmp/crontab > /etc/crontabs/root
+COPY data_refresh.sh /tmp/
 
-COPY crontab /etc/cron.d/crontab
-RUN chmod 0644 /etc/cron.d/crontab
-RUN crontab /etc/cron.d/crontab
-RUN touch /var/log/cron.log
-
-COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-
-ENTRYPOINT ["/app/start.sh"]
+ENTRYPOINT ["crond", "-f"]

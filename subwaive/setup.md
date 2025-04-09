@@ -45,20 +45,13 @@ SubWaive will not load until the following keys are populated:
 `DJANGO_SECRET_KEY`, `DATABASE_PASSWORD`, and `DOCUSEAL_ENDPOINT_SECRET` can be generated with the following Python:
 
 ```python
-from django.core.management.utils import get_random_secret_key  
-get_random_secret_key()
-```
-
 Since special characters can be a problem for capturing environmental variables for cronjobs, `DATA_REFRESH_TOKEN` should avoid characters like `#`. A more restrictive password could be generated using:
+from django.core.management.utils import get_random_secret_key
 
-```python
-import random
-import secrets
-import string
-
-characters = string.ascii_letters + string.digits + string.punctuation
-characters = characters.replace('#','')
-print(''.join(random.choice(characters) for i in range(32)))
+print(f"""DJANGO_SECRET_KEY={ get_random_secret_key() }\n
+DATABASE_PASSWORD={ get_random_secret_key() }\n
+DOCUSEAL_ENDPOINT_SECRET={ get_random_secret_key() }\n
+DATA_REFRESH_TOKEN={ get_random_secret_key() }""")
 ```
 
 You must update the `DJANGO_ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` keys for the frontend to not fail security checks. The Docker network for communicating between containers requires the hostname for SubWaive an element in these lists.

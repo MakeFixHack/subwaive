@@ -114,6 +114,7 @@ def refresh_event_by_token(request):
 
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
         webhook_refresh()
+        print(datetime.datetime.now(), "Refreshing events by token")
 
         return HttpResponse(status=200)
     else:

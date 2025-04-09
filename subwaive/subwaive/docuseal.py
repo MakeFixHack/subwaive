@@ -168,6 +168,7 @@ def refresh_docuseal_by_token(request):
     """ allow Docuseal data refresh by token """
 
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
+        print(datetime.datetime.now(), "Refreshing Docuseal by token")
         refresh_all()
 
         return HttpResponse(status=200)
