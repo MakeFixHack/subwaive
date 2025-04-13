@@ -8,7 +8,6 @@
 </div>
 
 {% include 'subwaive/templates/buttons.html' %}
-
 {% include 'subwaive/templates/messages.html' %}
 
 {% if data_source %}
@@ -31,10 +30,27 @@
                 {% endfor %}
                 {% for button in tile.buttons %}
                 <p>
+                    {% if button.post %}
+                    <form action="{{ button.url}}" method="POST">
+                        {% csrf_token %}
+                        {% for val in button.post %}
+                        <p>
+                            {% if val.label %}
+                            <label>{{ val.label }}</label>
+                            {% endif %}
+                            <input type="{{ val.type }}" name="{{ val.name }}" value="{{ val.val }}" />
+                            {% endfor %}
+                        </p>
+                        <button 
+                        class="btn btn-success"
+                        >{{ button.anchor }}</button>
+                    </form>
+                    {% else %}
                     <button 
                         class="btn btn-success"
                         onclick='window.location="{{ button.url }}";'
                         >{{ button.anchor }}</button>
+                    {% endif %}
                 </p>
                 {% endfor %}
             </div>
