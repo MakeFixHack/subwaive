@@ -37,4 +37,10 @@
     </div>
 </div>
 
+<!-- Paginator -->
+{% with events as page %}
+{% include 'subwaive/templates/paginator.html' %}
+{% endwith %}
+<!-- /Paginator -->
+
 {% endblock %}

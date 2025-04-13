@@ -4,6 +4,7 @@ import pytz
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -19,6 +20,7 @@ CALENDAR_URL = os.environ.get("CALENDAR_URL")
 
 DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
 
+PAGINATOR_SHORT = 8
 
 @login_required
 def member_check_in(request, person_id, event_id, override_checks=False):
@@ -126,18 +128,22 @@ def webhook_refresh():
     Event.refresh()
 
 @login_required
-def event_list(request, timeframe="last-five"):
+def event_list(request, timeframe="past"):
     """ List of events """
-    if timeframe == "last-five":
-        events = Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('-end')[:5]
+    if timeframe == "past":
+        events = Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('-end')
     elif timeframe == "future":
         events = Event.objects.filter(start__gt=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('start')
-    elif timeframe == "all":
+    else:
         events = Event.objects.all().order_by('-end')
     events = events.annotate(attendee_count=Count('attendee'))
     
+    paginator = Paginator(events, PAGINATOR_SHORT)
+    page_number = request.GET.get('page')
+    events = paginator.get_page(page_number)
+
     button_dict = [
-            {'url': reverse('event_list'), 'anchor': 'Last 5', 'active': timeframe=="last-five"},
+            {'url': reverse('event_list'), 'anchor': 'Past', 'active': timeframe=="past"},
             {'url': reverse('event_list', kwargs={'timeframe': 'future' }), 'anchor': 'Future', 'active': timeframe=="future"},
             {'url': reverse('event_list', kwargs={'timeframe': 'all' }), 'anchor': 'All', 'active': timeframe=="all"},
     ]
