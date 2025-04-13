@@ -55,6 +55,7 @@ services:
        - subwaive
 
   cron:
+    init: true
     build: ./cron
     environment:
       DATA_REFRESH_TOKEN: ${DATA_REFRESH_TOKEN}
