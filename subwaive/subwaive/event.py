@@ -1,5 +1,6 @@
 import datetime
 import os
+import pytz
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
@@ -13,6 +14,7 @@ from subwaive.models import Event, PersonEvent
 from subwaive.models import Person
 from subwaive.utils import refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_CONFIDENTIAL
 
+TIME_ZONE = os.environ.get("TIME_ZONE")
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
 
 DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
@@ -127,9 +129,9 @@ def webhook_refresh():
 def event_list(request, timeframe="last-five"):
     """ List of events """
     if timeframe == "last-five":
-        events = Event.objects.filter(start__lte=datetime.datetime.now()).order_by('-end')[:5]
+        events = Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('-end')[:5]
     elif timeframe == "future":
-        events = Event.objects.filter(start__gt=datetime.datetime.now()).order_by('start')
+        events = Event.objects.filter(start__gt=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('start')
     elif timeframe == "all":
         events = Event.objects.all().order_by('-end')
     events = events.annotate(attendee_count=Count('attendee'))
