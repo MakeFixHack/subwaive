@@ -188,6 +188,12 @@ In Docuseal, you must turn on webhooks in settings before you can add the secret
 
 The webhook header key is `X-Docuseal-Signature`.
 
+
+#### Troubleshooting
+
+* Log show `/` as `CSRF violation`: check the webhook address in Docuseal points to `https://hostname/docuseal/webhook/`
+
+
 ### Building links
 
 SubWaive builds links for various objects in its interface. Linking directly to Docuseal allows user access but only on the basis of having Docuseal credentials. This limits the ability of users to see certain information.
@@ -259,3 +265,8 @@ To maintain a reasonably current dataset, SubWaive uses `cron` to periodically u
 * DATA_REFRESH_TOKEN -  a user provided token for authenticating requests for data refreshes
 
 Since SubWaive communicates these requests over its Docker network, no additional security is provided.
+
+
+### Troubleshooting
+
+* Logs report `subwaive:8000` should be added to `ALLOWED_HOSTS`: add `subwaive` to `DJANGO_ALLOWED_HOSTS` in your `.env` file
