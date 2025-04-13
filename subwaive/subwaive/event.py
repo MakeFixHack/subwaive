@@ -9,10 +9,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from subwaive.models import DocusealFieldStore, StripeCustomer
 from subwaive.models import Event, PersonEvent
-from subwaive.models import Person, PersonEmail, QRCustom
-from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_SENSITIVE, CONFIDENTIALITY_LEVEL_CONFIDENTIAL, QR_SMALL, QR_LARGE
+from subwaive.models import Person
+from subwaive.utils import refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_CONFIDENTIAL
 
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
 
