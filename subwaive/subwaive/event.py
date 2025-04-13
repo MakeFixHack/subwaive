@@ -91,7 +91,19 @@ def event_refresh_page(request):
     tiles = [
         {
             'buttons': [
-                {'url_name': 'refresh_event', 'anchor': 'Refresh All Events'},
+                {'url_name': 'refresh_event', 'post': [
+                    {
+                        'type': 'hidden',
+                        'name': 'lbound',
+                        'val': datetime.date.today().isoformat()
+                    },
+                    {
+                        'type': 'datepicker',
+                        'label': 'Events between today and...',
+                        'name': 'ubound',
+                        'val': (datetime.date.today() + datetime.timedelta(days=7)).isoformat()
+                    },
+                ], 'anchor': 'Refresh Upcoming'},
             ],
             'log_descriptions': [
                 {'description': 'Event'},
@@ -105,7 +117,7 @@ def event_refresh_page(request):
 @login_required
 def refresh_event(request):
     """ force refresh ical Event data """
-    webhook_refresh()
+    Event.refresh(request)
 
     messages.success(request, f'Event data refreshed')
 
@@ -116,16 +128,12 @@ def refresh_event_by_token(request):
     """ allow event data refresh by token """
 
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
-        webhook_refresh()
         print(datetime.datetime.now(), "Refreshing events by token")
+        Event.refresh(request)
 
         return HttpResponse(status=200)
     else:
         return HttpResponse(status=401)
-
-def webhook_refresh():
-    """ refresh data sets in order """
-    Event.refresh()
 
 @login_required
 def event_list(request, timeframe="past"):
@@ -190,3 +198,11 @@ def event_details(request, event_id):
     }
 
     return render(request, f'subwaive/event/event-details.html', context)
+
+@login_required
+def event_refresh(request, event_id):
+    """ refresh an individual event """
+    print("entered event_refresh")
+    Event.objects.get(id=event_id).refresh_event()
+
+    return redirect('event_details', event_id)

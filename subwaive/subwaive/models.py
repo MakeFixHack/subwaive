@@ -372,13 +372,14 @@ class DocusealTemplate(models.Model):
 class Event(models.Model):
     """ An event from an ical file """
     UID = models.UUIDField()
-    """ UIDs are shared by recurrences, which means they are useful individually as a key
-    Since RECURRENCE_ID can change when the SEQUENCE changes, we instead assume that the
-    order of recurrences is stable for past events. When we load data, we sort the event list, 
-    since ICS event order is not stable, and assume that UID+our assigned ordinal will correctly 
-    identify the event we intend to update.
-    """
+    """ Part of a composite key with recurrence_order.\n
+    UIDs are shared by recurrences, which means they are not useful 
+    individually as a key. Since RECURRENCE_ID can change when the SEQUENCE changes, we instead 
+    assume that the order of recurrences is stable for past events. """
     recurrence_order = models.IntegerField(default=1)
+    """ Part of a composite key with UID.\n 
+    An ordinal sequence number. Assumed to be stable for past events, 
+    provided old events are not added to an existing series. """
     summary = models.CharField(max_length=512, help_text='What is the event summary?')
     description = models.TextField(max_length=2048, help_text='What is the event description?')
     start = models.DateTimeField(help_text='When does the event begin?')
@@ -389,6 +390,15 @@ class Event(models.Model):
 
     def __str__(self):
         return f"""{ self.summary[:50] } / { self.start } / { self.end }"""
+    
+    def create(event_values):
+        """ create a new event from a dict """
+        event = Event.objects.create(
+            UID=event_values['uid'], recurrence_order=event_values['recurrence_order'], 
+            summary=event_values['summary'], 
+            description=event_values['description'], 
+            start=event_values['start'], end=event_values['end'])
+        Log.objects.create(description="Create Event", json={'uid': event.UID})
     
     def get_current_event():
         """ return any Event objects for events that are currently happening """
@@ -412,9 +422,19 @@ class Event(models.Model):
 
                 return events
 
-    def refresh():
+    def refresh(request):
         """ Refresh events from ical URL """
         events = Event.get_event_list_from_calendar_url(CALENDAR_URL)
+        
+        lbound = None
+        ubound = None
+        json = {'type': 'full'}
+        if request.POST:
+            lbound = request.POST.get("lbound")
+            lbound = datetime.datetime.strptime(lbound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
+            ubound = request.POST.get("ubound")
+            ubound = datetime.datetime.strptime(ubound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
+            json = {'type': 'time-bounded', 'lbound': lbound.isoformat(), 'ubound': ubound.isoformat()}
 
         uid_count = {}
         for e in events:
@@ -425,49 +445,82 @@ class Event(models.Model):
             else:
                 uid_count[uid] = 1
 
-            recurrence_order = uid_count[uid]
-            event_values = {
-                'uid': uid,
-                'summary': e.get("SUMMARY").__str__(),
-                'description': e.get("DESCRIPTION").__str__()[:2048],
-                'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
-                'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
-            }
+            is_process = True
+            if lbound and ubound:
+                is_process = False
+                if e.start.astimezone(pytz.timezone(TIME_ZONE)) >= lbound \
+                    and e.start.astimezone(pytz.timezone(TIME_ZONE)) <= ubound:
+                    is_process = True
+            if is_process:
+                recurrence_order = uid_count[uid]
+                event_values = {
+                    'uid': uid,
+                    'summary': e.get("SUMMARY").__str__().strip(),
+                    'description': e.get("DESCRIPTION").__str__().strip()[:2048],
+                    'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
+                    'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
+                    'recurrence_order': recurrence_order,
+                }
 
-            event_qs = Event.objects.filter(UID=uid, recurrence_order=recurrence_order)
-            
-            if event_qs.exists():
-                event_inst = event_qs.first()
-                Event.update_event(event_inst, event_values)
+                event_qs = Event.objects.filter(UID=uid, recurrence_order=recurrence_order)
+                
+                if event_qs.exists():
+                    Event.update_event(event_qs.first(), event_values)
 
-            else:
-                event_inst = Event.objects.create(UID=uid, recurrence_order=recurrence_order, summary=event_values['summary'], description=event_values['description'], start=event_values['start'], end=event_values['end'])
-                Log.objects.create(description="Create Event", json={'uid': event_inst.UID})
-            Log.objects.create(description="Refresh Event")
+                else:
+                    Event.create(event_values)
+
+        if uid_count:
+            Log.objects.create(description="Refresh Event", json=json)
+
+    def refresh_event(self):
+        """ Refresh a single event """
+        events = Event.get_event_list_from_calendar_url(CALENDAR_URL)
+        recurrence_order = 0
+        for e in events:
+            uid = e.get("UID")
+            if uid==str(self.UID):
+                recurrence_order += 1
+                if recurrence_order == self.recurrence_order:
+                    event_values = {
+                        'uid': uid,
+                        'summary': e.get("SUMMARY").__str__().strip(),
+                        'description': e.get("DESCRIPTION").__str__().strip()[:2048],
+                        'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
+                        'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
+                        'recurrence_order': recurrence_order,
+                    }
+                    Event.update_event(self, event_values)
+                    break
 
     def update_event(event, event_values):
         """ Update an event record """
         is_updated = False
-        json = {'uid': event_values['uid']}
+        json = {'uid': event_values['uid'], 'recurrence_order': event_values['recurrence_order']}
+
         if event.summary != event_values['summary']:
             is_updated = True
             json['summary_updated'] = True
             event.summary = event_values['summary']
+
         if event.description != event_values['description']:
             is_updated = True
             json['description_updated'] = True
             event.description = event_values['description']
+
         if event.start != event_values['start']:
             is_updated = True
-            json['start_old'] = event.start
+            json['start_old'] = event.start.isoformat()
             event.start = event_values['start']
+
         if event.end != event_values['end']:
             is_updated = True
-            json['end_old'] = event.end
+            json['end_old'] = event.end.isoformat()
             event.end = event_values['end']
+
         if is_updated:
             event.save()
-        Log.objects.create(description="Update Event", json=json)
+            Log.objects.create(description="Update Event", json=json)
 
 
 class Log(models.Model):
