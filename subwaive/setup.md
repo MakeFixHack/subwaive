@@ -1,5 +1,6 @@
 # Setup for SubWaive
 
+
 ## The .env file
 
 SubWaive uses an environment file to define secrets, such as passwords, and configurations, such as timezones.
@@ -55,6 +56,7 @@ DATA_REFRESH_TOKEN={ get_random_secret_key() }""")
 
 You must update the `DJANGO_ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` keys for the frontend to not fail security checks. The Docker network for communicating between containers requires the hostname for SubWaive an element in these lists.
 
+
 ## Docker network connections
 
 If you are running Docuseal in a Docker container, such as in a development environment, this section is required. If your instance of Docuseal is not in a docker container (or can ), you can choose not to create the network and remove the references to the `subwaive` network from `compose.yaml`.
@@ -98,6 +100,7 @@ services:
   default:
 ```
 
+
 ### View Docker network
 
 To see if each container is attached to the network you defined:
@@ -111,6 +114,7 @@ This will also give the name of the containers you should use as hostnames in yo
 * Webhook endpoints
 * Database hostname
 * DJANGO_ALLOWED_HOSTS
+
 
 ## Initializing Django
 
@@ -135,6 +139,7 @@ docker exec -it subwaive python manage.py loaddata initial
 
 The initial data loaded creates a super user called `admin` with a password of `makefixhack`. If you don't change that password immediately, you get what you deserve. 😄
 
+
 ## Docuseal integration
 
 Docuseal can be downloaded and installed from:
@@ -150,6 +155,7 @@ SubWaive considers any document contained in a folder called `Waivers` to be a w
 
 To hide a document from SubWaive, archive it.
 
+
 ### API
 
 Docuseal has an API which requires an API key to be copied into the `.env` file. The API key can be found in the Docuseal settings menu, along with the API secret.
@@ -158,6 +164,7 @@ The relevant `.env` keys are:
 
 * DOCUSEAL_API_KEY - your Docuseal API key
 * DOCUSEAL_API_ENDPOINT - your Docuseal API address, from API examples in settings
+
 
 ### Webhooks
 
@@ -168,7 +175,7 @@ SubWaive can update Docuseal data in bulk or selectively. An initial bulk refres
 
 For routine updates, configure Docuseal webhooks that point to the SubWaive-Docuseal webhook URL:
 
-* https://hostname/docuseal/webhook/
+* https://`hostname`/docuseal/webhook/
 
 This address will trigger a selective update based on the payload provided by Docuseal.
 
@@ -201,10 +208,12 @@ The relevant `.env` keys are:
 
 * DOCUSEAL_WWW_ENDPOINT - your Docuseal web address, for building URLs
 
+
 ## Stripe integration
 
 * All sales options are represented by a payment link
 * All product prices have a price description
+
 
 ### API
 
@@ -225,11 +234,13 @@ The relevant `.env` keys are:
 
 * STRIPE_API_KEY - the API key built for this app
 
+
 ### Webhooks
 
 TDB - which hooks do you need?
 
 * STRIPE_ENDPOINT_SECRET -
+
 
 ### Building links
 
@@ -242,6 +253,7 @@ For production Stripe data:
 For test Stripe data:
 
 * STRIPE_WWW_ENDPOINT=https://dashboard.stripe.com/
+
 
 ## Calendar integration
 
