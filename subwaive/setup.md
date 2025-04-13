@@ -45,7 +45,6 @@ SubWaive will not load until the following keys are populated:
 `DJANGO_SECRET_KEY`, `DATABASE_PASSWORD`, and `DOCUSEAL_ENDPOINT_SECRET` can be generated with the following Python:
 
 ```python
-Since special characters can be a problem for capturing environmental variables for cronjobs, `DATA_REFRESH_TOKEN` should avoid characters like `#`. A more restrictive password could be generated using:
 from django.core.management.utils import get_random_secret_key
 
 print(f"""DJANGO_SECRET_KEY={ get_random_secret_key() }\n
