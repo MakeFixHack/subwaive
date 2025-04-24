@@ -51,7 +51,11 @@
                 {% endif %}
 
                 {% if issue.membership %}
+                    {% if issue.membership == 'missing' %}
                 <li>Missing membership</li>
+                    {% else %}
+                <li>Membership is not active</li>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>

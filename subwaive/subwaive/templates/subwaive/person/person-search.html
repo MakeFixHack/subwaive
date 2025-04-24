@@ -1,4 +1,5 @@
 {% extends 'subwaive/base.html' %}
+{% load static %}
 {% block content %}
 
 {% include 'subwaive/templates/determination-of-confidentiality.html' %}
@@ -41,7 +42,9 @@
     {% for person in results %}
     <div class="card text-center">
         <div class="card-body">
-            {% if person.has_membership %}<div class="float-end"><img width="20px" src="https://www.svgrepo.com/show/13695/star.svg" /></div>{% endif %}
+            {% if person.membership_status == 'active' %}<div class="float-end"><img width="20px" src="https://www.svgrepo.com/show/13695/star.svg" /></div>
+            {% elif person.membership_status %}<div class="float-end"><span style="padding: 0.25rem" class="alert alert-danger">{{ person.membership_status }} <img src="{% static 'img/exclamation-triangle.svg' %}"></span></div>
+            {% endif %}
             <h5 class="card-title">{{ person.name }}</h5>
 
             <div>

@@ -35,7 +35,7 @@ def member_check_in(request, person_id, event_id, override_checks=False):
     clean_checks = False
     if override_checks:
         clean_checks = True
-    elif waiver_check and membership_status and not has_prior_check_in:
+    elif waiver_check and membership_status=='active' and not has_prior_check_in:
         clean_checks = True
 
     if clean_checks:
@@ -179,8 +179,11 @@ def event_details(request, event_id):
     check_in_issues = []
     for p in persons:
         issues = {}
-        if not p.check_membership_status():
-            issues['membership'] = True
+        membership_status = p.check_membership_status()
+        if not membership_status:
+            issues['membership'] = 'missing'
+        elif membership_status!='active':
+            issues['membership'] = 'inactive'
         if not p.check_waiver_status():
             issues['waiver'] = True
         if issues.keys():

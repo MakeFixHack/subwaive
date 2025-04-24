@@ -22,7 +22,7 @@ def person_list(request):
             'id': p.id,
             'person_card': redirect('person_card', person_id=p.id).url,
             'last_check_in': p.get_last_check_in(),
-            'has_membership': p.check_membership_status(),
+            'membership_status': p.check_membership_status(),
             'last_check_in_event_id_list': [ci.event.id for ci in PersonEvent.objects.filter(person=p, event__start__date=datetime.date.today())],
         }
         for p in persons_prelim
@@ -57,7 +57,7 @@ def member_list(request):
             'id': p.id,
             'person_card': redirect('person_card', person_id=p.id).url,
             'last_check_in': p.get_last_check_in(),
-            'has_membership': p.check_membership_status(),
+            'membership_status': p.check_membership_status(),
             'last_check_in_event_id_list': [ci.event.id for ci in PersonEvent.objects.filter(person=p, event__start__date=datetime.date.today())],
         }
         for p in persons_prelim if p.check_membership_status()
@@ -101,6 +101,7 @@ def person_search(request):
                     'id': p.id,
                     'person_card': redirect('person_card', person_id=p.id).url,
                     'preferred_email': p.preferred_email.email,
+                    'membership_status': p.check_membership_status(),
                     'last_check_in': p.get_last_check_in(),
                     'last_check_in_event_id_list': [ci.event.id for ci in PersonEvent.objects.filter(person=p, event__start__date=datetime.date.today())],
                 }
@@ -132,7 +133,8 @@ def person_card(request, person_id):
     other_emails = PersonEmail.objects.filter(person=person)
     
     has_waiver = person.check_waiver_status()
-    has_membership = person.check_membership_status()
+    membership_status = person.check_membership_status()
+    memberships = person.get_memberships()
     
     last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
     check_in_events = Event.get_current_event()
@@ -150,7 +152,8 @@ def person_card(request, person_id):
         'person': person,
         'other_emails': other_emails,
         'has_waiver': has_waiver,
-        'has_membership': has_membership,
+        'membership_status': membership_status,
+        'memberships': memberships,
         'last_check_ins': last_check_ins,
         'last_check_in_event_id_list': [ci.event.id for ci in last_check_ins],
         'check_in_events': check_in_events,

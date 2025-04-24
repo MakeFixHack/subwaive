@@ -27,7 +27,11 @@
             <div class="card-body">
                 <h5 class="card-title">{{ subscription.name }}</h5>
                 <div>
-                    <div>Status: {{ subscription.status }}</div>
+                    <div class="alert 
+                    {% if subscription.status == 'active' %}alert-success
+                    {% else %}alert-danger
+                    {% endif %}
+                        ">Status: {{ subscription.status }}</div>
                     <div>Good through: {{ subscription.date_renew }}</div>
                     <div><a href="{{ subscription.url }}">View in Stripe</a></div>
                 </div>

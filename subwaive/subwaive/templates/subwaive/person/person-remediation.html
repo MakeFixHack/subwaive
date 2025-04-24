@@ -17,6 +17,7 @@
     <h2>{{ event.summary }}</h2>
 </div>
 
+<!-- check-in issues -->
 {% if has_prior_check_in %}
 <div class="row-container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
@@ -29,6 +30,7 @@
         </div>
     </div>
 </div>
+
 {% else %}
 <div class="row-container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
@@ -38,9 +40,6 @@
                 <h5 class="card-title">Waiver Check</h5>
 
                 <div>{{ person.name }} does not have a current, completed waiver.</div>
-                <div>Ask them to completed a waiver: <br />
-                    <a href="{% url 'docuseal_link_list' %}">Waivers</a>
-                </div>
             </div>
         </div>
         {% endif %}
@@ -51,13 +50,61 @@
                 <h5 class="card-title">Membership Check</h5>
 
                 <div>{{ person.name }} does not have a membership and have no purchased a day-pass.</div>
-                <div>Suggest membership or a "pay-what-you-can" day-pass.</div>
+            </div>
+        </div>
+
+        {% elif not membership_status == 'active' %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Membership Check</h5>
+
+                <div>{{ person.name }} has a membership that is not active.</div>
             </div>
         </div>
         {% endif %}                
     </div>
 </div>
 
+<!-- remediation steps -->
+<div class="row-container">
+    {% if not waiver_check %}
+    <div class="text-center alert alert-danger">
+        <div class="card-body">
+            <h5 class="card-title">Waiver Remediation</h5>
+            <p>Ask them to completed a waiver before using any tools or performing any task: <br />
+                <a href="{% url 'docuseal_link_list' %}">Waivers</a>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+            
+    {% if not membership_status %}
+    <div class="text-center alert alert-warning">
+        <div class="card-body">
+            <h5 class="card-title">Membership Remediation</h5>
+            <div>Suggest membership or a "pay-what-you-can" day-pass.</div>
+        </div>
+    </div>
+
+    {% elif not membership_status == 'active' %}
+    <div class="text-center alert alert-warning">
+        <div class="card-body">
+            <h5 class="card-title">Membership Remediation</h5>
+                <p>If a <a href="{% url 'stripe_refresh' %}">refresh of Stripe membership data</a> doesn't resolve this warning...</p>
+                <p>We never want people to feel judged or put on the spot, 
+                    especially where it might be a question of finances, which can be a sensitive topic.</p>
+                <p>Lots of reasonable situations could be causing this (including some that could be our fault).</p>
+                <ul>
+                    <li>Ask them about it privately if the opportunity presents itself organically</li>
+                    <li>Let them continue to act as a member, we're in no rush</li>
+                    <li>Notify <a href="mailto:membership@makefixhack.org">membership@makefixhack.org</a></li>
+                </ul>
+        </div>
+    </div>
+    {% endif %}                
+</div>
+
+<!-- force check-in -->
 <div class="section">
     <div>
         <div>If you wish to check them in anyways:</div>
