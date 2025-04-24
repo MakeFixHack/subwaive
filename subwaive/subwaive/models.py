@@ -587,11 +587,15 @@ class Person(models.Model):
     
     def check_membership_status(self):
         """ return true if they have a current membership """
-        has_membership = False
-        if self.get_memberships():
-            has_membership = True
+        status = None
+        memberships = self.get_memberships()
+        if memberships:
+            status = 'active'
+            for m in memberships:
+                if m['status']!='active':
+                    status = m['status']
 
-        return has_membership 
+        return status 
     
     def check_waiver_status_by_person_id(person_id):
         return Person.objects.get(id=person_id).check_waiver_status()
