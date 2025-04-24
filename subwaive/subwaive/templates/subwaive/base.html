@@ -33,7 +33,16 @@
                             <li><a class="nav-item nav-link" href="{% url 'docuseal_link_list' %}">Docuseal</a></li>
                         </ul>
                     </li>
-                    <a class="nav-item nav-link" href="{% url 'person_list' %}">People</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        People
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="nav-item nav-link" href="{% url 'person_list' %}">All</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'member_list' %}">Members</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'person_search' %}">Search</a></li>
+                        </ul>
+                    </li>
                     <a class="nav-item nav-link" href="{% url 'event_list' %}">Events</a>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
