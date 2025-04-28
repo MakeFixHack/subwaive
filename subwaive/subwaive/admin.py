@@ -52,7 +52,7 @@ class PersonEmail_Admin(admin.ModelAdmin):
 admin.site.register(PersonEmail, PersonEmail_Admin)
 
 class PersonEvent_Admin(admin.ModelAdmin):
-    list_display = ('person', 'event',)
+    list_display = ('person', )
 admin.site.register(PersonEvent, PersonEvent_Admin)
 
 class PersonStripe_Admin(admin.ModelAdmin):
