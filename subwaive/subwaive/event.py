@@ -11,8 +11,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from subwaive.models import Event, PersonEvent
-from subwaive.models import Person
+from subwaive.models import Person, PersonEvent
 from subwaive.utils import refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_CONFIDENTIAL
 
 TIME_ZONE = os.environ.get("TIME_ZONE")
@@ -109,7 +108,6 @@ def event_refresh_page(request):
                 {'description': 'Event'},
             ]
         },
-
     ]
 
     return refresh(request, page_title, data_source, tiles)
@@ -117,7 +115,7 @@ def event_refresh_page(request):
 @login_required
 def refresh_event(request):
     """ force refresh ical Event data """
-    Event.refresh(request)
+    # CalendarEvent.refresh(request)
 
     messages.success(request, f'Event data refreshed')
 
@@ -129,7 +127,7 @@ def refresh_event_by_token(request):
 
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
         print(datetime.datetime.now(), "Refreshing events by token")
-        Event.refresh(request)
+        # CalendarEvent.refresh(request)
 
         return HttpResponse(status=200)
     else:

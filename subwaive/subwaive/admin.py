@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from subwaive.models import DocusealField,DocusealFieldStore,DocusealSubmission,DocusealSubmitter,DocusealSubmitterSubmission,DocusealTemplate
-from subwaive.models import Event,Log,QRCategory,QRCustom
+from subwaive.models import Log,QRCategory,QRCustom
 from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonEvent,PersonStripe
 from subwaive.models import StripeCustomer,StripePaymentLink,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
 

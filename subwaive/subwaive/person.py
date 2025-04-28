@@ -6,8 +6,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from subwaive.models import DocusealFieldStore, StripeCustomer
-from subwaive.models import Event, PersonEvent
-from subwaive.models import Person, PersonEmail
+from subwaive.models import Person, PersonEmail, PersonEvent
 from subwaive.utils import CONFIDENTIALITY_LEVEL_CONFIDENTIAL
 
 @permission_required('subwaive.can_list_people')
@@ -28,7 +27,7 @@ def person_list(request):
         for p in persons_prelim
     ]
 
-    check_in_events = Event.get_current_event()
+    check_in_events = None#CalendarEvent.get_current_event()
 
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'All', 'active': True},
@@ -63,7 +62,7 @@ def member_list(request):
         for p in persons_prelim if p.check_membership_status()
     ]
 
-    check_in_events = Event.get_current_event()
+    check_in_events = None#CalendarEvent.get_current_event()
 
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'All'},
@@ -108,7 +107,7 @@ def person_search(request):
                 for p in results_prelim
             ]
 
-    check_in_events = Event.get_current_event()
+    check_in_events = None#CalendarEvent.get_current_event()
        
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'List'},
@@ -137,7 +136,7 @@ def person_card(request, person_id):
     memberships = person.get_memberships()
     
     last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
-    check_in_events = Event.get_current_event()
+    check_in_events = None#CalendarEvent.get_current_event()
 
     button_dict = [
         {'url': reverse('person_docuseal', kwargs={'person_id': person.id }), 'anchor': 'Docuseal', 'class': 'secondary', 'active': False},

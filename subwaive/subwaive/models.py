@@ -369,27 +369,38 @@ class DocusealTemplate(models.Model):
         return f"{ DOCUSEAL_WWW_ENDPOINT }/d/{ self.slug }"
     
 
-class Event(models.Model):
-    """ An event from an ical file """
-    UID = models.UUIDField()
-    """ Part of a composite key with recurrence_order.\n
-    UIDs are shared by recurrences, which means they are not useful 
-    individually as a key. Since RECURRENCE_ID can change when the SEQUENCE changes, we instead 
-    assume that the order of recurrences is stable for past events. """
-    recurrence_order = models.IntegerField(default=1)
-    """ Part of a composite key with UID.\n 
-    An ordinal sequence number. Assumed to be stable for past events, 
-    provided old events are not added to an existing series. """
-    summary = models.CharField(max_length=512, help_text='What is the event summary?')
-    description = models.TextField(max_length=2048, help_text='What is the event description?')
-    start = models.DateTimeField(help_text='When does the event begin?')
-    end = models.DateTimeField(help_text='When does the event finish?')
+# class CalendarEvent(models.Model):
+#     """ An event from an ical file """
+#     UID = models.UUIDField()
+#     """ Part of a composite key with recurrence_order.\n
+#     UIDs are shared by recurrences, which means they are not useful 
+#     individually as a key. Since RECURRENCE_ID can change when the SEQUENCE changes, we instead 
+#     assume that the order of recurrences is stable for past events. """
+#     recurrence_order = models.IntegerField(default=1)
+#     """ Part of a composite key with UID.\n 
+#     An ordinal sequence number. Assumed to be stable for past events, 
+#     provided old events are not added to an existing series. """
+#     summary = models.CharField(max_length=512, help_text='What is the event summary?')
+#     description = models.TextField(max_length=2048, help_text='What is the event description?')
+#     start = models.DateTimeField(help_text='When does the event begin?')
+#     end = models.DateTimeField(help_text='When does the event finish?')
 
-    class Meta:
-        ordering = ('-start', 'summary',)
+#     class Meta:
+#         ordering = ('-start', 'summary',)
 
-    def __str__(self):
-        return f"""{ self.summary[:50] } / { self.start } / { self.end }"""
+#     def __str__(self):
+#         return f"""{ self.summary[:50] } / { self.start } / { self.end }"""
+    
+#     def _auto_associate(self, lbound=None):
+#         """ automatically create an event for this calendar event if it is in the future and an event does not exist. """
+#         print(lbound)
+#         if self.start >= lbound:
+#             print("is after lbound")
+#             event_qs = Event.objects.filter(summary=self.summary, start=self.start, end=self.end)
+#             if not event_qs.exists():
+#                 Event.objects.create(summary=self.summary, start=self.start, end=self.end, calendar_event=self)
+#         else:
+#             print("out-of-update-date-range event")
     
     def create(event_values):
         """ create a new event from a dict """
@@ -400,22 +411,26 @@ class Event(models.Model):
             start=event_values['start'], end=event_values['end'])
         Log.objects.create(description="Create Event", json={'uid': event.UID})
     
-    def get_current_event():
-        """ return any Event objects for events that are currently happening """
-        return Event.objects.filter(start__lte=datetime.datetime.now(), end__gte=datetime.datetime.now())
+#     def get_current_event():
+#         """ return any Event objects for events that are currently happening """
+#         return CalendarEvent.objects.filter(start__lte=datetime.datetime.now(), end__gte=datetime.datetime.now())
 
-    def get_event_list_from_calendar_url(url):
-        """ return a sorted list of events from a calendar URL """
-        with caldav.DAVClient(url=CALENDAR_URL) as client:
-            principal = client.principal()
+#     def get_event_list_from_calendar_url(url, lbound=None, ubound=None):
+#         """ return a sorted list of events from a calendar URL """
+#         if not lbound:
+#             lbound = datetime.date.today()+datetime.timedelta(days=-30)
+#         if not ubound:
+#             ubound = datetime.date.today()+datetime.timedelta(days=60)
+#         with caldav.DAVClient(url=CALENDAR_URL) as client:
+#             principal = client.principal()
 
-            calendars = principal.calendars()
-            if calendars:
-                events_prelim = calendars[0].search(
-                    start=datetime.date.today()+datetime.timedelta(days=-30),
-                    end=datetime.date.today()+datetime.timedelta(days=60),
-                    event=True,
-                    expand=True)
+#             calendars = principal.calendars()
+#             if calendars:
+#                 events_prelim = calendars[0].search(
+#                     start=lbound,
+#                     end=ubound,
+#                     event=True,
+#                     expand=True)
                 
                 events = [e.icalendar_instance.events[0] for e in events_prelim]
                 events = sorted(events, key=lambda x: x.start)
@@ -426,101 +441,138 @@ class Event(models.Model):
         """ Refresh events from ical URL """
         events = Event.get_event_list_from_calendar_url(CALENDAR_URL)
         
-        lbound = None
-        ubound = None
-        json = {'type': 'full'}
-        if request.POST:
-            lbound = request.POST.get("lbound")
-            lbound = datetime.datetime.strptime(lbound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
-            ubound = request.POST.get("ubound")
-            ubound = datetime.datetime.strptime(ubound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
-            json = {'type': 'time-bounded', 'lbound': lbound.isoformat(), 'ubound': ubound.isoformat()}
+#         uid_count = {}
+#         for e in events:
+#             uid = e.get("UID")
 
-        uid_count = {}
-        for e in events:
-            uid = e.get("UID")
+#             if uid in uid_count.keys():
+#                 uid_count[uid] += 1
+#             else:
+#                 uid_count[uid] = 1
 
-            if uid in uid_count.keys():
-                uid_count[uid] += 1
-            else:
-                uid_count[uid] = 1
+#             is_process = True
+#             if lbound and ubound:
+#                 is_process = False
+#                 if e.start.astimezone(pytz.timezone(TIME_ZONE)) >= lbound \
+#                     and e.start.astimezone(pytz.timezone(TIME_ZONE)) <= ubound:
+#                     is_process = True
+#             if is_process:
+#                 recurrence_order = uid_count[uid]
+#                 event_values = {
+#                     'uid': uid,
+#                     'summary': e.get("SUMMARY").__str__().strip(),
+#                     'description': e.get("DESCRIPTION").__str__().strip()[:2048],
+#                     'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
+#                     'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
+#                     'recurrence_order': recurrence_order,
+#                 }
 
-            is_process = True
-            if lbound and ubound:
-                is_process = False
-                if e.start.astimezone(pytz.timezone(TIME_ZONE)) >= lbound \
-                    and e.start.astimezone(pytz.timezone(TIME_ZONE)) <= ubound:
-                    is_process = True
-            if is_process:
-                recurrence_order = uid_count[uid]
-                event_values = {
-                    'uid': uid,
-                    'summary': e.get("SUMMARY").__str__().strip(),
-                    'description': e.get("DESCRIPTION").__str__().strip()[:2048],
-                    'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
-                    'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
-                    'recurrence_order': recurrence_order,
-                }
-
-                event_qs = Event.objects.filter(UID=uid, recurrence_order=recurrence_order)
+#                 event_qs = CalendarEvent.objects.filter(UID=uid, recurrence_order=recurrence_order)
                 
-                if event_qs.exists():
-                    Event.update_event(event_qs.first(), event_values)
+#                 if event_qs.exists():
+#                     print("update")
+#                     CalendarEvent.update_event(event_qs.first(), event_values)
 
-                else:
-                    Event.create(event_values)
+#                 else:
+#                     print("create")
+#                     CalendarEvent.create(event_values, lbound)
 
-        if uid_count:
-            Log.objects.create(description="Refresh Event", json=json)
+#         if uid_count:
+#             Log.objects.create(description="Refresh Event", json=json)
 
-    def refresh_event(self):
-        """ Refresh a single event """
-        events = Event.get_event_list_from_calendar_url(CALENDAR_URL)
-        recurrence_order = 0
-        for e in events:
-            uid = e.get("UID")
-            if uid==str(self.UID):
-                recurrence_order += 1
-                if recurrence_order == self.recurrence_order:
-                    event_values = {
-                        'uid': uid,
-                        'summary': e.get("SUMMARY").__str__().strip(),
-                        'description': e.get("DESCRIPTION").__str__().strip()[:2048],
-                        'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
-                        'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
-                        'recurrence_order': recurrence_order,
-                    }
-                    Event.update_event(self, event_values)
-                    break
+#     def refresh_event(self):
+#         """ Refresh a single event """
+#         events = CalendarEvent.get_event_list_from_calendar_url(CALENDAR_URL)
+#         recurrence_order = 0
+#         for e in events:
+#             uid = e.get("UID")
+#             if uid==str(self.UID):
+#                 recurrence_order += 1
+#                 if recurrence_order == self.recurrence_order:
+#                     event_values = {
+#                         'uid': uid,
+#                         'summary': e.get("SUMMARY").__str__().strip(),
+#                         'description': e.get("DESCRIPTION").__str__().strip()[:2048],
+#                         'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
+#                         'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
+#                         'recurrence_order': recurrence_order,
+#                     }
+#                     CalendarEvent.update_event(self, event_values)
+#                     break
 
-    def update_event(event, event_values):
-        """ Update an event record """
-        is_updated = False
-        json = {'uid': event_values['uid'], 'recurrence_order': event_values['recurrence_order']}
+#     def update_event(event, event_values):
+#         """ Update an event record """
+#         is_updated = False
+#         json = {'uid': event_values['uid'], 'recurrence_order': event_values['recurrence_order']}
 
-        if event.summary != event_values['summary']:
-            is_updated = True
-            json['summary_updated'] = True
-            event.summary = event_values['summary']
+#         if event.summary != event_values['summary']:
+#             is_updated = True
+#             json['summary_updated'] = True
+#             event.summary = event_values['summary']
 
-        if event.description != event_values['description']:
-            is_updated = True
-            json['description_updated'] = True
-            event.description = event_values['description']
+#         if event.description != event_values['description']:
+#             is_updated = True
+#             json['description_updated'] = True
+#             event.description = event_values['description']
 
-        if event.start != event_values['start']:
-            is_updated = True
-            json['start_old'] = event.start.isoformat()
-            event.start = event_values['start']
+#         if event.start != event_values['start']:
+#             is_updated = True
+#             json['start_old'] = event.start.isoformat()
+#             event.start = event_values['start']
 
-        if event.end != event_values['end']:
-            is_updated = True
-            json['end_old'] = event.end.isoformat()
-            event.end = event_values['end']
+#         if event.end != event_values['end']:
+#             is_updated = True
+#             json['end_old'] = event.end.isoformat()
+#             event.end = event_values['end']
 
-        if is_updated:
-            event.save()
-            Log.objects.create(description="Update Event", json=json)
+#         if is_updated:
+#             event.save()
+#             Log.objects.create(description="Update Event", json=json)
+
+
+# class Event(models.Model):
+#     """ An event for storing attendance.
+#     iCal files are not stable enough to use as a database. Changed to dates or times can make difficult to track changes
+#     that make database entries related to them point to incorrect events.
+
+#     To avoid this messiness, we dump and rebuild calendar events when we refresh, and events that are in the future and have
+#     no person event records. Calendar event instances that are in the future automatically create event instances to 
+#     match. Calendar events can be selected as the source for an event from the admin console if needed (such as using a future event 
+#     to backfill a missing historical event you might want to populate).
+
+#     Three consequences to understand:
+#     1. To prevent a future event from being over-written, add a check-in
+#     2. To rebuild a past event, use the admin console to change the calendar event it points to
+#     3. When rebuilding a past event like this, rerun the event refresh to rebuild the canabalized future event
+#     """
+#     summary = models.CharField(max_length=512, help_text='What is the event summary?')
+#     description = models.TextField(max_length=2048, help_text='What is the event description?')
+#     start = models.DateTimeField(help_text='When does the event begin?')
+#     end = models.DateTimeField(help_text='When does the event finish?')
+#     calendar_event = models.ForeignKey("subwaive.CalendarEvent", blank=True, null=True, on_delete=models.SET_NULL, help_text="Which calendar event is this?")
+
+#     class Meta:
+#         ordering = ('-start', 'summary',)
+
+#     def __str__(self):
+#         return f"""{ self.id } / { self.summary[:50] } / { self.start } / { self.end }\n"""
+    
+#     def clear_future_unused():
+#         """ delete instances that are both in the future and have no associated check-ins """
+#         events = Event.objects.exclude(attendee__isnull=False).filter(start__gt=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)))
+#         print(events)
+#         events.delete()
+#         Log.objects.create(description="Clear unused, future Event instances")
+
+#     def refresh_local_data(self):
+#         """ refresh details for self.calendar_event """
+#         self.summary = self.calendar_event.summary
+#         self.start = self.calendar_event.start
+#         self.end = self.calendar_event.end
+#         self.save()
+
+#     # def save(self):
+#     # override save to look for cal event changes and to update the local data accordingly unless the local data was changed
 
 
 class Log(models.Model):
@@ -579,7 +631,7 @@ class Person(models.Model):
     
     def check_in(self, event_id):
         """ check the person into an event """
-        event = Event.objects.get(id=event_id)
+        event = None#CalendarEvent.objects.get(id=event_id)
         return PersonEvent.objects.create(person=self, event=event)
 
     def check_membership_status_by_person_id(person_id):
