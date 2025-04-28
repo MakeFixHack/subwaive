@@ -402,14 +402,16 @@ class DocusealTemplate(models.Model):
 #         else:
 #             print("out-of-update-date-range event")
     
-    def create(event_values):
-        """ create a new event from a dict """
-        event = Event.objects.create(
-            UID=event_values['uid'], recurrence_order=event_values['recurrence_order'], 
-            summary=event_values['summary'], 
-            description=event_values['description'], 
-            start=event_values['start'], end=event_values['end'])
-        Log.objects.create(description="Create Event", json={'uid': event.UID})
+#     def create(event_values, lbound=None):
+#         """ create a new event from a dict """
+#         print("creating cal event")
+#         event = CalendarEvent.objects.create(
+#             UID=event_values['uid'], recurrence_order=event_values['recurrence_order'], 
+#             summary=event_values['summary'], 
+#             description=event_values['description'], 
+#             start=event_values['start'], end=event_values['end'])
+#         event._auto_associate(lbound)
+#         Log.objects.create(description="Create Event", json={'uid': event.UID})
     
 #     def get_current_event():
 #         """ return any Event objects for events that are currently happening """
@@ -432,14 +434,26 @@ class DocusealTemplate(models.Model):
 #                     event=True,
 #                     expand=True)
                 
-                events = [e.icalendar_instance.events[0] for e in events_prelim]
-                events = sorted(events, key=lambda x: x.start)
+#                 events = [e.icalendar_instance.events[0] for e in events_prelim]
+#                 events = sorted(events, key=lambda x: x.start)
 
-                return events
+#                 return events
 
-    def refresh(request):
-        """ Refresh events from ical URL """
-        events = Event.get_event_list_from_calendar_url(CALENDAR_URL)
+#     def refresh(request):
+#         """ Refresh events from ical URL """
+#         lbound = None
+#         ubound = None
+#         json = {'type': 'full'}
+#         if request.POST:
+#             lbound = request.POST.get("lbound")
+#             lbound = datetime.datetime.strptime(lbound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
+#             ubound = request.POST.get("ubound")
+#             ubound = datetime.datetime.strptime(ubound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
+#             json = {'type': 'time-bounded', 'lbound': lbound.isoformat(), 'ubound': ubound.isoformat()}
+
+#         events = CalendarEvent.get_event_list_from_calendar_url(CALENDAR_URL, lbound, ubound)
+#         CalendarEvent.objects.all().delete()
+#         Event.clear_future_unused()
         
 #         uid_count = {}
 #         for e in events:
