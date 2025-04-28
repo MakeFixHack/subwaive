@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from subwaive.models import DocusealField,DocusealFieldStore,DocusealSubmission,DocusealSubmitter,DocusealSubmitterSubmission,DocusealTemplate
+from subwaive.models import CalendarEvent,Event
 from subwaive.models import Log,QRCategory,QRCustom
 from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonEvent,PersonStripe
 from subwaive.models import StripeCustomer,StripePaymentLink,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
@@ -52,7 +53,7 @@ class PersonEmail_Admin(admin.ModelAdmin):
 admin.site.register(PersonEmail, PersonEmail_Admin)
 
 class PersonEvent_Admin(admin.ModelAdmin):
-    list_display = ('person', )
+    list_display = ('person', 'event',)
 admin.site.register(PersonEvent, PersonEvent_Admin)
 
 class PersonStripe_Admin(admin.ModelAdmin):
@@ -64,10 +65,13 @@ admin.site.register(PersonStripe, PersonStripe_Admin)
 Other
 """
 
+class CalendarEvent_Admin(admin.ModelAdmin):
+    list_display = ('summary', 'start', 'end',)
+admin.site.register(CalendarEvent, CalendarEvent_Admin)
 
-# class Event_Admin(admin.ModelAdmin):
-#     list_display = ('summary', 'start', 'end',)
-# admin.site.register(Event, Event_Admin)
+class Event_Admin(admin.ModelAdmin):
+    list_display = ('summary', 'start', 'end',)
+admin.site.register(Event, Event_Admin)
 
 class Log_Admin(admin.ModelAdmin):
     list_display = ('timestamp', 'description',)
