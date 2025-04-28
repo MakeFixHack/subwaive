@@ -64,9 +64,10 @@ admin.site.register(PersonStripe, PersonStripe_Admin)
 Other
 """
 
-class Event_Admin(admin.ModelAdmin):
-    list_display = ('summary', 'start', 'end',)
-admin.site.register(Event, Event_Admin)
+
+# class Event_Admin(admin.ModelAdmin):
+#     list_display = ('summary', 'start', 'end',)
+# admin.site.register(Event, Event_Admin)
 
 class Log_Admin(admin.ModelAdmin):
     list_display = ('timestamp', 'description',)
