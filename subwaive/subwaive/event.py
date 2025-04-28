@@ -138,11 +138,11 @@ def refresh_event_by_token(request):
 def event_list(request, timeframe="past"):
     """ List of events """
     if timeframe == "past":
-        events = Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('-end')
+        events = CalendarEvent.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('-end')
     elif timeframe == "future":
-        events = Event.objects.filter(start__gt=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('start')
+        events = CalendarEvent.objects.filter(start__gt=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).order_by('start')
     else:
-        events = Event.objects.all().order_by('-end')
+        events = CalendarEvent.objects.all().order_by('-end')
     events = events.annotate(attendee_count=Count('attendee'))
     
     paginator = Paginator(events, PAGINATOR_SHORT)
