@@ -412,7 +412,7 @@ class CalendarEvent(models.Model):
             description=event_values['description'], 
             start=event_values['start'], end=event_values['end'])
         event._auto_associate(lbound)
-        Log.objects.create(description="Create Event", json={'uid': event.UID})
+        Log.objects.create(description="Create CalendarEvent", json={'uid': event.UID})
     
     def get_current_event():
         """ return any Event objects for events that are currently happening """
