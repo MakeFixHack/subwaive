@@ -399,7 +399,7 @@ class CalendarEvent(models.Model):
             # print("is after lbound")
             event_qs = Event.objects.filter(summary=self.summary, start=self.start, end=self.end)
             if not event_qs.exists():
-                Event.objects.create(summary=self.summary, start=self.start, end=self.end, calendar_event=self)
+                Event.objects.create(summary=self.summary, description=self.description, start=self.start, end=self.end, calendar_event=self)
         # else:
         #     print("out-of-update-date-range event")
     
