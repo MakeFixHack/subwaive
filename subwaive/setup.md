@@ -1,6 +1,5 @@
 # Setup for SubWaive
 
-
 ## The .env file
 
 SubWaive uses an environment file to define secrets, such as passwords, and configurations, such as timezones.
@@ -34,6 +33,7 @@ DOCUSEAL_API_ENDPOINT=
 DOCUSEAL_WWW_ENDPOINT=
 
 CALENDAR_URL=
+CALENDAR_WWW_ENDPOINT=
 ```
 
 Missing values are either secrets you need to collect/establish or setup-specific values, like a time zone or a resource.
@@ -55,7 +55,6 @@ DATA_REFRESH_TOKEN={ get_random_secret_key() }""")
 ```
 
 You must update the `DJANGO_ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` keys for the frontend to not fail security checks. The Docker network for communicating between containers requires the hostname for SubWaive an element in these lists.
-
 
 ## Docker network connections
 
@@ -100,7 +99,6 @@ services:
   default:
 ```
 
-
 ### View Docker network
 
 To see if each container is attached to the network you defined:
@@ -114,7 +112,6 @@ This will also give the name of the containers you should use as hostnames in yo
 * Webhook endpoints
 * Database hostname
 * DJANGO_ALLOWED_HOSTS
-
 
 ## Initializing Django
 
@@ -139,7 +136,6 @@ docker exec -it subwaive python manage.py loaddata initial
 
 The initial data loaded creates a super user called `admin` with a password of `makefixhack`. If you don't change that password immediately, you get what you deserve. 😄
 
-
 ## Docuseal integration
 
 Docuseal can be downloaded and installed from:
@@ -155,7 +151,6 @@ SubWaive considers any document contained in a folder called `Waivers` to be a w
 
 To hide a document from SubWaive, archive it.
 
-
 ### API
 
 Docuseal has an API which requires an API key to be copied into the `.env` file. The API key can be found in the Docuseal settings menu, along with the API secret.
@@ -164,7 +159,6 @@ The relevant `.env` keys are:
 
 * DOCUSEAL_API_KEY - your Docuseal API key
 * DOCUSEAL_API_ENDPOINT - your Docuseal API address, from API examples in settings
-
 
 ### Webhooks
 
@@ -194,11 +188,9 @@ In Docuseal, you must turn on webhooks in settings before you can add the secret
 
 The webhook header key is `X-Docuseal-Signature`.
 
-
 #### Troubleshooting
 
 * Log show `/` as `CSRF violation`: check the webhook address in Docuseal points to `https://hostname/docuseal/webhook/`
-
 
 ### Building links
 
@@ -208,12 +200,10 @@ The relevant `.env` keys are:
 
 * DOCUSEAL_WWW_ENDPOINT - your Docuseal web address, for building URLs
 
-
 ## Stripe integration
 
 * All sales options are represented by a payment link
 * All product prices have a price description
-
 
 ### API
 
@@ -234,13 +224,11 @@ The relevant `.env` keys are:
 
 * STRIPE_API_KEY - the API key built for this app
 
-
 ### Webhooks
 
 TDB - which hooks do you need?
 
 * STRIPE_ENDPOINT_SECRET -
-
 
 ### Building links
 
@@ -254,7 +242,6 @@ For test Stripe data:
 
 * STRIPE_WWW_ENDPOINT=https://dashboard.stripe.com/
 
-
 ## Calendar integration
 
 SubWaive reads in calendar events in order to provide a "check-in" feature for monitoring attendance. Check-ins allow you to view a person's history with events and the attendance at events.
@@ -267,7 +254,7 @@ This provides a away to:
 The relevant `.env` keys are:
 
 * CALENDAR_URL - the local used to download the ical file containing the calendar
-
+* CALENDAR_WWW_ENDPOINT- your public calendar's address, for building URLs
 
 ## Cronjobs
 
@@ -276,7 +263,6 @@ To maintain a reasonably current dataset, SubWaive uses `cron` to periodically u
 * DATA_REFRESH_TOKEN -  a user provided token for authenticating requests for data refreshes
 
 Since SubWaive communicates these requests over its Docker network, no additional security is provided.
-
 
 ### Troubleshooting
 

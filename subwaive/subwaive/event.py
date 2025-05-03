@@ -17,6 +17,7 @@ from subwaive.utils import refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALIT
 
 TIME_ZONE = os.environ.get("TIME_ZONE")
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
+CALENDAR_WWW_ENDPOINT = os.environ.get("CALENDAR_WWW_ENDPOINT")
 
 DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
 
@@ -88,6 +89,10 @@ def event_refresh_page(request):
     page_title = 'Event Data'
     data_source = CALENDAR_URL
 
+    button_dict = [
+        {'url': CALENDAR_WWW_ENDPOINT, 'anchor': 'NextCloud', 'class': 'info', 'active': True},
+    ]
+
     tiles = [
         {
             'title': 'Events',
@@ -110,7 +115,7 @@ def event_refresh_page(request):
         },
     ]
 
-    return refresh(request, page_title, data_source, tiles)
+    return refresh(request, page_title, data_source, tiles, button_dict)
 
 @login_required
 def refresh_event(request):
