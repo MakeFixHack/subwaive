@@ -148,6 +148,7 @@ def docuseal_refresh_page(request):
 
     tiles = [
         {
+            'title': 'Docuseal',
             'buttons': [
                 {'url_name': 'refresh_docuseal', 'anchor': 'Refresh All Docuseal'},
                 {'url_name': 'fetch_new_docuseal', 'anchor': 'Fetch New Docuseal'},

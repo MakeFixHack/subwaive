@@ -90,6 +90,7 @@ def event_refresh_page(request):
 
     tiles = [
         {
+            'title': 'Events',
             'buttons': [
                 {'url_name': 'refresh_event', 'post': [
                     {
@@ -99,15 +100,13 @@ def event_refresh_page(request):
                     },
                     {
                         'type': 'datepicker',
-                        'label': 'Events between today and...',
+                        'label': 'Refresh Events from today to...',
                         'name': 'ubound',
                         'val': (datetime.date.today() + datetime.timedelta(days=7)).isoformat()
                     },
                 ], 'anchor': 'Refresh Upcoming'},
             ],
-            'log_descriptions': [
-                {'description': 'Event'},
-            ]
+            'log_descriptions': [{'description': 'Event'}],
         },
     ]
 

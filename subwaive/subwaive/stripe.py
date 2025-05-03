@@ -182,6 +182,7 @@ def stripe_refresh_page(request):
 
     tiles = [
         {
+            'title': 'Products, Prices, & Links',
             'buttons': [
                 {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh All Products and Prices'},
                 {'url_name': 'fetch_product_and_price', 'anchor': 'Fetch New Products and Prices'},
@@ -193,6 +194,7 @@ def stripe_refresh_page(request):
             ]
         },
         {
+            'title': 'Customers & Subscriptions',
             'buttons': [
                 {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh All Subscriptions and Customers'},
                 {'url_name': 'fetch_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},

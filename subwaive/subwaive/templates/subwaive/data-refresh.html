@@ -22,36 +22,39 @@
         {% for tile in tiles %}
         <div class="card text-center">
             <div class="card-body">
-                {% for log in tile.log_descriptions %}
-                <p>
-                    <h5>{{ log.description }}</h5>
-                    <div>Last updated: {{ log.last_refresh }}</div>
-                </p>
-                {% endfor %}
+                <h5>{{ tile.title }}</h5>
                 {% for button in tile.buttons %}
-                <p>
-                    {% if button.post %}
-                    <form action="{{ button.url}}" method="POST">
-                        {% csrf_token %}
-                        {% for val in button.post %}
-                        <p>
-                            {% if val.label %}
-                            <label>{{ val.label }}</label>
-                            {% endif %}
-                            <input type="{{ val.type }}" name="{{ val.name }}" value="{{ val.val }}" />
-                            {% endfor %}
-                        </p>
+                {% if button.post %}
+                <form action="{{ button.url}}" method="POST">
+                    {% csrf_token %}
+                    {% for val in button.post %}
+                    <p>
+                        {% if val.label %}
+                        <label>{{ val.label }}</label>
+                        {% endif %}
+                        <input type="{{ val.type }}" name="{{ val.name }}" value="{{ val.val }}" />
+                        {% endfor %}
+                    </p>
+                    <p>
                         <button 
                         class="btn btn-success"
-                        >{{ button.anchor }}</button>
-                    </form>
-                    {% else %}
+                    >{{ button.anchor }}</button>
+                    </p>
+                </form>
+                {% else %}
+                <p>
                     <button 
-                        class="btn btn-success"
-                        onclick='window.location="{{ button.url }}";'
-                        >{{ button.anchor }}</button>
-                    {% endif %}
+                    class="btn btn-success"
+                    onclick='window.location="{{ button.url }}";'
+                    >{{ button.anchor }}</button>
                 </p>
+                {% endif %}
+                {% endfor %}
+                <hr>
+                <h5>Last Refresh</h5>
+                {% for log in tile.log_descriptions %}
+                <p>{{ log.description }}:<br>
+                {{ log.last_refresh }}</p>
                 {% endfor %}
             </div>
         </div>
