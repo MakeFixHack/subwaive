@@ -393,18 +393,19 @@ class CalendarEvent(models.Model):
     
     def _auto_associate(self, lbound=None):
         """ automatically create an event for this calendar event if it is in the future and an event does not exist. """
-        print(lbound)
+        if not lbound:
+            lbound = datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))
         if self.start >= lbound:
-            print("is after lbound")
+            # print("is after lbound")
             event_qs = Event.objects.filter(summary=self.summary, start=self.start, end=self.end)
             if not event_qs.exists():
                 Event.objects.create(summary=self.summary, start=self.start, end=self.end, calendar_event=self)
-        else:
-            print("out-of-update-date-range event")
+        # else:
+        #     print("out-of-update-date-range event")
     
     def create(event_values, lbound=None):
         """ create a new event from a dict """
-        print("creating cal event")
+        # print("creating cal event")
         event = CalendarEvent.objects.create(
             UID=event_values['uid'], recurrence_order=event_values['recurrence_order'], 
             summary=event_values['summary'], 
@@ -484,11 +485,11 @@ class CalendarEvent(models.Model):
                 event_qs = CalendarEvent.objects.filter(UID=uid, recurrence_order=recurrence_order)
                 
                 if event_qs.exists():
-                    print("update")
+                    # print("update")
                     CalendarEvent.update_event(event_qs.first(), event_values)
 
                 else:
-                    print("create")
+                    # print("create")
                     CalendarEvent.create(event_values, lbound)
 
         if uid_count:
