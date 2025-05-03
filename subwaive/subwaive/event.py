@@ -200,11 +200,3 @@ def event_details(request, event_id):
     }
 
     return render(request, f'subwaive/event/event-details.html', context)
-
-@login_required
-def event_refresh(request, event_id):
-    """ refresh an individual event """
-    print("entered event_refresh")
-    Event.objects.get(id=event_id).refresh_event()
-
-    return redirect('event_details', event_id)

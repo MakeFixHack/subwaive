@@ -20,7 +20,6 @@ urlpatterns.extend([
     path('event/refresh/all/', event.refresh_event, name='refresh_event'),
     path('event/refresh/by-token/', event.refresh_event_by_token, name='refresh_event_by_token'),
     path('event/<int:event_id>/', event.event_details, name='event_details'),
-    path('event/<int:event_id>/refresh/', event.event_refresh, name='event_refresh'),
     path('person/<int:person_id>/check-in/<int:event_id>/delete/', event.delete_member_check_in, name='delete_member_check_in'),
     path('person/<int:person_id>/event/<int:event_id>/check-in/', event.member_check_in, name='member_check_in'),
     path('person/<int:person_id>/event/<int:event_id>/check-in/force/', event.force_member_check_in, name='force_member_check_in'),
