@@ -413,10 +413,6 @@ class CalendarEvent(models.Model):
             start=event_values['start'], end=event_values['end'])
         event._auto_associate(lbound)
         Log.objects.create(description="Create CalendarEvent", json={'uid': event.UID})
-    
-    def get_current_event():
-        """ return any Event objects for events that are currently happening """
-        return CalendarEvent.objects.filter(start__lte=datetime.datetime.now(), end__gte=datetime.datetime.now())
 
     def get_event_list_from_calendar_url(url, lbound=None, ubound=None):
         """ return a sorted list of events from a calendar URL """
@@ -579,6 +575,10 @@ class Event(models.Model):
         events.delete()
         Log.objects.create(description="Clear unused, future Event instances")
 
+    def get_current_event():
+        """ return any Event objects for events that are currently happening """
+        return Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)), end__gte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)))
+
     def refresh_local_data(self):
         """ refresh details for self.calendar_event """
         self.summary = self.calendar_event.summary
@@ -646,7 +646,7 @@ class Person(models.Model):
     
     def check_in(self, event_id):
         """ check the person into an event """
-        event = CalendarEvent.objects.get(id=event_id)
+        event = Event.objects.get(id=event_id)
         return PersonEvent.objects.create(person=self, event=event)
 
     def check_membership_status_by_person_id(person_id):
