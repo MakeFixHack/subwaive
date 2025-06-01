@@ -808,6 +808,11 @@ class Person(models.Model):
             ps.person = self
             ps.save()
 
+        pes = PersonEvent.objects.filter(person=merge_child)
+        for pe in pes:
+            pe.person = self
+            pe.save()
+
         merge_child.delete()
 
     def search(search_term):
