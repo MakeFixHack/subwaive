@@ -63,7 +63,7 @@ def member_list(request):
         for p in persons_prelim if p.check_membership_status()
     ]
 
-    check_in_events = CalendarEvent.get_current_event()
+    check_in_events = Event.get_current_event()
 
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'All'},
@@ -108,7 +108,7 @@ def person_search(request):
                 for p in results_prelim
             ]
 
-    check_in_events = CalendarEvent.get_current_event()
+    check_in_events = Event.get_current_event()
        
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'List'},
