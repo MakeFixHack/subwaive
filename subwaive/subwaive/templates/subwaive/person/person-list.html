@@ -5,7 +5,12 @@
 {% include 'subwaive/templates/determination-of-confidentiality.html' %}
 
 <div class="container-fluid">
-    <h1>People</h1>
+    <h1>
+        People
+        {% if persons %}
+        <span class="badge text-bg-info" style="padding: 0.5rem;">{{ persons|length }}</span>
+        {% endif %}
+    </h1>
 </div>
 
 <div class="d-none d-md-flex">

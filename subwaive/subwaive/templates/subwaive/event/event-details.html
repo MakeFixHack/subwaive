@@ -25,7 +25,12 @@
 </div>
 
 <div class="section section-heading">
-    <h5>Check-Ins</h5>
+    <h5>
+        Check-Ins
+        {% if persons %}
+        <span class="badge text-bg-info" style="padding: 0.5rem;">{{ persons|length }}</span>
+        {% endif %}
+    </h5>
     <form action="{% url 'event_details' event.id %}" method="POST">
         {% csrf_token %}
         <select name="person_id">
