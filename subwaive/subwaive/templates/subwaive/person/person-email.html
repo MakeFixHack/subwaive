@@ -1,0 +1,30 @@
+{% extends 'subwaive/base.html' %}
+{% load static %}
+{% block content %}
+
+{% include 'subwaive/templates/determination-of-confidentiality.html' %}
+
+<div class="container-fluid">
+    <h1>
+        People
+        {% if persons %}
+        <span class="badge text-bg-info" style="padding: 0.5rem;">{{ persons|length }}</span>
+        {% endif %}
+    </h1>
+</div>
+
+<div class="d-none d-md-flex">
+    {% include 'subwaive/templates/buttons.html' %}
+</div>
+
+{% include 'subwaive/templates/messages.html' %}
+
+<div class="row-container">
+    <p>
+        {% for person in persons %}
+        "{{ person.name }}" &lt;{{ person.preferred_email.email }}&gt;;
+        {% endfor %}
+    </p>
+</div>
+
+{% endblock %}

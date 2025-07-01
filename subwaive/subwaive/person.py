@@ -33,6 +33,7 @@ def person_list(request):
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'All', 'active': True},
             {'url': reverse('member_list'), 'anchor': 'Members'},
+            {'url': reverse('member_email_list'), 'anchor': 'Email'},
             {'url': reverse('person_search'), 'anchor': 'Search'},
     ]
 
@@ -68,6 +69,7 @@ def member_list(request):
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'All'},
             {'url': reverse('member_list'), 'anchor': 'Members', 'active': True},
+            {'url': reverse('member_email_list'), 'anchor': 'Email'},
             {'url': reverse('person_search'), 'anchor': 'Search'},
     ]
 
@@ -79,6 +81,39 @@ def member_list(request):
     }
 
     return render(request, f'subwaive/person/person-list.html', context)
+
+
+@login_required
+def member_email_list(request):
+    """ Return a list of preferred emails for current members """
+    persons_prelim = Person.objects.all().order_by('name','preferred_email__email')
+
+    persons = [
+        {
+            'name': p.name,
+            'preferred_email': p.preferred_email
+        }
+        for p in persons_prelim if p.check_membership_status()
+    ]
+
+    check_in_events = Event.get_current_event()
+
+    button_dict = [
+            {'url': reverse('person_list'), 'anchor': 'All'},
+            {'url': reverse('member_list'), 'anchor': 'Members'},
+            {'url': reverse('member_email_list'), 'anchor': 'Email', 'active': True},
+            {'url': reverse('person_search'), 'anchor': 'Search'},
+    ]
+
+    context = {
+        'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
+        'persons': persons,
+        'buttons': button_dict,
+        'check_in_events': check_in_events,
+    }
+
+    return render(request, f'subwaive/person/person-email.html', context)
+
 
 @login_required
 @permission_required('subwaive.can_search_people')
@@ -113,6 +148,7 @@ def person_search(request):
     button_dict = [
             {'url': reverse('person_list'), 'anchor': 'List'},
             {'url': reverse('member_list'), 'anchor': 'Members'},
+            {'url': reverse('member_email_list'), 'anchor': 'Email'},
             {'url': reverse('person_search'), 'anchor': 'Search', 'active': True},
     ]
 

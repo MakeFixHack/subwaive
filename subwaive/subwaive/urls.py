@@ -40,6 +40,7 @@ urlpatterns.extend([
     path('person/search/', person.person_search, name='person_search'),
     path('person/all/', person.person_list, name='person_list'),
     path('person/members/', person.member_list, name='member_list'),
+    path('person/members/email/', person.member_email_list, name='member_email_list'),
     path('person/<int:person_id>/', person.person_card, name='person_card'),
     path('person/<int:person_id>/docuseal/', person.person_docuseal, name='person_docuseal'),
     path('person/<int:person_id>/edit/', person.person_edit, name='person_edit'),
