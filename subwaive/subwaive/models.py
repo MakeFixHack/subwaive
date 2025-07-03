@@ -1341,6 +1341,12 @@ class StripeSubscription(models.Model):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/subscriptions/{ self.stripe_id }"
 
+    def new(stripe_id, customer, name, created, current_period_end, status, subscription):
+        """ create a new Stripe Subscription """
+        StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
+        StripeSubscriptionItem.create_if_needed(subscription)
+        Log.objects.create(description="Create StripeSubscription", json={'stripe_id': stripe_id})
+
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         Log.objects.create(description="Refresh StripeSubscription")
@@ -1355,9 +1361,11 @@ class StripeSubscription(models.Model):
             current_period_end = fromtimestamp(subscription.current_period_end)
             status = subscription.status
 
-            StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
-            StripeSubscriptionItem.create_if_needed(subscription)
-            Log.objects.create(description="Create StripeSubscription", json={'stripe_id': stripe_id})
+            subscription_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
+            if subscription_qs:
+                subscription_qs.first().update(created, current_period_end, status)
+            else:
+                StripeSubscription.new(stripe_id, customer, name, created, current_period_end, status, subscription)
 
 class StripeSubscriptionItem(models.Model):
     """ A Stripe SubscriptionItem """
