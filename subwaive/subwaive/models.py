@@ -1361,7 +1361,7 @@ class StripeSubscription(models.Model):
             current_period_end = fromtimestamp(subscription.current_period_end)
             status = subscription.status
 
-            subscription_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
+            subscription_qs = StripeSubscription.objects.filter(stripe_id=stripe_id)
             if subscription_qs:
                 subscription_qs.first().update(created, current_period_end, status)
             else:
