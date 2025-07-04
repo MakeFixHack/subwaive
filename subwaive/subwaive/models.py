@@ -1367,6 +1367,32 @@ class StripeSubscription(models.Model):
             else:
                 StripeSubscription.new(stripe_id, customer, name, created, current_period_end, status, subscription)
 
+    def update(self, created, current_period_end, status):
+        """ Update an existing Stripe subscription """
+        is_update = False
+        json = {'stripe_id': self.stripe_id}
+
+        if created != self.created:
+            # how can creation date be updated?
+            is_update = True
+            json['created_old'] = self.created
+            self.created = created
+
+        if current_period_end != self.current_period_end:
+            is_update = True
+            json['current_period_end_old'] = self.current_period_end
+            self.current_period_end = current_period_end
+        
+        if status != self.status:
+            is_update = True
+            json['status_old'] = self.status
+            self.status = status
+
+        if is_update:
+            self.save()
+            Log.objects.create("Update StripeSubscription", json=json)
+
+
 class StripeSubscriptionItem(models.Model):
     """ A Stripe SubscriptionItem """
     stripe_id = models.CharField(max_length=64)
