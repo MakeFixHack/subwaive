@@ -45,6 +45,10 @@ LOGOUT_REDIRECT_URL = os.environ.get('LOGOUT_REDIRECT_URL','')
 OIDC_RP_SIGN_ALGO = os.environ.get('OIDC_RP_SIGN_ALGO','')
 OIDC_OP_JWKS_ENDPOINT = os.environ.get('OIDC_OP_JWKS_ENDPOINT','')
 
+if IS_USE_OIDC_LOGIN:
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Application definition
 
 INSTALLED_APPS = [
