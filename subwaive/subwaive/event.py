@@ -2,7 +2,7 @@ import datetime
 import os
 import pytz
 
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Count
@@ -71,7 +71,7 @@ def check_in_remediation(request, person_id, event_id, waiver_check, membership_
 
     return render(request, f'subwaive/person/person-remediation.html', context)
 
-@permission_required('subwaive.can_remove_check_in')
+
 @login_required
 def delete_member_check_in(request, person_id, event_id):
     """ A method for removing erroneous check-ins """

@@ -1,6 +1,6 @@
 import datetime
 
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -10,7 +10,7 @@ from subwaive.models import Event
 from subwaive.models import Person, PersonEmail, PersonEvent
 from subwaive.utils import CONFIDENTIALITY_LEVEL_CONFIDENTIAL
 
-@permission_required('subwaive.can_list_people')
+
 @login_required
 def person_list(request):
     """ List of people in the system """
@@ -46,7 +46,7 @@ def person_list(request):
 
     return render(request, f'subwaive/person/person-list.html', context)
 
-@permission_required('subwaive.can_list_people')
+
 @login_required
 def member_list(request):
     """ List of members in the system """
@@ -116,7 +116,6 @@ def member_email_list(request):
 
 
 @login_required
-@permission_required('subwaive.can_search_people')
 def person_search(request):
     """ Search for people by name or email """
     search_term = request.POST.get('search_term', None)

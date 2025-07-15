@@ -1,16 +1,28 @@
 from django.contrib import admin
+from django.contrib.auth.views import LoginView
 from django.urls import path
+
+from mozilla_django_oidc import views as oidc_views
 
 from subwaive import docuseal
 from subwaive import stripe
 from subwaive import person
 from subwaive import event
 from subwaive import link
+from subwaive.settings import IS_USE_OIDC_LOGIN
 
 # Admin
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
+
+# OIDC login
+if IS_USE_OIDC_LOGIN:
+    urlpatterns.extend([
+        path('login/', LoginView.as_view(redirect_authenticated_user = True, template_name = 'subwaive/login.html'), name = 'login'),
+        path("sso/authenticate/", oidc_views.OIDCAuthenticationRequestView.as_view(), name="oidc_authentication_init"),
+        path("sso/callback/", oidc_views.OIDCAuthenticationCallbackView.as_view(), name="oidc_authentication_callback"),
+    ])
 
 # Event
 urlpatterns.extend([

@@ -1,0 +1,57 @@
+{% load static %}
+<html>
+    <head>
+        <title>SubWaive</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{% static 'css/subwaive.css' %}">
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.ico' %}">
+
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+    </head>
+
+<!-- oidc_app/templates/registration/login.html -->
+    <body>
+        <div class="content" style="text-align: end; background-color: powderblue; padding: 0.5em;">
+            <img height="50" src="{% static 'img/SubWaive-wordmark.png' %}">
+        </div>
+
+        <div class="content">
+            <div class="container-fluid">
+                <h1>Log in</h1>
+            </div>
+
+            <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Login</h5>
+                        <p>
+                            <a href="{% url 'oidc_authentication_init' %}">
+                                <button class="btn btn-success" type="button">Log in with OIDC</button>
+                            </a>
+                        </p>
+                        <p>
+                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                                User/Password
+                            </button>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card text-center collapse" id="collapseExample">
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <button class="btn btn-success" type="submit">Log in</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

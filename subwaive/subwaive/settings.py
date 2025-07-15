@@ -33,11 +33,24 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS","http://127.0.0.1").split(",")
 
+IS_USE_OIDC_LOGIN = os.environ.get('IS_USE_OIDC_LOGIN',False)
+
+OIDC_RP_CLIENT_ID = os.environ.get('OIDC_RP_CLIENT_ID','')
+OIDC_RP_CLIENT_SECRET = os.environ.get('OIDC_RP_CLIENT_SECRET','')
+OIDC_OP_TOKEN_ENDPOINT = os.environ.get('OIDC_OP_TOKEN_ENDPOINT','')
+OIDC_OP_USER_ENDPOINT = os.environ.get('OIDC_OP_USER_ENDPOINT','')
+OIDC_OP_AUTHORIZATION_ENDPOINT = os.environ.get('OIDC_OP_AUTHORIZATION_ENDPOINT','')
+LOGIN_REDIRECT_URL = os.environ.get('LOGIN_REDIRECT_URL','')
+LOGOUT_REDIRECT_URL = os.environ.get('LOGOUT_REDIRECT_URL','')
+OIDC_RP_SIGN_ALGO = os.environ.get('OIDC_RP_SIGN_ALGO','')
+OIDC_OP_JWKS_ENDPOINT = os.environ.get('OIDC_OP_JWKS_ENDPOINT','')
+
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'mozilla_django_oidc',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -111,6 +124,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+if IS_USE_OIDC_LOGIN:
+    AUTHENTICATION_BACKENDS.append('subwaive.backends.AADB2CAuthenticationBackend')
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -135,4 +154,7 @@ STATIC_ROOT = BASE_DIR / 'subwaive/static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/admin/login/'
+if IS_USE_OIDC_LOGIN:
+    LOGIN_URL = '/login/' # with OIDC
+else:
+    LOGIN_URL = '/admin/login/' # without OIDC
