@@ -91,7 +91,7 @@ Stripe
 """
 
 class StripeCustomer_Admin(admin.ModelAdmin):
-    list_display = ('stripe_id', 'name',)
+    list_display = ('stripe_id', 'name', 'email',)
 admin.site.register(StripeCustomer, StripeCustomer_Admin)
 
 class StripePaymentLink_Admin(admin.ModelAdmin):
