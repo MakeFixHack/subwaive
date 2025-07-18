@@ -749,7 +749,7 @@ class Person(models.Model):
     def get_onetime_payments(self, product_description):
         """ fetch data on each one-time purchase the person has made """
         emails = [e.email for e in PersonEmail.objects.filter(person=self)]
-        payment_links = StripePaymentLinkPrice.objects.filter(price__product__name__icontains=product_description)
+        payment_links = StripePaymentLinkPrice.objects.filter(price__product__name__icontains=product_description,payment_link__is_recurring=False)
         
         otp = []
         for payment_link in payment_links:
@@ -1055,6 +1055,7 @@ class StripePaymentLink(models.Model):
     """ A Stripe PaymentLink """
     stripe_id = models.CharField(max_length=64)
     url = models.URLField()
+    is_recurring = models.BooleanField(default=False)
     # metadata to get name for day-pass event?
 
     class Meta:
@@ -1091,7 +1092,11 @@ class StripePaymentLink(models.Model):
         Log.objects.create(description="Refresh StripePaymentLink")
         StripePaymentLink.objects.all().delete()
         for payment_link in stripe.PaymentLink.list(active=True).auto_paging_iter():
-            StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url)
+            if payment_link.subscription_data:
+                is_recurring = True
+            else:
+                is_recurring = False
+            StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url, is_recurring=is_recurring)
             Log.objects.create(description="Create StripePaymentLink", json={'stripe_id': payment_link.id})
 
 

@@ -95,7 +95,7 @@ class StripeCustomer_Admin(admin.ModelAdmin):
 admin.site.register(StripeCustomer, StripeCustomer_Admin)
 
 class StripePaymentLink_Admin(admin.ModelAdmin):
-    list_display = ('stripe_id', 'url',)
+    list_display = ('stripe_id', 'url', 'is_recurring')
 admin.site.register(StripePaymentLink, StripePaymentLink_Admin)
 
 class StripePrice_Admin(admin.ModelAdmin):
