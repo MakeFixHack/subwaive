@@ -137,7 +137,7 @@ class DocusealSubmission(models.Model):
             Log.objects.create(description="Update DocusealSubmission", json={'submission_id': submission_id})
         else:
             DocusealSubmission.new(submission_id, submission_api['slug'], submission_api['status'], submission_api['created_at'], submission_api['completed_at'], submission_api['archived_at'], submission_api['template']['id'], submitters_api)
-            Log.objects.create(description="Create StripeCustomer", json=json)
+            Log.objects.create(description="Create DocusealSubmission", json=json)
 
     def new(submission_id, slug, status, created_at, completed_at, archived_at, template_id, submitters=None):
         """ Create a new instance """
