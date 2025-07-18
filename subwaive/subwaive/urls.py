@@ -57,7 +57,7 @@ urlpatterns.extend([
     path('person/<int:person_id>/docuseal/', person.person_docuseal, name='person_docuseal'),
     path('person/<int:person_id>/edit/', person.person_edit, name='person_edit'),
     path('person/<int:person_id>/name/<int:important_field_id>/docuseal/', person.set_docuseal_name, name='set_docuseal_name'),
-    path('person/<int:person_id>/name/<stripe_id>/stripe/', person.set_stripe_name, name='set_stripe_name'),
+    path('person/<int:person_id>/name/<customer_id>/stripe/', person.set_stripe_name, name='set_stripe_name'),
     path('person/<int:merge_child_id>/merge/', person.merge_people, name='merge_people'),
     path('person/<int:merge_child_id>/merge/<int:merge_parent_id>/', person.merge_people, name='merge_people'),
     path('person/<int:person_id>/stripe/', person.person_stripe, name='person_stripe'),

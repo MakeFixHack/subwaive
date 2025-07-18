@@ -351,10 +351,10 @@ def set_docuseal_name(request, person_id, important_field_id):
     return redirect('person_edit', person_id)
 
 @login_required
-def set_stripe_name(request, person_id, stripe_id):
+def set_stripe_name(request, person_id, customer_id):
     """ set the person name to a Stripe customer name """
     person = Person.objects.get(id=person_id)
-    name = StripeCustomer.objects.get(stripe_id=stripe_id).name
+    name = StripeCustomer.objects.get(id=customer_id).name
     person.name = name
     person.save()
 
