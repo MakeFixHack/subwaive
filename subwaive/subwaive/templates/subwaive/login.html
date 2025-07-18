@@ -35,20 +35,10 @@
                             </a>
                         </p>
                         <p>
-                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                                User/Password
-                            </button>
+                            <a href="/admin/login/">
+                                <button class="btn btn-primary" type="button">Local log in</button>
+                            </a>
                         </p>
-                    </div>
-                </div>
-
-                <div class="card text-center collapse" id="collapseExample">
-                    <div class="card-body">
-                        <form method="post">
-                            {% csrf_token %}
-                            {{ form.as_p }}
-                            <button class="btn btn-success" type="submit">Log in</button>
-                        </form>
                     </div>
                 </div>
             </div>
