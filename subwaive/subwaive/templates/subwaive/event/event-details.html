@@ -87,4 +87,36 @@
     </div>
 </div>
 
+{% if event_customers %}
+<div class="section section-heading">
+    <h5>
+        One-time payments
+        {% if persons %}
+        <span class="badge text-bg-info" style="padding: 0.5rem;">{{ event_customers|length }}</span>
+        {% endif %}
+    </h5>
+</div>
+
+<div class="row-container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for ec in event_customers %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5>{{ ec.person.name }}</h5>
+
+                <div>{{ person.preferred_email.email }}</div>
+
+                <div>
+                    <button class="btn btn-info" onclick="window.location='{% url 'person_card' person_id=ec.person.id %}'; return false;">Details</button>
+                    {% if not ec.is_attending %}
+                    <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person_id=ec.person.id event_id=event.id  %}'; return false;">Check-in</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

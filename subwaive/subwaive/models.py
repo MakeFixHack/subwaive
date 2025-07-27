@@ -731,22 +731,23 @@ class Person(models.Model):
 
         return documents
 
+    def get_events(self):
+        """ fetch a list of events purchased """
+        return self.get_onetime_payments(payment_type="event")
+
     def get_day_passes(self):
         """ fetch a list of day-passes purchased """
-        return self.get_onetime_payments("pay-what-you")
+        return self.get_onetime_payments(product_name="day pass")
 
     def get_donor_status(self):
         """ give a categorical description of how much they've donated """
-        otp = self.get_onetime_payments("donation")
+        otp = self.get_onetime_payments(payment_type="donation")
         
-        donor_status = []
+        donor_status = [False, 0]
         if self.get_subscriptions("donation"):
-            donor_status.append("Makes a recurring donation")
+            donor_status[0] = True
         if otp:
-            if len(otp) == 1:
-                donor_status.append(f"Made a one-time donation")
-            else:
-                donor_status.append(f"Made { len(otp) } one-time donations")
+            donor_status[1] = len(otp)
 
         return donor_status
 
@@ -762,26 +763,37 @@ class Person(models.Model):
         """ fetch a list of memberships """
         return self.get_subscriptions("membership")
 
-    def get_onetime_payments(self, product_description):
+    def get_onetime_payments(self, product_name=None, payment_type=None):
         """ fetch data on each one-time purchase the person has made """
-        emails = [e.email for e in PersonEmail.objects.filter(person=self)]
-        payment_links = StripePaymentLinkPrice.objects.filter(price__product__name__icontains=product_description,payment_link__is_recurring=False)
-        
+        # Get a list of OTP for this person
+        stripe_customers = [ps.customer for ps in PersonStripe.objects.filter(person=self)]
+        payments = StripeOneTimePayment.objects.filter(customer__in=stripe_customers)
+
+        # Find associated PL.Prc.Prdt.Names
         otp = []
-        for payment_link in payment_links:
-            charges = stripe.checkout.Session.list(payment_link=payment_link.payment_link)
-            for charge in charges:
-                if charge:
-                    if charge.customer_details:
-                        if charge.customer_details.email in emails:
-                            product = stripe.checkout.Session.list_line_items(charge.id).data[0]
-                            otp.append(
-                                {
-                                    'description': product.description, 
-                                    'date': fromtimestamp(charge.created).date(),
-                                    'url': f'{ STRIPE_WWW_ENDPOINT }/payments/{ charge.payment_intent }',
-                                    }
-                                )
+        for p in payments:
+            prices = StripePaymentLinkPrice.objects.filter(payment_link=p.payment_link)
+            if payment_type == "donation":
+                prices = prices.filter(price__product__name__icontains="donation")
+            elif payment_type == "event":
+                prices = prices.filter(payment_link__date__isnull=False)
+            else:
+                prices = prices.filter(payment_link__date__isnull=True).exclude(price__product__name__icontains="donation")
+
+            print(f"prices: {prices}")
+            for plp in prices:
+                if payment_type == "event":
+                    otp_date = p.payment_link.date
+                else:
+                    otp_date = p.date
+                otp.append(
+                    {
+                        'description': plp.price.product.name, 
+                        'date': otp_date,
+                    }
+                )
+
+        print(f"otp: {otp}")
 
         return otp
     
@@ -956,7 +968,7 @@ class QRCustom(models.Model):
 
 class StripeCustomer(models.Model):
     """ A Stripe Customer """
-    stripe_id = models.CharField(max_length=64)
+    stripe_id = models.CharField(max_length=64, blank=True, null=True)
     name = models.CharField(max_length=128)
     email = models.EmailField()
 
@@ -985,17 +997,29 @@ class StripeCustomer(models.Model):
                 person.preferred_email = email
                 person.save()
 
-    def create_and_or_return(stripe_id):
+    def create_and_or_return(stripe_id=None,email=None): #!!! prefer stripe_id, fallback email, if email then no stripe_id
         """ return a record if it exists, else create and return it """
-        json = {'stripe_id': stripe_id}
+        if stripe_id:
+            json = {'stripe_id': stripe_id}
 
-        customer_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
-        if customer_qs.exists():
-            customer = customer_qs.first()
-        else:
-            api_record = stripe.Customer.retrieve(stripe_id)
-            customer = StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
-            Log.objects.create(description="Create StripeCustomer", json=json)
+            customer_qs = StripeCustomer.objects.filter(stripe_id=stripe_id)
+            if customer_qs.exists():
+                customer = customer_qs.first()
+            else:
+                api_record = stripe.Customer.retrieve(stripe_id)
+                customer = StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
+                Log.objects.create(description="Create StripeCustomer", json=json)
+        elif email:
+            json = {'stripe_id': email}
+
+            customer_qs = StripeCustomer.objects.filter(email=email)
+            if customer_qs.exists():
+                customer = customer_qs.first()
+            else:
+                api_record = stripe.Customer.retrieve(stripe_id) #!!! stripe_id is null here
+                customer = StripeCustomer.objects.create(stripe_id=None, name=api_record.name, email=api_record.email)
+                Log.objects.create(description="Create StripeCustomer", json=json)
+
 
         return customer
 
@@ -1041,40 +1065,76 @@ class StripeCustomer(models.Model):
             StripeCustomer.new(stripe_id=stripe_id, name=name, email=email)
 
 
-# class StripeOneTimePayment(models.Model):
-#     """ A Stripe Subscription """
-#     stripe_id = models.CharField(max_length=64)
-#     customer = models.ForeignKey("subwaive.StripeCustomer", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
-#     date = models.DateTimeField(null=True, blank=True)
-#     status = models.CharField(max_length=64)
-#     name = models.CharField(max_length=128)
-#     product = models.ForeignKey("subwaive.StripeProduct", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
+class StripeOneTimePayment(models.Model):
+    """ A Stripe one-time payment """
+    stripe_id = models.CharField(max_length=128)
+    customer = models.ForeignKey("subwaive.StripeCustomer", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
+    date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=64)
+    payment_link = models.ForeignKey("subwaive.StripePaymentLink", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
 
-#     class Meta:
-#         ordering = ('stripe_id',)
+    class Meta:
+        ordering = ('stripe_id',)
 
-#     def __str__(self):
-#         return f"""{ self.stripe_id } / { self.product } / { self.date }"""
+    def __str__(self):
+        return f"""{ self.stripe_id } / { self.payment_link } / { self.date }"""
 
-#     def get_url(self):
-#         """ URL for a hyperlink """
-#         return f"{ STRIPE_WWW_ENDPOINT }/payments/{ self.stripe_id }"
+    def create_if_needed(checkout_session):
+        """ creates a new record """
+        json = {'stripe_id': checkout_session.stripe_id}
+        
+        if checkout_session.status == 'complete':
+            payment_qs = StripeOneTimePayment.objects.filter(stripe_id=checkout_session.id)
+            if not payment_qs.exists():
+                customer = None
+                email = checkout_session.customer_details['email']
+                name = checkout_session.customer_details['name']
+                if not name:
+                    name = email
+                customer_qs = StripeCustomer.objects.filter(email=email)
+                # print('checking for customer', email)
+                if customer_qs.exists():
+                    # print('using existing customer')
+                    customer = customer_qs.first()
+                else:
+                    # print('creating new customer')
+                    StripeCustomer.new(stripe_id=None, name=name, email=email)
+                    customer = StripeCustomer.objects.get(email=email)
+                    # print(customer)
 
-#     def refresh():
-#         """ clear out existing records and repopulate them from the API """
-#         Log.objects.create(description="Refresh StripeSubscription")
-#         StripeOneTimePayment.objects.all().delete()
-#         for pl in StripePaymentLink.objects.filter(interval='one-time'):
-#             for cs in stripe.checkout.Session.list(payment_link=pl.stripe_id):
-#                 # link customer_details.email and pl.price.product and date and status
-#                 # that will let us know who bought which product from which link, when, and if it succeeded
-#                 pass
+                payment_link_qs = StripePaymentLink.objects.filter(stripe_id=checkout_session.payment_link)
+                if payment_link_qs.exists():
+                    payment_link = payment_link_qs.first()
+                else:
+                    payment_link = StripePaymentLink.create_or_update(checkout_session.payment_link)
+                
+                if payment_link.date:
+                    otp_date = payment_link.date
+                else:
+                    otp_date = fromtimestamp(checkout_session.created).date()
+
+                StripeOneTimePayment.objects.create(stripe_id=checkout_session.id, customer=customer, date=otp_date, status=checkout_session.status, payment_link=payment_link)
+                Log.objects.create(description="Create StripeOneTimePayment", json=json)
+
+    def get_url(self):
+        """ URL for a hyperlink """
+        return f"{ STRIPE_WWW_ENDPOINT }/payments/{ self.stripe_id }"
+
+    def refresh(new_only=False):
+        """ clear out existing records and repopulate them from the API """
+        Log.objects.create(description="Refresh StripeSubscription")
+        StripeOneTimePayment.objects.all().delete()
+        for plp in StripePaymentLinkPrice.objects.filter(payment_link__is_recurring=False):
+            for cs in stripe.checkout.Session.list(payment_link=plp.payment_link.stripe_id):
+                StripeOneTimePayment.create_if_needed(cs)
+
 
 class StripePaymentLink(models.Model):
     """ A Stripe PaymentLink """
     stripe_id = models.CharField(max_length=64)
     url = models.URLField()
     is_recurring = models.BooleanField(default=False)
+    date = models.DateField(blank=True, null=True)
     # metadata to get name for day-pass event?
 
     class Meta:
@@ -1110,12 +1170,16 @@ class StripePaymentLink(models.Model):
         """ clear out existing records and repopulate them from the API """
         Log.objects.create(description="Refresh StripePaymentLink")
         StripePaymentLink.objects.all().delete()
-        for payment_link in stripe.PaymentLink.list(active=True).auto_paging_iter():
+        for payment_link in stripe.PaymentLink.list().auto_paging_iter():
             if payment_link.subscription_data:
                 is_recurring = True
             else:
                 is_recurring = False
-            StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url, is_recurring=is_recurring)
+            if "event_date" in payment_link.metadata.keys():
+                event_date = datetime.datetime.strptime(payment_link.metadata.get("event_date"), "%Y-%m-%d")
+            else:
+                event_date = None
+            StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url, is_recurring=is_recurring, date=event_date)
             Log.objects.create(description="Create StripePaymentLink", json={'stripe_id': payment_link.id})
 
 
@@ -1143,7 +1207,7 @@ class StripePaymentLinkPrice(models.Model):
         for payment_link in StripePaymentLink.objects.all():
             for line_item in stripe.PaymentLink.list_line_items(payment_link.stripe_id).auto_paging_iter():
                 stripe_id = line_item.price.id
-                price = StripePrice.objects.get(stripe_id=stripe_id)
+                price = StripePrice.create_and_or_return(stripe_id=stripe_id)
                 StripePaymentLinkPrice.objects.create(payment_link=payment_link, price=price)
 
 
@@ -1173,8 +1237,10 @@ class StripePrice(models.Model):
 
         price_qs = StripePrice.objects.filter(stripe_id=stripe_id)
         if not price_qs.exists():
-            api_prc = stripe.Price.retrieve(stripe_id)
-            product = StripeProduct.create_or_update(api_prc.product)
+            api_record = StripePrice.fetch_api_data(stripe_id)
+            api_prc = StripePrice.dict_from_api(api_record)
+            product = StripeProduct.create_and_or_return(api_record.product)
+            print(product)
             price = StripePrice.objects.create(stripe_id=stripe_id, product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
             Log.objects.create(description="Create StripePrice", json=json)
         else:
@@ -1232,7 +1298,7 @@ class StripePrice(models.Model):
         Log.objects.create(description="Refresh StripePrice")
         StripePrice.objects.all().delete()
         for price in stripe.Price.list(active=True).auto_paging_iter():
-            print(price.product)
+            # print(price.product)
             if stripe.Product.retrieve(price.product).active:
                 product = StripeProduct.objects.get(stripe_id=price.product)
                 api_prc = StripePrice.dict_from_api(price)
@@ -1270,10 +1336,10 @@ class StripeProduct(models.Model):
         """ updates an existing record, otherwise creates one """
         json = {'stripe_id': stripe_id}
         
-        product_qs = StripeProduct.objects.filter(stripe_id=stripe_id).first()
+        product_qs = StripeProduct.objects.filter(stripe_id=stripe_id)
         api_prd = stripe.Product.retrieve(stripe_id)
         if product_qs.exists():
-            product = product_qs
+            product = product_qs.first()
             product.name = api_prd.name
             product.description = api_prd.description
             product.save()

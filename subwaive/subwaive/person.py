@@ -237,6 +237,7 @@ def person_stripe(request, person_id):
         'person': person,
         'stripe_subscriptions': person.get_memberships(),
         'stripe_onetime_payments': person.get_day_passes(),
+        'stripe_events': person.get_events(),
         'stripe_donor_status': person.get_donor_status(),
     }
 

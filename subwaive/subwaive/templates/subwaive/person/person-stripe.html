@@ -57,16 +57,44 @@
         </div>
         {% endfor %}
     </div>
+
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% for payment in stripe_events %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">{{ payment.description }}</h5>
+                <div>{{ payment.date }}</div>
+                <div><a href="{{ payment.url }}">View in Stripe</a></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <div class="section section-heading">
     <h5 class="card-title">Donor Status</h5>
-    <div>
-        {% for donor_status in stripe_donor_status %}
-        <p>{{ donor_status }}</p>
-        {% empty %}
-        <p>Not yet</p>
-        {% endfor %}
+</div>
+
+<div class="container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        {% if stripe_donor_status %}
+            {% if stripe_donor_status.0 %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">Recurring donations</h5>
+                <div>Makes a recurring donation.</div>
+            </div>
+        </div>
+            {% endif %}
+            {% if stripe_donor_status.1 %}
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">One-time donation</h5>
+                <div>Has made {{ stripe_donor_status.1 }} donation{{ stripe_donor_status.1|pluralize }}.</div>
+            </div>
+        </div>
+            {% endif %}
+        {% endif %}
     </div>
 </div>
 

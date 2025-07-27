@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import stripe
 
-from subwaive.models import StripePaymentLink,StripePrice,StripeProduct,StripePaymentLinkPrice,StripeSubscription,StripeCustomer
+from subwaive.models import StripeOneTimePayment,StripePaymentLink,StripePrice,StripeProduct,StripePaymentLinkPrice,StripeSubscription,StripeCustomer
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, QR_SMALL, QR_LARGE
 
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
@@ -169,6 +169,7 @@ def fetch_new_subscription_and_customer():
 def refresh_all_subscription_and_customer(new_only=False):
     StripeCustomer.refresh(new_only)
     StripeSubscription.refresh(new_only)
+    StripeOneTimePayment.refresh(new_only)
 
 @login_required
 def stripe_refresh_page(request):
@@ -184,8 +185,8 @@ def stripe_refresh_page(request):
         {
             'title': 'Products, Prices, & Links',
             'buttons': [
-                {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh All Products and Prices'},
-                {'url_name': 'fetch_product_and_price', 'anchor': 'Fetch New Products and Prices'},
+                {'url_name': 'refresh_product_and_price', 'anchor': 'Refresh All Products, Prices, and Links'},
+                {'url_name': 'fetch_product_and_price', 'anchor': 'Fetch New Products, Prices, and Links'},
             ],
             'log_descriptions': [
                 {'description': 'StripeProduct'},
@@ -196,12 +197,13 @@ def stripe_refresh_page(request):
         {
             'title': 'Customers & Subscriptions',
             'buttons': [
-                {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh All Subscriptions and Customers'},
-                {'url_name': 'fetch_subscription_and_customer', 'anchor': 'Fetch New Subscriptions and Customers'},
+                {'url_name': 'refresh_subscription_and_customer', 'anchor': 'Refresh All Subscriptions, Payments, and Customers'},
+                {'url_name': 'fetch_subscription_and_customer', 'anchor': 'Fetch New Subscriptions, Payments, and Customers'},
             ],
             'log_descriptions': [
                 {'description': 'StripeCustomer'},
                 {'description': 'StripeSubscription'},
+                {'description': 'StripeOneTimePayment'},
             ]
         },
     ]
