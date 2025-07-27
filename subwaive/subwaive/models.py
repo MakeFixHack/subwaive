@@ -755,10 +755,6 @@ class Person(models.Model):
         """ return a list of emails associated with this person """
         return PersonEmail.objects.filter(person=self)
 
-    def get_events(self):
-        """ fetch a list of events purchased """
-        return self.get_onetime_payments("event")
-
     def get_memberships(self):
         """ fetch a list of memberships """
         return self.get_subscriptions("membership")
