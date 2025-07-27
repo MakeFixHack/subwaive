@@ -24,25 +24,14 @@
     <div>{{ event.description }}</div>
 </div>
 
+{% if check_in_issues %}
 <div class="section section-heading">
     <h5>
-        Check-Ins
-        {% if persons %}
-        <span class="badge text-bg-info" style="padding: 0.5rem;">{{ persons|length }}</span>
-        {% endif %}
+        Check-in issues
+        <span class="badge text-bg-info" style="padding: 0.5rem;">{{ check_in_issues|length }}</span>
     </h5>
-    <form action="{% url 'event_details' event.id %}" method="POST">
-        {% csrf_token %}
-        <select name="person_id">
-            {% for person in possible_check_ins %}
-            <option value="{{ person.id }}">{{ person.name }}</option>
-            {% endfor %}
-        </select>
-        <button class="btn btn-success">Add</button>
-    </form>
 </div>
 
-{% if check_in_issues %}
 <div class="row-container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
         {% for issue in check_in_issues %}
@@ -67,6 +56,24 @@
     </div>
 </div>
 {% endif %}
+
+<div class="section section-heading">
+    <h5>
+        Attendees
+        {% if persons %}
+        <span class="badge text-bg-info" style="padding: 0.5rem;">{{ persons|length }}</span>
+        {% endif %}
+    </h5>
+    <form action="{% url 'event_details' event.id %}" method="POST">
+        {% csrf_token %}
+        <select name="person_id">
+            {% for person in possible_check_ins %}
+            <option value="{{ person.id }}">{{ person.name }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-success">Add</button>
+    </form>
+</div>
 
 <div class="row-container">
     <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
