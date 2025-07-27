@@ -4,7 +4,7 @@ from subwaive.models import DocusealField,DocusealFieldStore,DocusealSubmission,
 from subwaive.models import CalendarEvent,Event
 from subwaive.models import Log,QRCategory,QRCustom
 from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonEvent,PersonStripe
-from subwaive.models import StripeCustomer,StripePaymentLink,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
+from subwaive.models import StripeCustomer,StripeOneTimePayment,StripePaymentLink,StripePaymentLinkPrice,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
 
 
 """
@@ -94,14 +94,22 @@ class StripeCustomer_Admin(admin.ModelAdmin):
     list_display = ('stripe_id', 'name', 'email',)
 admin.site.register(StripeCustomer, StripeCustomer_Admin)
 
+class StripeOneTimePayment_Admin(admin.ModelAdmin):
+    list_display = ('stripe_id', 'customer', 'date',)
+admin.site.register(StripeOneTimePayment, StripeOneTimePayment_Admin)
+
 class StripePaymentLink_Admin(admin.ModelAdmin):
-    list_display = ('stripe_id', 'url', 'is_recurring')
+    list_display = ('stripe_id', 'url', 'is_recurring', 'date')
 admin.site.register(StripePaymentLink, StripePaymentLink_Admin)
 
-class StripePrice_Admin(admin.ModelAdmin):
-    list_display = ('stripe_id', 'interval', 'price',)
-admin.site.register(StripePrice, StripePrice_Admin)
+class StripePaymentLinkPrice_Admin(admin.ModelAdmin):
+    list_display = ('payment_link', 'price')
+admin.site.register(StripePaymentLinkPrice, StripePaymentLinkPrice_Admin)
 
+class StripePrice_Admin(admin.ModelAdmin):
+    list_display = ('stripe_id', 'interval', 'name', 'price', 'product',)
+admin.site.register(StripePrice, StripePrice_Admin)
+    
 class StripeProduct_Admin(admin.ModelAdmin):
     list_display = ('stripe_id', 'name', 'description',)
 admin.site.register(StripeProduct, StripeProduct_Admin)
