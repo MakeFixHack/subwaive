@@ -57,7 +57,7 @@ class DocusealFieldStore(models.Model):
 
     def __str__(self):
         return f"""{ self.field }"""
-    
+
     def re_extract(submission_id):
         """ re-extract field store values for a DocusealSubmission """
         Log.objects.create(description="Refresh DocusealFieldStore", json={'submission_id': submission_id})
@@ -71,8 +71,9 @@ class DocusealFieldStore(models.Model):
                 if form_field['field'].lower().strip() == field.field.lower().strip():
                     if form_field['value']:
                         DocusealFieldStore.objects.create(submission=submission, field=field, value=form_field['value'])
+                        if 'name' in field.field.lower():
+                            submission._auto_name(form_field['value'])
 
-    
     def refresh(max_existing_submission_id=None):
         """ clear out existing records and repopulate them from the API """
         if max_existing_submission_id:
@@ -91,6 +92,8 @@ class DocusealFieldStore(models.Model):
                     if form_field['field'].lower().strip() == field.field.lower().strip():
                         if form_field['value']:
                             DocusealFieldStore.objects.create(submission=submission, field=field, value=form_field['value'])
+                            if 'name' in field.field.lower():
+                                submission._auto_name(form_field['value'])
 
 
 class DocusealSubmission(models.Model):
@@ -108,6 +111,18 @@ class DocusealSubmission(models.Model):
 
     def __str__(self):
         return f"""{ self.submission_id } / { self.template } / { self.slug } / { self.status } / {self.completed_at }"""
+    
+    def _auto_name(self, name):
+        """ automatically update the associated submitter's name if it looks like an email address. """
+        submitters = [dss.submitter for dss in DocusealSubmitterSubmission.objects.filter(submission=self)]
+        for submitter in submitters:
+            person = PersonDocuseal.objects.get(submitter=submitter).person
+            if "@" in person.name and "." in person.name:
+                print(f"Updating: {person.name}==>{name}")
+                person.name = name
+                person.save()
+            else:
+                print(f"Not updating: {person.name} / {name}")
 
     def create_or_update(submission_id):
         """ update a record if it exists, else create one """
@@ -214,6 +229,7 @@ class DocusealSubmitter(models.Model):
                 email = PersonEmail.objects.create(person=person, email=self.email)
                 person.preferred_email = email
                 person.save()
+                PersonDocuseal.objects.create(person=person, submitter=self)
 
     def create_if_needed_by_id(submitter_id):
         """ Create a new DocusealSubmitter if one with this email doesn't exist already """
@@ -960,8 +976,11 @@ class StripeCustomer(models.Model):
                 person = email.person
             if person:
                 PersonStripe.objects.create(person=person, customer=self)
+                if "@" in person.name and "." in person.name:
+                    person.name=self.name
+                    person.save()
             else:
-                person = Person.objects.create(name=self.email)
+                person = Person.objects.create(name=self.name)
                 email = PersonEmail.objects.create(person=person, email=self.email)
                 person.preferred_email = email
                 person.save()
