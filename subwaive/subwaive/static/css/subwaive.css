@@ -30,6 +30,10 @@ div.card {
     margin-bottom: 1rem;
     margin-right: 1rem;
 }
+div.text-body {
+    width: 100%;
+    margin-bottom: 1rem;
+}
 div.row-container {
     margin: 1rem;
 }

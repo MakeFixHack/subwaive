@@ -19,12 +19,29 @@
 
 {% include 'subwaive/templates/messages.html' %}
 
+<div class="section section-heading">
+    <h5 class="card-title">ListMonk CSV import format <a href="#" onclick="copyElementTextToClipboard('link-monk-import-csv');"><img src="{% static 'img/copy.svg' %}"></a></h5>
+</div>
+
 <div class="row-container">
-    <p>
-        {% for person in persons %}
-        "{{ person.name }}" &lt;{{ person.preferred_email.email }}&gt;;
-        {% endfor %}
-    </p>
+    <div class="card text-body text-center">
+        <div class="card-body">
+            <p id="link-monk-import-csv">email,name,attributes<br />{% for person in persons %}
+{{ person.preferred_email.email }},"{{ person.name }}",""<br />{% endfor %}</p>
+        </div>
+    </div>
+</div>
+
+<div class="section section-heading">
+    <h5 class="card-title">Email client field format <a href="#" onclick="copyElementTextToClipboard('email-recipient-list');"><img src="{% static 'img/copy.svg' %}"></a></h5>
+</div>
+
+<div class="row-container">
+    <div class="card text-body text-center">
+        <div class="card-body">
+            <p id="email-recipient-list">{% for person in persons %}"{{ person.name }}" &lt;{{ person.preferred_email.email }}&gt;; {% endfor %}</p>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
