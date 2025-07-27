@@ -45,7 +45,7 @@ def member_check_in(request, person_id, event_id, override_checks=False):
         check_in = Person.objects.get(id=person_id).check_in(event_id)
         messages.success(request, f"Checked-in for { check_in.event.summary }")
 
-        return redirect('person_card', person_id)
+        return redirect('event_details', event_id)
     else:
         print('check-in checks failed')
         return check_in_remediation(request=request, person_id=person_id, event_id=event_id, waiver_check=waiver_check, membership_status=membership_status, has_prior_check_in=has_prior_check_in)
