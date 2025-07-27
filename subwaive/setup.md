@@ -136,6 +136,78 @@ docker exec -it subwaive python manage.py loaddata initial
 
 The initial data loaded creates a super user called `admin` with a password of `makefixhack`. If you don't change that password immediately, you get what you deserve. 😄
 
+## Single Sign On with OIDC
+
+SubWaive has optional support for two forms of authentication:
+
+1. Django's built-in auth system (always enabled)
+2. OIDC
+
+### Configuration
+
+To configure OIDC a set of key-value pairs must be added to the `.env` file.
+
+To turn on SSO:
+
+```
+IS_USE_OIDC_LOGIN=True
+```
+
+Authentication details:
+
+```
+OIDC_RP_SIGN_ALGO=
+OIDC_RP_CLIENT_ID=
+OIDC_RP_CLIENT_SECRET=
+```
+
+SubWaive hosting details:
+
+```
+LOGIN_REDIRECT_URL=
+LOGOUT_REDIRECT_URL=
+```
+
+> Use http://localhost/ for a local development instance.
+
+SSO server endpoints:
+
+```
+OIDC_OP_TOKEN_ENDPOINT=
+OIDC_OP_AUTHORIZATION_ENDPOINT=
+OIDC_OP_JWKS_ENDPOINT=
+OIDC_OP_USER_ENDPOINT=
+```
+
+> Fully formed URLs you can find in your OpenID Configuration for the OIDC client.
+
+Missing values are specific to your OIDC configuration and `client`.
+
+### Providers
+
+By default, SubWaive is designed to work with [Keycloak](https://www.keycloak.org/). 
+
+For other providers you may need to modify `subwaive/subwaive/backends.py` to provide different keys for the dictionary `claims`, which is used to populate meaningful user information.
+
+### User privileges
+
+When SubWaive creates a local user for a new SSO login, it provides that user access to the `Admin Console`. The `Admin Console` allows them to perform certain tasks that are not exposed by SubWaive's web interface. To that end, SubWaive provides the new user with privileges so they can view, add, remove, and change a select number of database models:
+
+* Person - name updates and additions
+* PersonEmail - email address management
+* QRCategory - managing custom QR code categories
+* QRCustom - managing custom QR codes
+
+The `admin` user can modify these permissions once established. To change the set of privileges provided to new users, modify the list `codenames` in `subwaive/subwaive/backends.py`.
+
+### Logging in
+
+When SSO is enabled, a different log-in page is used. The custom log-in page provides a button for signing in with your SSO provider and a button to reveal the built-in login (for the admin and any other local accounts).
+
+### Logging out
+
+Logout is handled by the `Admin Console` regardless of authentication method.
+
 ## Docuseal integration
 
 Docuseal can be downloaded and installed from:
