@@ -12,7 +12,8 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from subwaive.models import CalendarEvent, Event
-from subwaive.models import Person, PersonEvent
+from subwaive.models import Person, PersonEvent, PersonStripe
+from subwaive.models import StripeOneTimePayment
 from subwaive.utils import refresh, CONFIDENTIALITY_LEVEL_PUBLIC, CONFIDENTIALITY_LEVEL_CONFIDENTIAL
 
 TIME_ZONE = os.environ.get("TIME_ZONE")
@@ -195,11 +196,28 @@ def event_details(request, event_id):
 
     possible_check_ins = Person.objects.exclude(id__in=[p.id for p in persons])
 
+    print(f"event.start.date(): {event.start.date()}")
+    for otp in StripeOneTimePayment.objects.all():
+        print (otp.date)
+    payees = [otp.customer for otp in StripeOneTimePayment.objects.filter(date=event.start.date())]
+    print(f"payees: {payees}")
+    customers = PersonStripe.objects.filter(customer__in=payees).exclude(person__id__in=[p.id for p in persons])
+    print(f"customers: {customers}")
+    event_customers = []
+    for customer in customers:
+        event_customers.append(
+            {
+                'is_attending': bool(customer in persons),
+                'person': customer.person
+            }
+        )
+
     context = {
         'event': event,
         'persons': persons,
         'possible_check_ins': possible_check_ins,
         'check_in_issues': check_in_issues,
+        'event_customers': event_customers,
         'CONFIDENTIALITY_LEVEL': CONFIDENTIALITY_LEVEL_CONFIDENTIAL,
     }
 
