@@ -4,4 +4,4 @@
 58 * * * * /bin/sh /tmp/data_refresh.sh $DATA_REFRESH_TOKEN docuseal
 00 * * * * /bin/sh /tmp/data_refresh.sh $DATA_REFRESH_TOKEN stripe
 
-* * * * * /bin/sh /tmp/thin_logs.sh $DATA_REFRESH_TOKEN
+0 0 * * 1 /bin/sh /tmp/thin_logs.sh $DATA_REFRESH_TOKEN
