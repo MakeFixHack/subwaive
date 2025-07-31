@@ -121,6 +121,7 @@ class DocusealSubmission(models.Model):
             person = PersonDocuseal.objects.get(submitter=submitter).person
             if "@" in person.name and "." in person.name:
                 # print(f"Updating: {person.name}==>{name}")
+                Log.new(logging_level=logging.INFO, description="Auto-name by Docuseal", json={'old': person.name, 'new': name})
                 person.name = name
                 person.save()
             # else:
@@ -1004,6 +1005,7 @@ class StripeCustomer(models.Model):
             if person:
                 PersonStripe.objects.create(person=person, customer=self)
                 if "@" in person.name and "." in person.name:
+                    Log.new(logging_level=logging.INFO, description="Auto-name by Stripe", json={'old': person.name, 'new': self.name})
                     person.name=self.name
                     person.save()
             else:
