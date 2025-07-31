@@ -120,12 +120,11 @@ class DocusealSubmission(models.Model):
         for submitter in submitters:
             person = PersonDocuseal.objects.get(submitter=submitter).person
             if "@" in person.name and "." in person.name:
-                # print(f"Updating: {person.name}==>{name}")
-                Log.new(logging_level=logging.INFO, description="Auto-name by Docuseal", json={'old': person.name, 'new': name})
-                person.name = name
-                person.save()
-            # else:
-            #     print(f"Not updating: {person.name} / {name}")
+                if "@" not in name and "." not in name:
+                    # print(f"Updating: {person.name}==>{name}")
+                    Log.new(logging_level=logging.INFO, description="Auto-name by Docuseal", json={'old': person.name, 'new': name})
+                    person.name = name
+                    person.save()
 
     def create_or_update(submission_id):
         """ update a record if it exists, else create one """
@@ -1005,9 +1004,10 @@ class StripeCustomer(models.Model):
             if person:
                 PersonStripe.objects.create(person=person, customer=self)
                 if "@" in person.name and "." in person.name:
-                    Log.new(logging_level=logging.INFO, description="Auto-name by Stripe", json={'old': person.name, 'new': self.name})
-                    person.name=self.name
-                    person.save()
+                    if "@" not in self.name and "." not in self.name:
+                        Log.new(logging_level=logging.INFO, description="Auto-name by Stripe", json={'old': person.name, 'new': self.name})
+                        person.name=self.name
+                        person.save()
             else:
                 person = Person.objects.create(name=self.name)
                 email = PersonEmail.objects.create(person=person, email=self.email)
