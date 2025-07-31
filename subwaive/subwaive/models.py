@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import pytz #!!! your sometimes adding local and sometimes adding utc, if they are tz-aware does it mater?
 import caldav
@@ -29,6 +30,7 @@ stripe.api_key = STRIPE_API_KEY
 TIME_ZONE = os.environ.get("TIME_ZONE")
 CALENDAR_URL = os.environ.get("CALENDAR_URL")
 
+LOGGING_LEVEL = int(os.environ.get("LOGGING_LEVEL", logging.DEBUG))
 
 def fromtimestamp(timestamp):
     """ transforms a timestamp to a datetime """
@@ -60,7 +62,7 @@ class DocusealFieldStore(models.Model):
 
     def re_extract(submission_id):
         """ re-extract field store values for a DocusealSubmission """
-        Log.objects.create(description="Refresh DocusealFieldStore", json={'submission_id': submission_id})
+        Log.new(logging_level=logging.INFO, description="Refresh DocusealFieldStore", json={'submission_id': submission_id})
         submission = DocusealSubmission.objects.get(id=submission_id)
         DocusealFieldStore.objects.filter(submission=submission).delete()
         important_fields = DocusealField.objects.all()
@@ -80,7 +82,7 @@ class DocusealFieldStore(models.Model):
             submissions = DocusealSubmission.objects.filter(submission_id__gt=max_existing_submission_id)
         else:
             submissions = DocusealSubmission.objects.all()
-            Log.objects.create(description="Refresh DocusealFieldStore")
+            Log.new(logging_level=logging.INFO, description="Refresh DocusealFieldStore")
             DocusealFieldStore.objects.all().delete()
 
         important_fields = DocusealField.objects.all()
@@ -149,29 +151,29 @@ class DocusealSubmission(models.Model):
                 for submitter in submitters_new:
                     DocusealSubmitter.create_if_needed_by_id(submitter['submitter_id'])
                 DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=submission, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters_new])
-            Log.objects.create(description="Update DocusealSubmission", json={'submission_id': submission_id})
+            Log.new(logging_level=logging.DEBUG, description="Update DocusealSubmission", json={'submission_id': submission_id})
         else:
             DocusealSubmission.new(submission_id, submission_api['slug'], submission_api['status'], submission_api['created_at'], submission_api['completed_at'], submission_api['archived_at'], submission_api['template']['id'], submitters_api)
-            Log.objects.create(description="Create DocusealSubmission", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create DocusealSubmission", json=json)
 
     def new(submission_id, slug, status, created_at, completed_at, archived_at, template_id, submitters=None):
         """ Create a new instance """
         template = DocusealTemplate.objects.get(template_id=template_id)
         doc_sub = DocusealSubmission.objects.create(submission_id=submission_id, slug=slug, status=status, created_at=created_at, completed_at=completed_at, archived_at=archived_at, template=template)
-        Log.objects.create(description="Create DocusealSubmission", json={'submission_id': submission_id})
+        Log.new(logging_level=logging.DEBUG, description="Create DocusealSubmission", json={'submission_id': submission_id})
         if submitters:
             DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=doc_sub, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters])
 
     def refresh(new_only=True):
         """ clear out existing records and repopulate them from the API """
         if new_only:
-            Log.objects.create(description="Fetch New DocusealSubmission")
+            Log.new(logging_level=logging.INFO, description="Fetch New DocusealSubmission")
             # capture changes to submission status/dates
             for submission in DocusealSubmission.objects.filter(completed_at__isnull=True).order_by('-created_at')[:20]:
                 DocusealSubmission.create_or_update(submission.submission_id)
             last_submission_id = DocusealSubmission.objects.all().order_by('-submission_id').first().submission_id
         else:
-            Log.objects.create(description="Refresh DocusealSubmission")
+            Log.new(logging_level=logging.INFO, description="Refresh DocusealSubmission")
             DocusealSubmission.objects.all().delete()
             last_submission_id = None
 
@@ -247,7 +249,7 @@ class DocusealSubmitter(models.Model):
     def new(submitter_id, email, slug):
         """ Create a new instance and auto_associate """
         doc_sub = DocusealSubmitter.objects.create(submitter_id=submitter_id, email=email, slug=slug)
-        Log.objects.create(description="Create DocusealSubmitter", json={'submitter_id': submitter_id})
+        Log.new(logging_level=logging.DEBUG, description="Create DocusealSubmitter", json={'submitter_id': submitter_id})
         doc_sub._auto_associate()
 
     def search(email):
@@ -275,10 +277,10 @@ class DocusealSubmitter(models.Model):
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         if new_only:
-            Log.objects.create(description="Fetch New DocusealSubmitter")
+            Log.new(logging_level=logging.INFO, description="Fetch New DocusealSubmitter")
             last_submitter_id = DocusealSubmitter.objects.all().order_by('-submitter_id').first().submitter_id
         else:
-            Log.objects.create(description="Refresh DocusealSubmitter")
+            Log.new(logging_level=logging.INFO, description="Refresh DocusealSubmitter")
             DocusealSubmitter.objects.all().delete()
             last_submitter_id = None
 
@@ -342,22 +344,22 @@ class DocusealTemplate(models.Model):
             template.name = template_api['name']
             template.folder_name = template_api['folder_name']
             template.save()
-            Log.objects.create(description="Update DocusealTemplate", json={'template_id': template_id})
+            Log.new(logging_level=logging.DEBUG, description="Update DocusealTemplate", json={'template_id': template_id})
         else:
             DocusealTemplate.new(template_api['id'], template_api['folder_name'], template_api['name'], template_api['slug'])
 
     def new(template_id, folder_name, name, slug):
         """ Create a new instance and auto_associate """
         DocusealTemplate.objects.create(template_id=template_id, folder_name=folder_name, name=name, slug=slug)
-        Log.objects.create(description="Create DocusealTemplate", json={'template_id': template_id})
+        Log.new(logging_level=logging.DEBUG, description="Create DocusealTemplate", json={'template_id': template_id})
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
         if new_only:
-            Log.objects.create(description="Fetch New DocusealTemplate")
+            Log.new(logging_level=logging.INFO, description="Fetch New DocusealTemplate")
             last_template_id = DocusealTemplate.objects.all().order_by('-template_id').first().template_id
         else:
-            Log.objects.create(description="Refresh DocusealTemplate")
+            Log.new(logging_level=logging.INFO, description="Refresh DocusealTemplate")
             last_template_id = None
             DocusealTemplate.objects.all().delete()
 
@@ -428,7 +430,7 @@ class CalendarEvent(models.Model):
             description=event_values['description'], 
             start=event_values['start'], end=event_values['end'])
         event._auto_associate(lbound)
-        Log.objects.create(description="Create CalendarEvent", json={'uid': event.UID})
+        Log.new(logging_level=logging.DEBUG, description="Create CalendarEvent", json={'uid': event.UID})
 
     def get_event_list_from_calendar_url(url, lbound=None, ubound=None):
         """ return a sorted list of events from a calendar URL """
@@ -505,7 +507,7 @@ class CalendarEvent(models.Model):
                     CalendarEvent.create(event_values, lbound)
 
         if uid_count:
-            Log.objects.create(description="Refresh Event", json=json)
+            Log.new(logging_level=logging.INFO, description="Refresh Event", json=json)
 
     def refresh_event(self):
         """ Refresh a single event """
@@ -554,7 +556,7 @@ class CalendarEvent(models.Model):
 
         if is_updated:
             event.save()
-            Log.objects.create(description="Update Event", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Update Event", json=json)
 
 
 class Event(models.Model):
@@ -589,7 +591,7 @@ class Event(models.Model):
         events = Event.objects.exclude(attendee__isnull=False).filter(start__gt=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)))
         print(events)
         events.delete()
-        Log.objects.create(description="Clear unused, future Event instances")
+        Log.new(logging_level=logging.DEBUG, description="Clear unused, future Event instances")
 
     def get_current_event():
         """ return any Event objects for events that are currently happening """
@@ -636,6 +638,11 @@ class Log(models.Model):
                 filter_condition.add(Q(**{f'json__{key}': val}), Q.AND)
 
         return Log.objects.filter(filter_condition).order_by('-timestamp').first()
+
+    def new(logging_level, description, json=None, other_info=None):
+        if logging_level >= LOGGING_LEVEL:
+            Log.objects.create(description=description, json=json, other_info=other_info)
+
 
 class Permission(models.Model):
     """ Permissions defining what data users can access """  
@@ -776,7 +783,7 @@ class Person(models.Model):
             else:
                 prices = prices.filter(payment_link__date__isnull=True).exclude(price__product__name__icontains="donation")
 
-            print(f"prices: {prices}")
+            # print(f"prices: {prices}")
             for plp in prices:
                 if payment_type == "event":
                     otp_date = p.payment_link.date
@@ -789,7 +796,7 @@ class Person(models.Model):
                     }
                 )
 
-        print(f"otp: {otp}")
+        # print(f"otp: {otp}")
 
         return otp
     
@@ -816,7 +823,7 @@ class Person(models.Model):
         """ Merge the associations from merge_child into self and delete merge_child """
         merge_child = Person.objects.get(id=merge_child_id)
 
-        Log.objects.create(description="Merge Person", json={'person_id': self.id, 'merge_child_id': merge_child_id})
+        Log.new(logging_level=logging.INFO, description="Merge Person", json={'person_id': self.id, 'merge_child_id': merge_child_id})
         pds = PersonDocuseal.objects.filter(person=merge_child)
         for pd in pds:
             pd.person = self
@@ -880,25 +887,25 @@ class PersonEmail(models.Model):
 
     def unmerge(self):
         """ Break linkages between self and an email address (including Stripe and Docuseal accounts)"""
-        print('unmerge')
+        # print('unmerge')
         email = self.email
-        print("pre-delete",email)
+        # print("pre-delete",email)
         person_id = self.person.id
-        print(person_id)
+        # print(person_id)
 
-        Log.objects.create(description="Unmerge Person", json={'person_id': person_id, 'email': email})
+        Log.new(logging_level=logging.INFO, description="Unmerge Person", json={'person_id': person_id, 'email': email})
 
         PersonStripe.objects.filter(person__id=person_id).delete()
         PersonDocuseal.objects.filter(person__id=person_id).delete()
         self.delete()
-        print("post-delete",email)
+        # print("post-delete",email)
 
         for ds in DocusealSubmitter.objects.filter(email=email):
-            print(ds)
+            # print(ds)
             ds._auto_associate()
 
         for sc in StripeCustomer.objects.filter(email=email):
-            print(sc)
+            # print(sc)
             sc._auto_associate()
 
 
@@ -1004,7 +1011,7 @@ class StripeCustomer(models.Model):
             else:
                 api_record = stripe.Customer.retrieve(stripe_id)
                 customer = StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
-                Log.objects.create(description="Create StripeCustomer", json=json)
+                Log.new(logging_level=logging.DEBUG, description="Create StripeCustomer", json=json)
         elif email:
             json = {'stripe_id': email}
 
@@ -1014,7 +1021,7 @@ class StripeCustomer(models.Model):
             else:
                 api_record = stripe.Customer.retrieve(stripe_id) #!!! stripe_id is null here
                 customer = StripeCustomer.objects.create(stripe_id=None, name=api_record.name, email=api_record.email)
-                Log.objects.create(description="Create StripeCustomer", json=json)
+                Log.new(logging_level=logging.DEBUG, description="Create StripeCustomer", json=json)
 
 
         return customer
@@ -1031,10 +1038,10 @@ class StripeCustomer(models.Model):
             customer.name = api_record.name
             customer.email = api_record.email
             customer.save()
-            Log.objects.create(description="Update StripeCustomer", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Update StripeCustomer", json=json)
         else:
             StripeCustomer.objects.create(stripe_id=stripe_id, name=api_record.name, email=api_record.email)
-            Log.objects.create(description="Create StripeCustomer", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create StripeCustomer", json=json)
 
 
     def get_url(self):
@@ -1043,7 +1050,7 @@ class StripeCustomer(models.Model):
 
     def new(stripe_id, name, email):
         sc = StripeCustomer.objects.create(stripe_id=stripe_id, name=name, email=email)
-        Log.objects.create(description="Create StripeCustomer", json={'stripe_id': stripe_id})
+        Log.new(logging_level=logging.DEBUG, description="Create StripeCustomer", json={'stripe_id': stripe_id})
         sc._auto_associate()
 
     def search(name, email):
@@ -1052,7 +1059,7 @@ class StripeCustomer(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh StripeCustomer")
+        Log.new(logging_level=logging.INFO, description="Refresh StripeCustomer")
         StripeCustomer.objects.all().delete()
         for customer in stripe.Customer.list().auto_paging_iter():
             stripe_id = customer['id']
@@ -1110,7 +1117,7 @@ class StripeOneTimePayment(models.Model):
                     otp_date = fromtimestamp(checkout_session.created).date()
 
                 StripeOneTimePayment.objects.create(stripe_id=checkout_session.id, customer=customer, date=otp_date, status=checkout_session.status, payment_link=payment_link)
-                Log.objects.create(description="Create StripeOneTimePayment", json=json)
+                Log.new(logging_level=logging.DEBUG, description="Create StripeOneTimePayment", json=json)
 
     def get_url(self):
         """ URL for a hyperlink """
@@ -1118,7 +1125,7 @@ class StripeOneTimePayment(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh StripeSubscription")
+        Log.new(logging_level=logging.INFO, description="Refresh StripeOneTimePayment")
         StripeOneTimePayment.objects.all().delete()
         for plp in StripePaymentLinkPrice.objects.filter(payment_link__is_recurring=False):
             for cs in stripe.checkout.Session.list(payment_link=plp.payment_link.stripe_id):
@@ -1149,7 +1156,7 @@ class StripePaymentLink(models.Model):
             payment_link.create_or_update_children()
         else:
             plink = StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url)
-            Log.objects.create(description="Create StripePaymentLink", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create StripePaymentLink", json=json)
             plink.create_or_update_children()
 
     def create_or_update_children(self):
@@ -1164,7 +1171,7 @@ class StripePaymentLink(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh StripePaymentLink")
+        Log.new(logging_level=logging.INFO, description="Refresh StripePaymentLink")
         StripePaymentLink.objects.all().delete()
         for payment_link in stripe.PaymentLink.list().auto_paging_iter():
             if payment_link.subscription_data:
@@ -1176,7 +1183,7 @@ class StripePaymentLink(models.Model):
             else:
                 event_date = None
             StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url, is_recurring=is_recurring, date=event_date)
-            Log.objects.create(description="Create StripePaymentLink", json={'stripe_id': payment_link.id})
+            Log.new(logging_level=logging.DEBUG, description="Create StripePaymentLink", json={'stripe_id': payment_link.id})
 
 
 
@@ -1195,10 +1202,10 @@ class StripePaymentLinkPrice(models.Model):
         """ create a PaymentLink-Price map if one does not already exist """
         if not StripePaymentLinkPrice.objects.filter(payment_link=payment_link, price=price).exists():
             StripePaymentLinkPrice.objects.create(payment_link=payment_link, price=price)
-            Log.objects.create(description="Create StripePaymentLinkPrice")
+            Log.new(logging_level=logging.DEBUG, description="Create StripePaymentLinkPrice")
     
     def refresh():
-        Log.objects.create(description="Refresh StripePaymentLinkPrice")
+        Log.new(logging_level=logging.INFO, description="Refresh StripePaymentLinkPrice")
         StripePaymentLinkPrice.objects.all().delete()
         for payment_link in StripePaymentLink.objects.all():
             for line_item in stripe.PaymentLink.list_line_items(payment_link.stripe_id).auto_paging_iter():
@@ -1236,9 +1243,9 @@ class StripePrice(models.Model):
             api_record = StripePrice.fetch_api_data(stripe_id)
             api_prc = StripePrice.dict_from_api(api_record)
             product = StripeProduct.create_and_or_return(api_record.product)
-            print(product)
+            # print(product)
             price = StripePrice.objects.create(stripe_id=stripe_id, product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
-            Log.objects.create(description="Create StripePrice", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create StripePrice", json=json)
         else:
             price = price_qs.first()
         
@@ -1260,10 +1267,10 @@ class StripePrice(models.Model):
             price.price = api_prc['price_amount']
             price.product = product
             price.save()
-            Log.objects.create(description="Update StripePrice", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Update StripePrice", json=json)
         else:
             StripePrice.objects.create(stripe_id=stripe_id, product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
-            Log.objects.create(description="Create StripePrice", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create StripePrice", json=json)
 
     def fetch_api_data(stripe_id):
         """ fetch api data """
@@ -1291,7 +1298,7 @@ class StripePrice(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh StripePrice")
+        Log.new(logging_level=logging.INFO, description="Refresh StripePrice")
         StripePrice.objects.all().delete()
         for price in stripe.Price.list(active=True).auto_paging_iter():
             # print(price.product)
@@ -1299,7 +1306,7 @@ class StripePrice(models.Model):
                 product = StripeProduct.objects.get(stripe_id=price.product)
                 api_prc = StripePrice.dict_from_api(price)
                 StripePrice.objects.create(stripe_id=api_prc['stripe_id'], product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
-                Log.objects.create(description="Create StripePrice", json={'stripe_id': api_prc['stripe_id']})
+                Log.new(logging_level=logging.DEBUG, description="Create StripePrice", json={'stripe_id': api_prc['stripe_id']})
 
 
 class StripeProduct(models.Model):
@@ -1322,7 +1329,7 @@ class StripeProduct(models.Model):
         if not product_qs.exists():
             api_prd = stripe.Product.retrieve(stripe_id)
             product = StripeProduct.objects.create(stripe_id=stripe_id, name=api_prd.name, description=api_prd.description)
-            Log.objects.create(description="Create StripeProduct", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create StripeProduct", json=json)
         else:
             product = product_qs.first()
         
@@ -1339,10 +1346,10 @@ class StripeProduct(models.Model):
             product.name = api_prd.name
             product.description = api_prd.description
             product.save()
-            Log.objects.create(description="Update StripeProduct", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Update StripeProduct", json=json)
         else:
             StripeProduct.objects.create(stripe_id=stripe_id, name=api_prd.name, description=api_prd.description)
-            Log.objects.create(description="Create StripeProduct", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create StripeProduct", json=json)
 
     def get_url(self):
         """ URL for a hyperlink """
@@ -1350,11 +1357,11 @@ class StripeProduct(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh StripeProduct")
+        Log.new(logging_level=logging.INFO, description="Refresh StripeProduct")
         StripeProduct.objects.all().delete()
         for product in stripe.Product.list(active=True).auto_paging_iter():
             StripeProduct.objects.create(stripe_id=product.id, name=product.name, description=product.description)
-            Log.objects.create(description="Create StripeProduct", json={'stripe_id': product.id})
+            Log.new(logging_level=logging.DEBUG, description="Create StripeProduct", json={'stripe_id': product.id})
 
 
 class StripeSubscription(models.Model):
@@ -1388,7 +1395,7 @@ class StripeSubscription(models.Model):
         if subscription_qs.exists():
             if status == 'canceled':
                 subscription_qs.delete()
-                Log.objects.create(description="Cancel StripeSubscription", json=json)
+                Log.new(logging_level=logging.INFO, description="Cancel StripeSubscription", json=json)
             else:
                 subscription = subscription_qs.first()
                 subscription.customer = StripeCustomer.create_and_or_return(customer_id)
@@ -1398,17 +1405,17 @@ class StripeSubscription(models.Model):
                 subscription.name = name
                 subscription.save()
     
-                Log.objects.create(description="Delete StripeSubscriptionItem", json={'subscription.id': subscription.id})
+                Log.new(logging_level=logging.DEBUG, description="Delete StripeSubscriptionItem", json={'subscription.id': subscription.id})
                 StripeSubscriptionItem.objects.filter(subscription=subscription).delete()
                 StripeSubscriptionItem.create_if_needed(api_record)
-                Log.objects.create(description="Update StripeSubscription", json=json)
+                Log.new(logging_level=logging.DEBUG, description="Update StripeSubscription", json=json)
         elif status != 'canceled':
             customer = StripeCustomer.create_and_or_return(customer_id)
             subscription = StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
-            Log.objects.create(description="Delete StripeSubscriptionItem", json={'subscription.id': subscription.id})
+            Log.new(logging_level=logging.DEBUG, description="Delete StripeSubscriptionItem", json={'subscription.id': subscription.id})
             StripeSubscriptionItem.objects.filter(subscription=subscription).delete()
             StripeSubscriptionItem.create_if_needed(api_record)
-            Log.objects.create(description="Create StripeSubscription", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Create StripeSubscription", json=json)
 
     def get_api_name(stripe_id):
         """ return a name if provided in the checkout, else "self" """
@@ -1431,11 +1438,11 @@ class StripeSubscription(models.Model):
         """ create a new Stripe Subscription """
         StripeSubscription.objects.create(stripe_id=stripe_id, customer=customer, name=name, created=created, current_period_end=current_period_end, status=status)
         StripeSubscriptionItem.create_if_needed(subscription)
-        Log.objects.create(description="Create StripeSubscription", json={'stripe_id': stripe_id})
+        Log.new(logging_level=logging.DEBUG, description="Create StripeSubscription", json={'stripe_id': stripe_id})
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.objects.create(description="Refresh StripeSubscription")
+        Log.new(logging_level=logging.INFO, description="Refresh StripeSubscription")
         StripeSubscription.objects.all().delete()
         for subscription in stripe.Subscription.search(query='-status:"canceled"').auto_paging_iter():
             customer = StripeCustomer.objects.get(stripe_id=subscription.customer)
@@ -1476,7 +1483,7 @@ class StripeSubscription(models.Model):
 
         if is_update:
             self.save()
-            Log.objects.create("Update StripeSubscription", json=json)
+            Log.new(logging_level=logging.DEBUG, description="Update StripeSubscription", json=json)
 
 
 class StripeSubscriptionItem(models.Model):
@@ -1500,5 +1507,5 @@ class StripeSubscriptionItem(models.Model):
             subscription = StripeSubscription.objects.get(stripe_id=api_sub.id)
             if not StripeSubscriptionItem.objects.filter(stripe_id=item_id, subscription=subscription, price=price).exists():
                 StripeSubscriptionItem.objects.create(stripe_id=item_id, subscription=subscription, price=price)
-                Log.objects.create(description="Create StripeSubscriptionItem")
+                Log.new(logging_level=logging.DEBUG, description="Create StripeSubscriptionItem")
 

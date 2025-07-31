@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 
 from django.contrib.auth.decorators import login_required
@@ -70,7 +71,7 @@ def receive_webhook(request):
             try:
                 payload = json.loads(request.body.decode('utf-8'))
 
-                Log.objects.create(description="Docuseal webhook", json=payload)
+                Log.new(logging_level=logging.INFO, description="Docuseal webhook", json=payload)
 
                 print("webhook type: ",payload['event_type'] )
 
@@ -124,6 +125,7 @@ def receive_webhook(request):
                 else:
                     # some other kind of webhook was received
                     print("unhandled webhook event_type")
+                    Log.new(logging_level=logging.WARN, description="Unhandled Docuseal webhook", json=payload)
             
                 return HttpResponse(status=200)
             
