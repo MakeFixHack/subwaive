@@ -81,7 +81,8 @@ def receive_webhook(request):
                     # an individual has completed their portion of a form
                     # print(payload)
                     template_id = payload['data']['template']['id']
-                    DocusealTemplate.create_or_update_by_id(template_id)
+                    if not DocusealTemplate.objects.filter(template_id=template_id).exists():
+                        DocusealTemplate.create_or_update_by_id(template_id)
 
                     # email we take on faith, since having an email in the system gets you nothing
                     email = payload['data']['email']
@@ -95,7 +96,8 @@ def receive_webhook(request):
                     # a form has email addresses added for signatures
                     # print(payload)
                     template_id = payload['data']['template']['id']
-                    DocusealTemplate.create_or_update_by_id(template_id)
+                    if not DocusealTemplate.objects.filter(template_id=template_id).exists():
+                        DocusealTemplate.create_or_update_by_id(template_id)
 
                     for submitter in payload['data']['submitters']:
                         email = submitter['email']
@@ -119,7 +121,8 @@ def receive_webhook(request):
                     # a submitted form is archived
                     submission_id = payload['data']['id']
                     template_id = payload['data']['template']['id']
-                    DocusealTemplate.create_or_update_by_id(template_id)
+                    if not DocusealTemplate.objects.filter(template_id=template_id).exists():
+                        DocusealTemplate.create_or_update_by_id(template_id)
                     DocusealSubmission.create_or_update(submission_id)
                     DocusealFieldStore.re_extract(submission_id)
 
