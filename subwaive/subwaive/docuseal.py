@@ -127,8 +127,9 @@ def receive_webhook(request):
                     print("unhandled webhook event_type")
                     Log.new(logging_level=logging.WARN, description="Unhandled Docuseal webhook", json=payload)
             
+                Log.new(logging_level=logging.DEBUG, description="Docuseal webhook handling complete", json=payload)
                 return HttpResponse(status=200)
-            
+           
             except json.JSONDecodeError:
                 return HttpResponse(status=400, reason="Invalid JSON payload")
         else:
