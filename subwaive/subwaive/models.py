@@ -120,11 +120,11 @@ class DocusealSubmission(models.Model):
         for submitter in submitters:
             person = PersonDocuseal.objects.get(submitter=submitter).person
             if "@" in person.name and "." in person.name:
-                print(f"Updating: {person.name}==>{name}")
+                # print(f"Updating: {person.name}==>{name}")
                 person.name = name
                 person.save()
-            else:
-                print(f"Not updating: {person.name} / {name}")
+            # else:
+            #     print(f"Not updating: {person.name} / {name}")
 
     def create_or_update(submission_id):
         """ update a record if it exists, else create one """
@@ -220,17 +220,25 @@ class DocusealSubmitter(models.Model):
         """ automatically associate this submitter with the first person 
         it finds that shares this email address. if none is found create a Person for it. """
         if not PersonDocuseal.objects.filter(submitter__id=self.submitter_id):
+            # print("new person-docuseal")
             person = None
             email = PersonEmail.objects.filter(email=self.email).first()
             if email:
+                # print(f"found email: {email}")
                 person = email.person
             if person:
+                # print(f"found person: {person}")
+                # print("creating docuseal-person")
                 PersonDocuseal.objects.create(person=person, submitter=self)
             else:
+                # print(f"could not find person with email: {email}")
+                # print("creating person")
                 person = Person.objects.create(name=self.email)
+                # print("linking email")
                 email = PersonEmail.objects.create(person=person, email=self.email)
                 person.preferred_email = email
                 person.save()
+                # print("creating docuseal-person")
                 PersonDocuseal.objects.create(person=person, submitter=self)
 
     def create_if_needed_by_id(submitter_id):
@@ -589,7 +597,7 @@ class Event(models.Model):
     def clear_future_unused():
         """ delete instances that are both in the future and have no associated check-ins """
         events = Event.objects.exclude(attendee__isnull=False).filter(start__gt=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)))
-        print(events)
+        # print(events)
         events.delete()
         Log.new(logging_level=logging.DEBUG, description="Clear unused, future Event instances")
 
@@ -769,8 +777,12 @@ class Person(models.Model):
     def get_onetime_payments(self, product_name=None, payment_type=None):
         """ fetch data on each one-time purchase the person has made """
         # Get a list of OTP for this person
+        # print(f"payment_type: {payment_type}")
+        # print(f"product_name: {product_name}")
         stripe_customers = [ps.customer for ps in PersonStripe.objects.filter(person=self)]
+        # print(f"stripe_customers: {stripe_customers}")
         payments = StripeOneTimePayment.objects.filter(customer__in=stripe_customers)
+        # print(f"payments: {payments}")
 
         # Find associated PL.Prc.Prdt.Names
         otp = []

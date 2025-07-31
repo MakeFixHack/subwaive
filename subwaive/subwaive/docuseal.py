@@ -75,14 +75,15 @@ def receive_webhook(request):
 
                 print("webhook type: ",payload['event_type'] )
 
-                # Probably not needed, but to prevent bad actors, we only accept information on 
-                # which records to address from the webhook. We use the API to do the actual updates.
+                # Probably not needed since we exchange a secret, but to prevent bad actors, we only use the webhook
+                # to determine which records to address. We use an API pull for the actual data.
                 if payload['event_type'] == 'form.completed':
                     # an individual has completed their portion of a form
                     # print(payload)
                     template_id = payload['data']['template']['id']
                     DocusealTemplate.create_or_update_by_id(template_id)
 
+                    # email we take on faith, since having an email in the system gets you nothing
                     email = payload['data']['email']
                     DocusealSubmitter.create_if_needed(email)
 
@@ -106,7 +107,7 @@ def receive_webhook(request):
 
                 elif payload['event_type'] == 'form.declined':
                     # an individual has declined to sign a form?
-                    #!!! we might want to know about declined or started forms at some point
+                    #!!! we might want to know about declined or started forms at some point to send nagging emails
                     pass
 
                 elif payload['event_type'] in ['template.created','template.updated']:
@@ -121,6 +122,10 @@ def receive_webhook(request):
                     DocusealTemplate.create_or_update_by_id(template_id)
                     DocusealSubmission.create_or_update(submission_id)
                     DocusealFieldStore.re_extract(submission_id)
+
+                elif payload['event_type'] == 'submission.archived':
+                    # this might be the better webhook than form.completed, since this relies on all signature being done
+                    pass
 
                 else:
                     # some other kind of webhook was received
