@@ -1086,7 +1086,7 @@ class StripeOneTimePayment(models.Model):
     """ A Stripe one-time payment """
     stripe_id = models.CharField(max_length=128)
     customer = models.ForeignKey("subwaive.StripeCustomer", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
-    date = models.DateTimeField(null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=64)
     payment_link = models.ForeignKey("subwaive.StripePaymentLink", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
 
