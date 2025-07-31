@@ -9,6 +9,8 @@ from subwaive import stripe
 from subwaive import person
 from subwaive import event
 from subwaive import link
+from subwaive import logs
+
 from subwaive.settings import IS_USE_OIDC_LOGIN
 
 # Admin
@@ -61,6 +63,11 @@ urlpatterns.extend([
     path('person/<int:merge_child_id>/merge/', person.merge_people, name='merge_people'),
     path('person/<int:merge_child_id>/merge/<int:merge_parent_id>/', person.merge_people, name='merge_people'),
     path('person/<int:person_id>/stripe/', person.person_stripe, name='person_stripe'),
+])
+
+# Logs
+urlpatterns.extend([
+    path('logs/thin-by-token/', logs.thin_logs_by_token, name='thin_logs_by_token'),
 ])
 
 # Docuseal

@@ -74,7 +74,7 @@ class Event_Admin(admin.ModelAdmin):
 admin.site.register(Event, Event_Admin)
 
 class Log_Admin(admin.ModelAdmin):
-    list_display = ('timestamp', 'description',)
+    list_display = ('timestamp', 'logging_level', 'description',)
 admin.site.register(Log, Log_Admin)
 
 class QRCategory_Admin(admin.ModelAdmin):

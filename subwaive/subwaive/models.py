@@ -622,12 +622,13 @@ class Log(models.Model):
     description = models.CharField(max_length=512, help_text='What happened?')
     other_info = models.TextField(max_length=4096, blank=True, null=True, help_text='Additional detail')
     json = models.JSONField(blank=True, null=True)
+    logging_level = models.IntegerField(default=0, help_text='Python logging level, as integer')
 
     class Meta:
         ordering = ('-timestamp',)
 
     def __str__(self):
-        return f"""{ self.timestamp } / { self.description[:32] }"""
+        return f"""{ self.timestamp } / { self.logging_level } / { self.description[:32] }"""
     
     def date(self, tz=TIME_ZONE):
         """ returns the date for the requested tz """
@@ -649,7 +650,7 @@ class Log(models.Model):
 
     def new(logging_level, description, json=None, other_info=None):
         if logging_level >= LOGGING_LEVEL:
-            Log.objects.create(description=description, json=json, other_info=other_info)
+            Log.objects.create(description=description, json=json, other_info=other_info, logging_level=logging_level)
 
 
 class Permission(models.Model):
