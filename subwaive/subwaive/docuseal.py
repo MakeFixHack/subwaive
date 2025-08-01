@@ -120,9 +120,6 @@ def receive_webhook(request):
                 elif payload['event_type'] == 'submission.archived':
                     # a submitted form is archived
                     submission_id = payload['data']['id']
-                    template_id = payload['data']['template']['id']
-                    if not DocusealTemplate.objects.filter(template_id=template_id).exists():
-                        DocusealTemplate.create_or_update_by_id(template_id)
                     DocusealSubmission.create_or_update(submission_id)
                     DocusealFieldStore.re_extract(submission_id)
 
