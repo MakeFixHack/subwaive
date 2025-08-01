@@ -148,9 +148,10 @@ class DocusealSubmission(models.Model):
             submitters_new = [s for s in submitters_api if s['submitter_id'] not in submitters_db]
             # print(f"submitters_new: {submitters_new}")
             if submitters_new:
-                for submitter in submitters_new:
-                    DocusealSubmitter.create_if_needed_by_id(submitter['submitter_id'])
-                DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=submission, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters_new])
+                for s in submitters_new:
+                    DocusealSubmitter.create_if_needed_by_id(s['submitter_id'])
+                    submitter = DocusealSubmitter.objects.get(submitter_id=s['submitter_id'])
+                    DocusealSubmitterSubmission.objects.create(submission=submission, submitter=submitter)
             Log.new(logging_level=logging.DEBUG, description="Update DocusealSubmission", json={'submission_id': submission_id})
         else:
             DocusealSubmission.new(submission_id, submission_api['slug'], submission_api['status'], submission_api['created_at'], submission_api['completed_at'], submission_api['archived_at'], submission_api['template']['id'], submitters_api)
@@ -161,8 +162,10 @@ class DocusealSubmission(models.Model):
         template = DocusealTemplate.objects.get(template_id=template_id)
         doc_sub = DocusealSubmission.objects.create(submission_id=submission_id, slug=slug, status=status, created_at=created_at, completed_at=completed_at, archived_at=archived_at, template=template)
         Log.new(logging_level=logging.DEBUG, description="Create DocusealSubmission", json={'submission_id': submission_id})
-        if submitters:
-            DocusealSubmitterSubmission.objects.bulk_create([DocusealSubmitterSubmission(submission=doc_sub, submitter=DocusealSubmitter.objects.get(submitter_id=s['submitter_id']), status=s['status'], role=s['role']) for s in submitters])
+        for s in submitters:
+            DocusealSubmitter.create_if_needed_by_id(submitter_id=s['submitter_id'])
+            submitter = DocusealSubmitter.objects.get(submitter_id=s['submitter_id'])
+            DocusealSubmitterSubmission.objects.create(submission=doc_sub, submitter=submitter)
 
     def refresh(new_only=True):
         """ clear out existing records and repopulate them from the API """
