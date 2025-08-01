@@ -57,14 +57,6 @@ def payment_link_list(request):
 @csrf_exempt
 def receive_webhook(request):
     """ handle Stripe webhooks """
-    """
-    customer.subscription.deleted - log
-    invoice.paid - log
-    invoice.payment_failed - log
-    payment_link.created - trigger update of payment links
-    payment_link.updated - trigger update of payment links
-    """
-    #!!! should webhooks be more focused?
     # https://docs.stripe.com/webhooks
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
@@ -83,21 +75,28 @@ def receive_webhook(request):
         return HttpResponse(status=400)
     
     # Handle the event
-    #!!! parse webhooks and get the specific entity that needs creating or updating
-    #!!! limit updates to what needs updating
+    customer_events = [
+        'checkout.session.completed',
+        'customer.subscription.created',
+        'customer.subscription.deleted',
+        'customer.subscription.paused',
+        'customer.subscription.resumed',
+        'invoice.paid',
+        'invoice.payment_failed',
+        ]
+    payment_link_events = [
+        'payment_link.created',
+        'payment_link.updated'
+        ]
+
     payload = event.data.object
-    if event.type == 'customer.subscription.deleted':
-        # StripeSubscription.objects.get(payload['id']).delete()
-        refresh_all_subscription_and_customer()
 
-    elif event.type in ['invoice.paid','invoice.payment_failed']:
-        refresh_all_subscription_and_customer()
+    if 'id' in payload.keys():
+        if event.type in customer_events:
+            StripeCustomer.create_or_update(payload['id'])
 
-    elif event.type in ['payment_link.created','payment_link.updated']:
-        # payment_link = StripePaymentLink.objects.get(payload['id'])
-        # payment_link.whatever = some_val
-        # payment_link.save()
-        refresh_all_product_and_price()
+        elif event.type in payment_link_events:
+            StripePaymentLink.create_or_update(payload['id'])
 
     else:
         # need to handle everything we use
