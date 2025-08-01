@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import stripe
 
-from subwaive.models import StripeOneTimePayment,StripePaymentLink,StripePrice,StripeProduct,StripePaymentLinkPrice,StripeSubscription,StripeCustomer
+from subwaive.models import Log,StripeOneTimePayment,StripePaymentLink,StripePrice,StripeProduct,StripePaymentLinkPrice,StripeSubscription,StripeCustomer
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, QR_SMALL, QR_LARGE
 
 STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY")
@@ -100,9 +100,12 @@ def receive_webhook(request):
         elif event.type in payment_link_events:
             StripePaymentLink.create_or_update(payload['id'])
 
+        else:
+            # need to handle everything we use
+            print('Unhandled event type {}'.format(event.type))
+            Log.new(logging_level=logging.WARN, description="Unhandled Stripe webhook", json=payload)
     else:
-        # need to handle everything we use
-        print('Unhandled event type {}'.format(event.type))
+        Log.new(logging_level=logging.WARN, description="Unexpected Stripe webhook payload", json=payload)
 
     return HttpResponse(status=200)
 
