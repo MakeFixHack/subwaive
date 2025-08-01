@@ -27,8 +27,10 @@ def thin_logs_by_token(request):
             {'level': logging.CRITICAL, 'horizon': datetime.timedelta(weeks=24)},
         ]
 
+        exclusion_list = ['Check-in']
+
         for r in retention_schedule:
-            Log.objects.filter(logging_level=r['level'],timestamp__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))-r['horizon']).delete()
+            Log.objects.exclude(description__in=exclusion_list).filter(logging_level=r['level'],timestamp__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))-r['horizon']).delete()
 
         Log.new(logging_level=logging.INFO, description='Thin logs by token')
 
