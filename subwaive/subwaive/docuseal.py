@@ -131,7 +131,7 @@ def receive_webhook(request):
                     # some other kind of webhook was received
                     print("unhandled webhook event_type")
                     Log.new(logging_level=logging.WARN, description="Unhandled Docuseal webhook", json=payload)
-            
+
                 Log.new(logging_level=logging.DEBUG, description="Docuseal webhook handling complete", json=payload)
                 return HttpResponse(status=200)
            
