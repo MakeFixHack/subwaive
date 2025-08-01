@@ -36,3 +36,13 @@ def thin_logs_by_token(request):
     else:
         return HttpResponse(status=401)
 
+
+# Fix logging level fields by partition
+# Log.objects.filter(logging_level=0,description__contains="Create").update(logging_level=10)
+# Log.objects.filter(logging_level=0,description__contains="Clear unused").update(logging_level=10)
+# Log.objects.filter(logging_level=0,description__contains="Update").update(logging_level=10)
+# Log.objects.filter(logging_level=0,description__contains="Fetch").update(logging_level=20)
+# Log.objects.filter(logging_level=0,description__contains="Merge").update(logging_level=20)
+# Log.objects.filter(logging_level=0,description__contains="Auto-name").update(logging_level=20)
+# Log.objects.filter(logging_level=0,description__contains="Refresh").update(logging_level=20)
+# Log.objects.filter(logging_level=0,description__contains=" webhook").update(logging_level=20)
