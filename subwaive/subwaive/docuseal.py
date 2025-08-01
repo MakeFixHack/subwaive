@@ -123,7 +123,7 @@ def receive_webhook(request):
                     DocusealSubmission.create_or_update(submission_id)
                     DocusealFieldStore.re_extract(submission_id)
 
-                elif payload['event_type'] == 'submission.archived':
+                elif payload['event_type'] == 'submission.completed':
                     # this might be the better webhook than form.completed, since this relies on all signature being done
                     pass
 
