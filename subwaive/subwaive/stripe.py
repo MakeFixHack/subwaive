@@ -93,21 +93,33 @@ def receive_webhook(request):
     Log.new(logging_level=logging.INFO, description="Stripe webhook", json=payload)
     print(payload)
 
-    if 'id' in payload.keys():
-        if event.type in customer_events:
-            StripeCustomer.create_or_update(payload['id'])
+    try:
+        if 'id' in payload.keys():
+            if event.type in customer_events:
+                StripeCustomer.create_or_update(payload['id'])
 
-        elif event.type in payment_link_events:
-            StripePaymentLink.create_or_update(payload['id'])
+            elif event.type in payment_link_events:
+                StripePaymentLink.create_or_update(payload['id'])
 
+            else:
+                # need to handle everything we use
+                print('Unhandled event type {}'.format(event.type))
+                Log.new(logging_level=logging.WARN, description="Unhandled Stripe webhook", json=payload, other_info=event.type)
         else:
-            # need to handle everything we use
-            print('Unhandled event type {}'.format(event.type))
-            Log.new(logging_level=logging.WARN, description="Unhandled Stripe webhook", json=payload)
-    else:
-        Log.new(logging_level=logging.WARN, description="Unexpected Stripe webhook payload", json=payload)
+            Log.new(logging_level=logging.WARN, description="Unexpected Stripe webhook payload", json=payload, other_info=event.type)
 
-    return HttpResponse(status=200)
+        Log.new(logging_level=logging.DEBUG, description="Stripe webhook handling complete", json=payload, other_info=event.type)
+        return HttpResponse(status=200)
+    
+    except json.JSONDecodeError as e:
+        # print(e)
+        Log.new(logging_level=logging.ERROR, description='Invalid JSON payload', other_info=e, json=payload, other_info=event.type)
+        return HttpResponse(status=400, reason="Invalid JSON payload")
+
+    except Exception as e:
+        # print(e)
+        Log.new(logging_level=logging.ERROR, description='Internal server error', other_info=e, json=payload, other_info=event.type)
+        return HttpResponse(status=500, reason="Internal server error")
 
 @csrf_exempt
 def refresh_stripe_by_token(request):
