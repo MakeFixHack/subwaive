@@ -135,10 +135,16 @@ def receive_webhook(request):
                 Log.new(logging_level=logging.DEBUG, description="Docuseal webhook handling complete", json=payload)
                 return HttpResponse(status=200)
            
+            except json.JSONDecodeError as e:
+                # print(e)
+                Log.new(logging_level=logging.ERROR, description='Invalid JSON payload', other_info=e, json=payload)
+                return HttpResponse(status=400, reason="Invalid JSON payload")
+
             except Exception as e:
                 # print(e)
-                Log.new(logging_level=logging.ERROR, description='Failed to process webhook', other_info=e, json=payload)
-                return HttpResponse(status=400, reason="Invalid JSON payload")
+                Log.new(logging_level=logging.ERROR, description='Internal server error', other_info=e, json=payload)
+                return HttpResponse(status=500, reason="Internal server error")
+
         else:
             print(401, 'Invalid signature')
             return HttpResponse(status=401, reason="Invalid signature")
