@@ -113,12 +113,12 @@ def receive_webhook(request):
     
     except json.JSONDecodeError as e:
         # print(e)
-        Log.new(logging_level=logging.ERROR, description='Invalid JSON payload', other_info=e, json=payload, other_info=event.type)
+        Log.new(logging_level=logging.ERROR, description='Invalid JSON payload', other_info=e, json=payload)
         return HttpResponse(status=400, reason="Invalid JSON payload")
 
     except Exception as e:
         # print(e)
-        Log.new(logging_level=logging.ERROR, description='Internal server error', other_info=e, json=payload, other_info=event.type)
+        Log.new(logging_level=logging.ERROR, description='Internal server error', other_info=e, json=payload)
         return HttpResponse(status=500, reason="Internal server error")
 
 @csrf_exempt
