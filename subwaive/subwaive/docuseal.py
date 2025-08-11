@@ -130,9 +130,9 @@ def receive_webhook(request):
                 else:
                     # some other kind of webhook was received
                     print("unhandled webhook event_type")
-                    Log.new(logging_level=logging.WARN, description="Unhandled Docuseal webhook", json=payload)
+                    Log.new(logging_level=logging.WARN, description="Unhandled Docuseal webhook", json=payload, other_info=payload['event_type'])
 
-                Log.new(logging_level=logging.DEBUG, description="Docuseal webhook handling complete", json=payload)
+                Log.new(logging_level=logging.DEBUG, description="Docuseal webhook handling complete", json=payload, other_info=payload['event_type'])
                 return HttpResponse(status=200)
            
             except json.JSONDecodeError as e:
