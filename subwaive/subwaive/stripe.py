@@ -81,13 +81,15 @@ def receive_webhook(request):
         'customer.subscription.deleted',
         'customer.subscription.paused',
         'customer.subscription.resumed',
+    ]
+    invoice_events = [
         'invoice.paid',
         'invoice.payment_failed',
-        ]
+    ]
     payment_link_events = [
         'payment_link.created',
         'payment_link.updated'
-        ]
+    ]
 
     payload = event.data.object
     Log.new(logging_level=logging.INFO, description="Stripe webhook", json=payload)
@@ -97,6 +99,10 @@ def receive_webhook(request):
         if 'id' in payload.keys():
             if event.type in customer_events:
                 StripeCustomer.create_or_update(payload['id'])
+
+            elif event.type in invoice_events:
+                if payload['subscription']:
+                    StripeSubscription.create_or_update(payload['subscription'])
 
             elif event.type in payment_link_events:
                 StripePaymentLink.create_or_update(payload['id'])
