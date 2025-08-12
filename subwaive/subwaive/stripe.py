@@ -103,6 +103,9 @@ def receive_webhook(request):
             elif event.type in invoice_events:
                 if payload['subscription']:
                     StripeSubscription.create_or_update(payload['subscription'])
+                elif payload['object'] == "checkout.session":
+                    session = StripeOneTimePayment.get_session(payload['id'])
+                    StripeOneTimePayment.create_if_needed(session)
 
             elif event.type in payment_link_events:
                 StripePaymentLink.create_or_update(payload['id'])

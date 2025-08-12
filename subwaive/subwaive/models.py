@@ -1137,6 +1137,10 @@ class StripeOneTimePayment(models.Model):
                 StripeOneTimePayment.objects.create(stripe_id=checkout_session.id, customer=customer, date=otp_date, status=checkout_session.status, payment_link=payment_link)
                 Log.new(logging_level=logging.DEBUG, description="Create StripeOneTimePayment", json=json)
 
+    def get_session(stripe_id):
+        """ return a session from the API for a given ID"""
+        return stripe.checkout.Session.retrieve(stripe_id)
+
     def get_url(self):
         """ URL for a hyperlink """
         return f"{ STRIPE_WWW_ENDPOINT }/payments/{ self.stripe_id }"
