@@ -76,7 +76,6 @@ def receive_webhook(request):
     
     # Handle the event
     customer_events = [
-        'checkout.session.completed',
         'customer.subscription.created',
         'customer.subscription.deleted',
         'customer.subscription.paused',
@@ -85,6 +84,9 @@ def receive_webhook(request):
     invoice_events = [
         'invoice.paid',
         'invoice.payment_failed',
+    ]
+    checkout_events = [
+        'checkout.session.completed',
     ]
     payment_link_events = [
         'payment_link.created',
@@ -101,11 +103,12 @@ def receive_webhook(request):
                 StripeCustomer.create_or_update(payload['id'])
 
             elif event.type in invoice_events:
-                if payload['subscription']:
+                if payload['subscription']: # subscription
                     StripeSubscription.create_or_update(payload['subscription'])
-                elif payload['object'] == "checkout.session":
-                    session = StripeOneTimePayment.get_session(payload['id'])
-                    StripeOneTimePayment.create_if_needed(session)
+                
+            elif event.type in checkout_events:
+                session = StripeOneTimePayment.get_session(payload['id'])
+                StripeOneTimePayment.create_if_needed(session)
 
             elif event.type in payment_link_events:
                 StripePaymentLink.create_or_update(payload['id'])
