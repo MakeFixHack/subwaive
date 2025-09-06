@@ -958,6 +958,15 @@ class PersonStripe(models.Model):
         return f"""{ self.person } / { self.customer.stripe_id }"""
     
 
+class NFC(models.Model):
+    """ An NFC token for a person """
+    uid = models.CharField(max_length=32, help_text="UID identifying this NFC")
+    person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, blank=True, null=True, help_text="Person associated with this NFC token?")
+    nfc_id = models.CharField(max_length=32, help_text="What is the URL secret used to register this NFC token?")
+    activation_id = models.CharField(max_length=32, help_text="What is the URL secret used to activate this NFC token?")
+    is_active = models.BooleanField(default=False, help_text="Has this NFC token been activated?")
+
+
 class QRCategory(models.Model):
     """ Categories for organizing QR codes """
     name = models.CharField(max_length=64, help_text="What is the name of the QR code category?")
