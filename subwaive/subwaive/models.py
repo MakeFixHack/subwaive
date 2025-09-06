@@ -604,7 +604,7 @@ class Event(models.Model):
 
     def get_current_event():
         """ return any Event objects for events that are currently happening """
-        return Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)), end__gte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)))
+        return Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)), end__gte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE))).first()
 
     def get_registration_link(self):
         """ return a URL for event registration or None """
