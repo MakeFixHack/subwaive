@@ -929,12 +929,13 @@ class PersonEvent(models.Model):
     """ A map between Person and Event """
     person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, help_text="Who is the person checked-in to this event?")
     event = models.ForeignKey("subwaive.Event", on_delete=models.CASCADE, blank=True, null=True, related_name="attendee", help_text="What event is associated with this check-in?")
+    check_in_time = models.DateTimeField(auto_now_add=True, help_text="When was the check-in logged?")
 
     class Meta:
-        ordering = ('person', 'event',)
+        ordering = ('-check_in_time', 'person', 'event',)
 
     def __str__(self):
-        return f"""{ self.person } / { self.event }"""
+        return f"""{ self.check_in_time } / { self.person } / { self.event }"""
 
     def check_prior_check_in(person_id, event_id):
         """ check if a person has already been checked in to an event """

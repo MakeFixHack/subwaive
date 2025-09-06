@@ -36,7 +36,11 @@
                 <div>
                     {% if person.last_check_in %}
                     <div>Last check-in:</div>
+                        {% if person.last_check_in.event %}
                     <div><a href="{% url 'event_details' event_id=person.last_check_in.event.id %}">{{ person.last_check_in.event.start|date:"Y-m-d" }} / {{ person.last_check_in.event.summary }}</a></div>
+                        {% else %}
+                    <div>{{ person.last_check_in.check_in_time }} / No event</div>
+                        {% endif %}
                     {% else %}
                     <div>Never checked in</div>
                     {% endif %}
