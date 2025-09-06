@@ -1,5 +1,7 @@
 import secrets
 
+from PIL import Image
+
 from django.contrib.auth.decorators import login_required
 from django.core import mail
 from django.shortcuts import render, redirect

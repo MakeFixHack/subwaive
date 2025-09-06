@@ -10,3 +10,4 @@ docuseal==1.0.4
 icalendar==6.1.2
 caldav==1.4.0
 mozilla-django-oidc==4.0.1
+pillow
