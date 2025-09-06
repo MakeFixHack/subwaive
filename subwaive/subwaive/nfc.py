@@ -17,8 +17,6 @@ TIME_ZONE = os.environ.get("TIME_ZONE")
 @csrf_exempt
 def nfc_self_serve(request):
     """ self-serve terminal interface for NFC check-in and self-serve sign-up """
-    # !!! depends on Event.get_registration_url()
-
     response = HttpResponse(status=401)
 
     # print(f"token: {request.headers.get('X-Self-Serve-Token')}")
@@ -120,7 +118,7 @@ def nfc_self_serve(request):
                     status=200,
                     headers={'line1': 'Membership', 'line2': 'Needed', 'qr_size': qr_size})
 
-            elif is_last_check_in_date_today and person.is_nfc_admin:
+            elif is_last_check_in_date_today and person.is_nfc_admin: #!!! check is in staff group
                 print("admin-debrief")
                 response = HttpResponse(
                     status=200,
