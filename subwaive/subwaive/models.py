@@ -679,11 +679,15 @@ class Person(models.Model):
     def __str__(self):
         return f"""{ self.name } / { self.preferred_email }"""
     
-    def check_in(self, event_id):
+    def check_in(self, event_id=None):
         """ check the person into an event """
-        event = Event.objects.get(id=event_id)
+        print("checking in...")
+        if event_id:
+            event = Event.objects.get(id=event_id)
+        else:
+            event = None
         return PersonEvent.objects.create(person=self, event=event)
-
+    
     def check_membership_status_by_person_id(person_id):
         return Person.objects.get(id=person_id).check_membership_status()
     
