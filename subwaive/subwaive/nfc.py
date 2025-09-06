@@ -100,6 +100,16 @@ def nfc_self_serve(request):
                     status=200,
                     headers={'line1': 'Sign', 'line2': 'Waiver', 'qr_size': qr_size})
 
+            elif is_event_requires_registration and not event.start.date in [e.date for e in person.get_events()]:
+                print("needs registration")
+                url = event.get_registration_link()
+                (bmp,qr_size)=generate_qr_bitmap(url)
+                response = HttpResponse(
+                    content=bmp, 
+                    content_type="text/bitmap",
+                    status=200,
+                    headers={'line1': 'Register', 'line2': 'for Event', 'qr_size': qr_size})
+
             elif not person.check_membership_status() and not person.get_events():
                 print("needs membership")
                 url = "https://www.makefixhack.org/p/membership-and-donation.html"

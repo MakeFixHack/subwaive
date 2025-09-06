@@ -606,6 +606,16 @@ class Event(models.Model):
         """ return any Event objects for events that are currently happening """
         return Event.objects.filter(start__lte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)), end__gte=datetime.datetime.now().astimezone(pytz.timezone(TIME_ZONE)))
 
+    def get_registration_link(self):
+        """ return a URL for event registration or None """
+        url = None
+        pl_qs = StripePaymentLink.objects.filter(date=self.start.date())
+        if pl_qs:
+            url = pl_qs.first().url
+        # match on date
+        # match on summary or some other metadata?
+        return url
+
     def refresh_local_data(self):
         """ refresh details for self.calendar_event """
         self.summary = self.calendar_event.summary
