@@ -124,7 +124,10 @@ def nfc_self_serve(request):
             
             else:
                 print("check-in succeeded")
-                check_in = person.check_in()
+                if event:
+                    check_in = person.check_in(event.id)
+                else:
+                    check_in = person.check_in()
                 check_in.save()
                 print(check_in)
                 response = HttpResponse(
