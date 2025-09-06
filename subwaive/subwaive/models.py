@@ -672,7 +672,9 @@ class Person(models.Model):
     """ A dummy model for linking records together """
     name = models.CharField(max_length=128, help_text="What is the preferred name for ths person?")
     preferred_email = models.ForeignKey("subwaive.PersonEmail", related_name="+", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
-
+    is_nfc_admin = models.BooleanField(default=False, help_text="Is this person allowed to see NFC terminal config debrief?")
+    #!!! extract nfc_admin to group?
+     
     class Meta:
         ordering = ('name', 'preferred_email__email',)
 
@@ -963,6 +965,15 @@ class PersonStripe(models.Model):
     def __str__(self):
         return f"""{ self.person } / { self.customer.stripe_id }"""
     
+
+class Phone(models.Model):
+    """ A phone number for a person """
+    phone_number = models.CharField(max_length=10, help_text="What is your phone number?")
+    person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, blank=True, null=True, help_text="Who is the person associated with this phone number?")
+    phone_id = models.CharField(max_length=32, help_text="What is the URL secret for registering this phone number?")
+    activation_id = models.CharField(max_length=32, help_text="What is the URL secret used to activate this phone number?")
+    is_active = models.BooleanField(default=False, help_text="Has this phone number been activated?")
+
 
 class NFC(models.Model):
     """ An NFC token for a person """

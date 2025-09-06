@@ -110,6 +110,12 @@ def nfc_self_serve(request):
                     status=200,
                     headers={'line1': 'Membership', 'line2': 'Needed', 'qr_size': qr_size})
 
+            elif is_last_check_in_date_today and person.is_nfc_admin:
+                print("admin-debrief")
+                response = HttpResponse(
+                    status=200,
+                    headers={'message': 'admin-debrief'})
+                
             elif is_last_check_in_date_today:
                 print("already checked-in")
                 response = HttpResponse(
