@@ -718,7 +718,7 @@ class Person(models.Model):
 
     def get_last_check_in(self):
         """ return the last check-in for a person """
-        return PersonEvent.objects.filter(person=self).order_by('-event__end').first()
+        return PersonEvent.objects.filter(person=self).order_by('-check_in_time').first()
 
     def get_submissions(self, lifecycle_state):
         """ fetch links to each document the person has signed """
