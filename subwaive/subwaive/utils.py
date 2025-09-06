@@ -1,3 +1,5 @@
+import secrets
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from subwaive.models import Log
@@ -19,6 +21,13 @@ def generate_qr_svg(content, box_size=QR_SMALL):
 
     return svg
 
+def generate_qr_bitmap(content):
+    """ Return a raw bitmap QR code encoding content """
+    png = qrcode.make(content, version=5, box_size=4)
+
+    return (png.tobytes(), png.size[0])
+
+
 @login_required
 def refresh(request, page_title, data_source, tiles, buttons=None):
     """ a page for initiating data refreshes """
@@ -38,3 +47,7 @@ def refresh(request, page_title, data_source, tiles, buttons=None):
     }
 
     return render(request, f'subwaive/data-refresh.html', context)
+
+def url_secret():
+    return secrets.token_urlsafe(16)
+

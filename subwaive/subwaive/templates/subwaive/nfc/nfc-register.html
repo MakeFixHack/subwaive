@@ -1,0 +1,56 @@
+{% extends 'subwaive/base.html' %}
+{% load static %}
+{% block content %}
+
+{% include 'subwaive/templates/determination-of-confidentiality.html' %}
+
+<div class="container-fluid">
+    <h1>Register NFC token</h1>
+</div>
+
+{% include 'subwaive/templates/buttons.html' %}
+{% include 'subwaive/templates/messages.html' %}
+
+<div class="section section-heading">
+    <div class="card text-center">
+        <div class="card-body">
+            {% if action == "nfc_not_found" %}
+            <h5 class="card-title">NFC not found</h5>
+            <p>The NFC token you requested is not in the system. Please tap it on the NFC reader to load it into the system.</p>
+
+            {% elif action == "direct_sign_up" %}
+            <h5 class="card-title">Email not found</h5>
+            <p>The email address you provided is not in the system. Please use the self-serve check-in system to add it.</p>
+            <p>{{ link }}</p>
+
+            {% elif action == "direct_activate" %}
+            <h5 class="card-title">Token registered</h5>
+            <p>Check your email for an activation link.</p>
+            <p>{{ link }}</p>
+
+            {% elif action == "reject" %}
+            <h5 class="card-title">Token already registered</h5>
+            <p>The NFC token you requested is already in the system. Please tap a different NFC token on the NFC reader to start this work flow again.</p>
+
+            {% elif action == 'collect_email' %}
+            <h5 class="card-title">Email address</h5>
+
+            <form method="POST">
+                {% csrf_token %}
+                <p>
+                    <input type="text" name="email" />
+                </p>
+                <p>
+                    <button class="btn btn-success">Register</button>
+                </p>
+            </form>
+
+            {% else %}
+            <p>{{action}}</p>
+            {% endif %}
+            <p>{{message}}</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

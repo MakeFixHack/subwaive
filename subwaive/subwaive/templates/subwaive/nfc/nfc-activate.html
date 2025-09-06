@@ -1,0 +1,35 @@
+{% extends 'subwaive/base.html' %}
+{% load static %}
+{% block content %}
+
+{% include 'subwaive/templates/determination-of-confidentiality.html' %}
+
+<div class="container-fluid">
+    <h1>Register NFC token</h1>
+</div>
+
+{% include 'subwaive/templates/buttons.html' %}
+{% include 'subwaive/templates/messages.html' %}
+
+<div class="section section-heading">
+    <div class="card text-center">
+        <div class="card-body">
+            {% if action == "nfc_not_found" %}
+            <h5 class="card-title">NFC not found</h5>
+            <p>The activation link you requested is not in the system. Is the link correct?</p>
+
+            {% elif action == "already_active" %}
+            <h5 class="card-title">Already activated</h5>
+            <p>This NFC token has already been activated. Try tapping again to check-in.</p>
+
+            {% elif action == "activation_success" %}
+            <h5 class="card-title">Token activated</h5>
+            <p>Your NFC token is now active and can be used to check-in.</p>
+            <p>{{ link }}</p>
+
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

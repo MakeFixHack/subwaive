@@ -6,6 +6,7 @@ from mozilla_django_oidc import views as oidc_views
 
 from subwaive import docuseal
 from subwaive import stripe
+from subwaive import nfc
 from subwaive import person
 from subwaive import event
 from subwaive import link
@@ -45,6 +46,13 @@ urlpatterns.extend([
     path('', link.public_link_list),
     path('links/public/', link.public_link_list, name='public_link_list'),
     path('links/internal/', link.sensitive_link_list, name='sensitive_link_list'),
+])
+
+# NFC
+urlpatterns.extend([
+    path('nfc/check-in/', nfc.nfc_self_serve, name="nfc_self_serve"),
+    path('nfc/register/<nfc_id>/', nfc.register_nfc, name="register_nfc"),
+    path('nfc/activate/<activation_id>/', nfc.activate_nfc, name="activate_nfc"),
 ])
 
 # Person
