@@ -1,8 +1,10 @@
 import secrets
 
 from django.contrib.auth.decorators import login_required
+from django.core import mail
 from django.shortcuts import render, redirect
 from subwaive.models import Log
+from subwaive.settings import EMAIL_FROM
 
 import qrcode
 import qrcode.image.svg
@@ -51,3 +53,12 @@ def refresh(request, page_title, data_source, tiles, buttons=None):
 def url_secret():
     return secrets.token_urlsafe(16)
 
+def send_email(email_to_address, email_body, email_html_body, email_subject):
+    """ send an email """
+    mail.send_mail(
+        email_subject,
+        email_body,
+        EMAIL_FROM,
+        [email_to_address],
+        html_message=email_html_body
+    )

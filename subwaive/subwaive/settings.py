@@ -45,6 +45,14 @@ LOGOUT_REDIRECT_URL = os.environ.get('LOGOUT_REDIRECT_URL','')
 OIDC_RP_SIGN_ALGO = os.environ.get('OIDC_RP_SIGN_ALGO','')
 OIDC_OP_JWKS_ENDPOINT = os.environ.get('OIDC_OP_JWKS_ENDPOINT','')
 
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST','')
+EMAIL_PORT = os.environ.get('EMAIL_PORT','')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER','')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD','')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL','')
+EMAIL_FROM = os.environ.get('EMAIL_FROM','')
+
 if IS_USE_OIDC_LOGIN:
     USE_X_FORWARDED_HOST = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
