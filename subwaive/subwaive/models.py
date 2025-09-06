@@ -750,13 +750,13 @@ class Person(models.Model):
 
         return documents
 
-    def get_events(self):
+    def get_events(self, is_today=False):
         """ fetch a list of events purchased """
-        return self.get_onetime_payments(payment_type="event")
+        return self.get_onetime_payments(payment_type="event", is_today=is_today)
 
-    def get_day_passes(self):
+    def get_day_passes(self, is_today=False):
         """ fetch a list of day-passes purchased """
-        return self.get_onetime_payments(product_name="day pass")
+        return self.get_onetime_payments(product_name="day pass", is_today=is_today)
 
     def get_donor_status(self):
         """ give a categorical description of how much they've donated """
@@ -778,7 +778,7 @@ class Person(models.Model):
         """ fetch a list of memberships """
         return self.get_subscriptions("membership")
 
-    def get_onetime_payments(self, product_name=None, payment_type=None):
+    def get_onetime_payments(self, product_name=None, payment_type=None, is_today=False):
         """ fetch data on each one-time purchase the person has made """
         # Get a list of OTP for this person
         # print(f"payment_type: {payment_type}")
@@ -786,6 +786,8 @@ class Person(models.Model):
         stripe_customers = [ps.customer for ps in PersonStripe.objects.filter(person=self)]
         # print(f"stripe_customers: {stripe_customers}")
         payments = StripeOneTimePayment.objects.filter(customer__in=stripe_customers)
+        if is_today:
+            payments = payments.filter(date=datetime.date.today())
         # print(f"payments: {payments}")
 
         # Find associated PL.Prc.Prdt.Names
