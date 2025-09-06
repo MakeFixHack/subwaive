@@ -50,8 +50,8 @@ class DocusealField(models.Model):
 
 class DocusealFieldStore(models.Model):
     """ Fields that should be saved from DocusealSubmission """
-    submission = models.ForeignKey("subwaive.DocusealSubmission", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
-    field = models.ForeignKey("subwaive.DocusealField", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
+    submission = models.ForeignKey("subwaive.DocusealSubmission", blank=True, null=True, on_delete=models.CASCADE, help_text="Which submission is being extracted from?")
+    field = models.ForeignKey("subwaive.DocusealField", blank=True, null=True, on_delete=models.CASCADE, help_text="What is the name of the field being extracted?")
     value = models.CharField(max_length=256)
 
     class Meta:
@@ -100,13 +100,13 @@ class DocusealFieldStore(models.Model):
 
 class DocusealSubmission(models.Model):
     """ A Docuseal submission """
-    submission_id = models.PositiveIntegerField()
-    created_at = models.DateTimeField(null=True, blank=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    archived_at = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=16)
-    slug = models.CharField(max_length=32)
-    template = models.ForeignKey("subwaive.DocusealTemplate", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
+    submission_id = models.PositiveIntegerField(help_text="What is the Docuseal ID of this submission?")
+    created_at = models.DateTimeField(null=True, blank=True, help_text="When was this submission created in Docuseal?")
+    completed_at = models.DateTimeField(null=True, blank=True, help_text="When was this submission completed in Docuseal?")
+    archived_at = models.DateTimeField(null=True, blank=True, help_text="When was this submission archived in Docuseal?")
+    status = models.CharField(max_length=16, help_text="What is the Docuseal status of this submission?")
+    slug = models.CharField(max_length=32, help_text="What is the URL slug for this submission?")
+    template = models.ForeignKey("subwaive.DocusealTemplate", blank=True, null=True, on_delete=models.CASCADE, help_text="What template was used for this submission?")
 
     class Meta:
         ordering = ('-completed_at', 'status', 'slug',)
@@ -209,9 +209,9 @@ class DocusealSubmission(models.Model):
 
 class DocusealSubmitter(models.Model):
     """ A Docuseal submitter - often per documents """
-    submitter_id = models.PositiveIntegerField()
-    email = models.EmailField()
-    slug = models.CharField(max_length=32)
+    submitter_id = models.PositiveIntegerField(help_text="What is the Docuseal ID of this submitter?")
+    email = models.EmailField(help_text="What is the email address of this submitter?")
+    slug = models.CharField(max_length=32, help_text="What is the URL slug for this submitter?")
 
     class Meta:
         ordering = ('email', 'slug',)
@@ -317,10 +317,10 @@ class DocusealSubmitter(models.Model):
 
 class DocusealSubmitterSubmission(models.Model):
     """ A map between Docuseal submitter and  submission """
-    submitter = models.ForeignKey("subwaive.DocusealSubmitter", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
-    submission = models.ForeignKey("subwaive.DocusealSubmission", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
     status = models.CharField(max_length=32)
     role = models.CharField(max_length=64)
+    submitter = models.ForeignKey("subwaive.DocusealSubmitter", blank=True, null=True, on_delete=models.CASCADE, help_text="Who is the submitter for this submission?")
+    submission = models.ForeignKey("subwaive.DocusealSubmission", blank=True, null=True, on_delete=models.CASCADE, help_text="What submission did this submitter submit?")
 
     class Meta:
         ordering = ('-status', 'role',)
@@ -331,10 +331,10 @@ class DocusealSubmitterSubmission(models.Model):
 
 class DocusealTemplate(models.Model):
     """ A Docuseal template """
-    template_id = models.PositiveIntegerField()
-    folder_name = models.CharField(max_length=128)
-    name = models.CharField(max_length=128)
-    slug = models.CharField(max_length=32)
+    template_id = models.PositiveIntegerField(help_text="What is the Docuseal ID of this template?")
+    folder_name = models.CharField(max_length=128, help_text="What folder id this template under in Docuseal?")
+    name = models.CharField(max_length=128, help_text="What is the name of this template?")
+    slug = models.CharField(max_length=32, help_text="What is the URL slug for this template?")
 
     class Meta:
         ordering = ('folder_name', 'name', 'slug',)
@@ -400,19 +400,19 @@ class DocusealTemplate(models.Model):
 
 class CalendarEvent(models.Model):
     """ An event from an ical file """
-    UID = models.UUIDField()
+    UID = models.UUIDField(help_text="What is the ical UID of this calendar event?")
     """ Part of a composite key with recurrence_order.\n
     UIDs are shared by recurrences, which means they are not useful 
     individually as a key. Since RECURRENCE_ID can change when the SEQUENCE changes, we instead 
     assume that the order of recurrences is stable for past events. """
-    recurrence_order = models.IntegerField(default=1)
+    recurrence_order = models.IntegerField(default=1, help_text="What is the ical recurrence_order of this calendar event?")
     """ Part of a composite key with UID.\n 
     An ordinal sequence number. Assumed to be stable for past events, 
     provided old events are not added to an existing series. """
-    summary = models.CharField(max_length=512, help_text='What is the event summary?')
-    description = models.TextField(max_length=2048, help_text='What is the event description?')
-    start = models.DateTimeField(help_text='When does the event begin?')
-    end = models.DateTimeField(help_text='When does the event finish?')
+    summary = models.CharField(max_length=512, help_text='What is the calendar event summary?')
+    description = models.TextField(max_length=2048, help_text='What is the calendar event description?')
+    start = models.DateTimeField(help_text='When does the calendar event begin?')
+    end = models.DateTimeField(help_text='When does the calendar event finish?')
 
     class Meta:
         ordering = ('-start', 'summary',)
@@ -589,7 +589,7 @@ class Event(models.Model):
     description = models.TextField(max_length=2048, help_text='What is the event description?')
     start = models.DateTimeField(help_text='When does the event begin?')
     end = models.DateTimeField(help_text='When does the event finish?')
-    calendar_event = models.ForeignKey("subwaive.CalendarEvent", blank=True, null=True, on_delete=models.SET_NULL, help_text="Which calendar event is this?")
+    calendar_event = models.ForeignKey("subwaive.CalendarEvent", blank=True, null=True, on_delete=models.SET_NULL, help_text="Which calendar event is this based on?")
 
     class Meta:
         ordering = ('-start', 'summary',)
@@ -623,9 +623,9 @@ class Log(models.Model):
     """ Log activities """
     timestamp = models.DateTimeField(auto_now_add=True, help_text='When was the event logged?')
     description = models.CharField(max_length=512, help_text='What happened?')
-    other_info = models.TextField(max_length=4096, blank=True, null=True, help_text='Additional detail')
-    json = models.JSONField(blank=True, null=True)
-    logging_level = models.IntegerField(default=0, help_text='Python logging level, as integer')
+    other_info = models.TextField(max_length=4096, blank=True, null=True, help_text='What additional detail helps describe the event?')
+    json = models.JSONField(blank=True, null=True, help_text="What JSON describes the event?")
+    logging_level = models.IntegerField(default=0, help_text='What is the Python logging level of the event?')
 
     class Meta:
         ordering = ('-timestamp',)
@@ -670,7 +670,7 @@ class Permission(models.Model):
 
 class Person(models.Model):
     """ A dummy model for linking records together """
-    name = models.CharField(max_length=128, help_text="What is the preferred nae for ths person?")
+    name = models.CharField(max_length=128, help_text="What is the preferred name for ths person?")
     preferred_email = models.ForeignKey("subwaive.PersonEmail", related_name="+", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
 
     class Meta:
@@ -892,7 +892,7 @@ class PersonDocuseal(models.Model):
 
 class PersonEmail(models.Model):
     """ A list of email addresses associated with a Person """
-    person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, help_text="Who is the person associated with this Docuseal submitter?")
+    person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, help_text="Who is the person associated with this email address?")
     email = models.EmailField(help_text="What is this person's email address?")
 
     class Meta:
@@ -927,8 +927,8 @@ class PersonEmail(models.Model):
 
 class PersonEvent(models.Model):
     """ A map between Person and Event """
-    person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, help_text="Who is the person associated with this Docuseal submitter?")
-    event = models.ForeignKey("subwaive.Event", on_delete=models.CASCADE, related_name="attendee", help_text="Who is the person associated with this Docuseal submitter?")
+    person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, help_text="Who is the person checked-in to this event?")
+    event = models.ForeignKey("subwaive.Event", on_delete=models.CASCADE, blank=True, null=True, related_name="attendee", help_text="What event is associated with this check-in?")
 
     class Meta:
         ordering = ('person', 'event',)
@@ -959,8 +959,8 @@ class PersonStripe(models.Model):
 
 class QRCategory(models.Model):
     """ Categories for organizing QR codes """
-    name = models.CharField(max_length=64, help_text="What is the name of the View?")
-    is_sensitive = models.BooleanField(default=False)
+    name = models.CharField(max_length=64, help_text="What is the name of the QR code category?")
+    is_sensitive = models.BooleanField(default=False, help_text="Should this link be hidden from unauthenticated viewers?")
 
     class Meta:
         ordering = ('is_sensitive', 'name',)
@@ -974,7 +974,7 @@ class QRCategory(models.Model):
 
 class QRCustom(models.Model):
     """ User-defined QR codes """
-    name = models.CharField(max_length=64, help_text="What is the name of the View?")
+    name = models.CharField(max_length=64, help_text="What is the name of the QR code?")
     category = models.ForeignKey("subwaive.QRCategory", on_delete=models.CASCADE, help_text="What category does this QR code belong to?")
     content = models.CharField(max_length=4096, help_text="What is the QR code's payload?")
 
@@ -987,9 +987,9 @@ class QRCustom(models.Model):
 
 class StripeCustomer(models.Model):
     """ A Stripe Customer """
-    stripe_id = models.CharField(max_length=64, blank=True, null=True)
-    name = models.CharField(max_length=128)
-    email = models.EmailField()
+    stripe_id = models.CharField(max_length=64, blank=True, null=True, help_text="What is the Stripe ID of this customer?")
+    name = models.CharField(max_length=128, help_text="What is the name of this customer?")
+    email = models.EmailField(help_text="What is the email address of this customer?")
 
     class Meta:
         ordering = ('email', 'name',)
@@ -1088,11 +1088,11 @@ class StripeCustomer(models.Model):
 
 class StripeOneTimePayment(models.Model):
     """ A Stripe one-time payment """
-    stripe_id = models.CharField(max_length=128)
-    customer = models.ForeignKey("subwaive.StripeCustomer", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
-    date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=64)
-    payment_link = models.ForeignKey("subwaive.StripePaymentLink", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
+    stripe_id = models.CharField(max_length=128, help_text="What is the Stripe ID of this checkout session?")
+    customer = models.ForeignKey("subwaive.StripeCustomer", on_delete=models.CASCADE, help_text="What Stripe Customer is associated with this checkout session?")
+    date = models.DateField(null=True, blank=True, help_text="What is date is associated with the payment link or what was the date the checkout session occurred?") #!!! if we store paymentlink, why muddle this field's contents?
+    status = models.CharField(max_length=64, help_text="What is the status of tis checkout session?")
+    payment_link = models.ForeignKey("subwaive.StripePaymentLink", on_delete=models.CASCADE, help_text="What payment link was used to initiate this checkout session?")
 
     class Meta:
         ordering = ('stripe_id',)
@@ -1156,10 +1156,10 @@ class StripeOneTimePayment(models.Model):
 
 class StripePaymentLink(models.Model):
     """ A Stripe PaymentLink """
-    stripe_id = models.CharField(max_length=64)
-    url = models.URLField()
-    is_recurring = models.BooleanField(default=False)
-    date = models.DateField(blank=True, null=True)
+    stripe_id = models.CharField(max_length=64, help_text="What is the Stripe ID of this payment link?")
+    url = models.URLField(help_text="What is the URL of this payment link?")
+    is_recurring = models.BooleanField(default=False, help_text="Is this payment link for a recurring charge?")
+    date = models.DateField(blank=True, null=True, help_text="What event_date was provided in the payment link metadata?")
     # metadata to get name for day-pass event?
 
     class Meta:
@@ -1238,10 +1238,10 @@ class StripePaymentLinkPrice(models.Model):
 
 class StripePrice(models.Model):
     """ A Stripe Price """
-    stripe_id = models.CharField(max_length=64)
+    stripe_id = models.CharField(max_length=64, help_text="What is the Stripe ID of this price?")
     name = models.CharField(max_length=64, help_text="What is the name of the Price?")
-    interval = models.CharField(max_length=64)
-    price = models.IntegerField()
+    interval = models.CharField(max_length=64, help_text="What is the interval type of this price?")
+    price = models.IntegerField(help_text="What is the numerical base-currency value of this price?")
     product = models.ForeignKey("subwaive.StripeProduct", on_delete=models.CASCADE, help_text="What Stripe Product does this Price apply to?")
 
     class Meta:
@@ -1333,9 +1333,9 @@ class StripePrice(models.Model):
 
 class StripeProduct(models.Model):
     """ A Stripe Product """
-    stripe_id = models.CharField(max_length=64)
-    name = models.CharField(max_length=64)
-    description = models.TextField(max_length=512)
+    stripe_id = models.CharField(max_length=64, help_text="What is the Stripe ID of this product?")
+    name = models.CharField(max_length=64,  help_text="What is the name of this product?")
+    description = models.TextField(max_length=512, help_text="What is the description of this product?")
 
     class Meta:
         ordering = ('name', 'description',)
@@ -1388,12 +1388,12 @@ class StripeProduct(models.Model):
 
 class StripeSubscription(models.Model):
     """ A Stripe Subscription """
-    stripe_id = models.CharField(max_length=64)
+    stripe_id = models.CharField(max_length=64, help_text="What is the Stripe ID of this subscription?")
     customer = models.ForeignKey("subwaive.StripeCustomer", on_delete=models.CASCADE, help_text="What Stripe Customer holds this Subscription?")
-    created = models.DateTimeField(null=True, blank=True)
-    current_period_end = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=64)
-    name = models.CharField(max_length=128)
+    created = models.DateTimeField(null=True, blank=True, help_text="When was this subscription created?")
+    current_period_end = models.DateTimeField(null=True, blank=True, help_text="When does this subscription end if not renewed?")
+    status = models.CharField(max_length=64, help_text="What is the status of this subscription?")
+    name = models.CharField(max_length=128, help_text="What is the name of this subscription?")
 
     # class Meta:
     #     ordering = ('category', 'name',)
@@ -1510,9 +1510,9 @@ class StripeSubscription(models.Model):
 
 class StripeSubscriptionItem(models.Model):
     """ A Stripe SubscriptionItem """
-    stripe_id = models.CharField(max_length=64)
-    subscription = models.ForeignKey("subwaive.StripeSubscription", on_delete=models.CASCADE, help_text="What Stripe Price is being mapped?")
-    price = models.ForeignKey("subwaive.StripePrice", on_delete=models.CASCADE, help_text="What Stripe Price is being mapped?")
+    stripe_id = models.CharField(max_length=64, help_text="What is the Stripe ID of this subscription item?")
+    subscription = models.ForeignKey("subwaive.StripeSubscription", on_delete=models.CASCADE, help_text="What subscription is this subscription item a part of?")
+    price = models.ForeignKey("subwaive.StripePrice", on_delete=models.CASCADE, help_text="What Stripe Price is associated with the subscription item?")
 
     class Meta:
         ordering = ('stripe_id', 'price',)
