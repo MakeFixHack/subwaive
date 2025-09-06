@@ -95,7 +95,7 @@ def receive_webhook(request):
 
     payload = event.data.object
     Log.new(logging_level=logging.INFO, description="Stripe webhook", json=payload)
-    print(payload)
+    # print(payload)
 
     try:
         if 'id' in payload.keys():

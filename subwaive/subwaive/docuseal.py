@@ -58,7 +58,7 @@ def qr_links(request):
 def receive_webhook(request):
     """ Handle a Docuseal webhook """
 
-    print(f"request.method: {request.method}")
+    # print(f"request.method: {request.method}")
     # need to valid webhook came from trusted source
     if request.method == 'POST':
         signature = request.headers.get('X-Docuseal-Signature')
@@ -73,7 +73,7 @@ def receive_webhook(request):
 
                 Log.new(logging_level=logging.INFO, description="Docuseal webhook", json=payload)
 
-                print("webhook type: ",payload['event_type'] )
+                # print("webhook type: ",payload['event_type'] )
 
                 # Probably not needed since we exchange a secret, but to prevent bad actors, we only use the webhook
                 # to determine which records to address. We use an API pull for the actual data.

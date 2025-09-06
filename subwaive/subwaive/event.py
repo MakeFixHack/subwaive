@@ -30,9 +30,9 @@ def member_check_in(request, person_id, event_id, override_checks=False):
     waiver_check = Person.check_waiver_status_by_person_id(person_id)
     # print(waiver_check)
     membership_status = Person.check_membership_status_by_person_id(person_id)
-    print(membership_status)
+    # print(membership_status)
     has_prior_check_in = PersonEvent.check_prior_check_in(person_id, event_id)
-    print(has_prior_check_in)
+    # print(has_prior_check_in)
 
     clean_checks = False
     if override_checks:
@@ -47,7 +47,7 @@ def member_check_in(request, person_id, event_id, override_checks=False):
 
         return redirect('event_details', event_id)
     else:
-        print('check-in checks failed')
+        # print('check-in checks failed')
         return check_in_remediation(request=request, person_id=person_id, event_id=event_id, waiver_check=waiver_check, membership_status=membership_status, has_prior_check_in=has_prior_check_in)
 
 @login_required
@@ -196,13 +196,13 @@ def event_details(request, event_id):
 
     possible_check_ins = Person.objects.exclude(id__in=[p.id for p in persons])
 
-    print(f"event.start.date(): {event.start.date()}")
+    # print(f"event.start.date(): {event.start.date()}")
     for otp in StripeOneTimePayment.objects.all():
         print (otp.date)
     payees = [otp.customer for otp in StripeOneTimePayment.objects.filter(date=event.start.date())]
-    print(f"payees: {payees}")
+    # print(f"payees: {payees}")
     customers = PersonStripe.objects.filter(customer__in=payees).exclude(person__id__in=[p.id for p in persons])
-    print(f"customers: {customers}")
+    # print(f"customers: {customers}")
     event_customers = []
     for customer in customers:
         event_customers.append(
