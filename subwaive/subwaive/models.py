@@ -317,16 +317,14 @@ class DocusealSubmitter(models.Model):
 
 class DocusealSubmitterSubmission(models.Model):
     """ A map between Docuseal submitter and  submission """
-    status = models.CharField(max_length=32)
-    role = models.CharField(max_length=64)
     submitter = models.ForeignKey("subwaive.DocusealSubmitter", blank=True, null=True, on_delete=models.CASCADE, help_text="Who is the submitter for this submission?")
     submission = models.ForeignKey("subwaive.DocusealSubmission", blank=True, null=True, on_delete=models.CASCADE, help_text="What submission did this submitter submit?")
 
     class Meta:
-        ordering = ('-status', 'role',)
+        ordering = ('submitter', 'submission',)
 
     def __str__(self):
-        return f"""{ self.submitter } / { self.submission } / {self.role }"""
+        return f"""{ self.submitter } / { self.submission }"""
     
 
 class DocusealTemplate(models.Model):
