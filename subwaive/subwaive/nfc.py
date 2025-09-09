@@ -1,6 +1,7 @@
 import datetime
 import os
 import logging
+import pytz
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -65,10 +66,10 @@ def nfc_self_serve(request):
                 print(last_check_in.check_in_time.date())
                 print(datetime.date.today())
                 if last_check_in.event:
-                    if last_check_in.event.start.date() == datetime.date.today():
+                    if last_check_in.event.start.date() == datetime.datetime.now(tz=pytz.timezone(TIME_ZONE)).date():
                         print("last event check in was today")
                         is_last_check_in_date_today = True
-                elif last_check_in.check_in_time.date() == datetime.date.today():
+                elif last_check_in.check_in_time.astimezone(tz=pytz.timezone(TIME_ZONE)).date() == datetime.datetime.now(tz=pytz.timezone(TIME_ZONE)).date():
                     print("last ad hoc check in was today")
                     is_last_check_in_date_today = True
             print(f"is_last_check_in_date_today: {is_last_check_in_date_today}")
