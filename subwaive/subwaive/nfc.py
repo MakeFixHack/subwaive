@@ -165,6 +165,7 @@ def register_nfc(request, nfc_id):
         if nfc.person:
             context['action'] = 'reject'
             context['message'] = "This NFC token has already been associated with a person. Check your email for a confirmation link."
+        
         elif email:
             person_qs = PersonEmail.objects.filter(email=email)
             if person_qs.exists():
@@ -178,21 +179,27 @@ def register_nfc(request, nfc_id):
                 An NFC card/sticker was registered with MakeFixHack for this email address. This will allow you to check-in using our self check-in system.
                 {url}
                 
-                Didn't request this? You can ignore it and it will expire."""
+                Didn't request this? You can ignore it."""
+
                 email_html_body=f"""<h1>Activate your NFC token</h1>
                 <p>An NFC card/sticker was registered with MakeFixHack for this email address. This will allow you to check-in using our self check-in system.</p>
                 <p><a href="{url}"><button onclick="false;">Activate</button></a></p>
                 <hr>
                 <p>Didn't request this? You can ignore it and it will expire.</p>"""
+
                 send_email(email_to_address=email, email_body=email_body, email_html_body=email_html_body, email_subject="Activate your NFC token")
+                
                 context['message'] = "This NFC token has been associated with your email address. Check that email for a confirmation link."
+            
             else:
                 context['action'] = 'direct_sign_up'
                 context['message'] = "The email address provided wasn't found in the database. Sign-up and try again."
                 context['link'] = redirect('self_check_in_email').url
+        
         elif nfc:
             # elif no-email-provided, prompt for email address
             context['action'] = 'collect_email'
+        
         else:
             context['action'] = 'nfc_not_found'
 
@@ -212,8 +219,8 @@ def activate_nfc(request, activation_id):
 
         if nfc.is_active:
             context['action'] = 'already_active'
-        
-        else: # !!! add elif for expired request
+
+        else:
             nfc.is_active = True
             nfc.save()
             context['action'] = "activation_success"
