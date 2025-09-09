@@ -26,13 +26,14 @@ def nfc_self_serve(request):
     # print(f"http-payload: {request.POST}")
 
     if terminal:
+        # print(f"terminal: {terminal.location}")
         uid = request.POST.get("uid", None)
         # print(f"uid: {uid}")
         nfc_qs = NFC.objects.filter(uid=uid)
 
         if not nfc_qs.exists():
             Log.new(logging_level=logging.INFO, description="NFC - new token", json={'uid': uid, 'terminal': terminal.id})
-            print("nfc not in database")
+            # print("nfc not in database")
             # store NFC
             nfc = NFC.objects.create(uid=uid, nfc_id=url_secret(), activation_id=url_secret())
             # create link to register NFC
@@ -46,7 +47,7 @@ def nfc_self_serve(request):
                 headers={'line1': 'Register', 'line2': 'w/ QR code', 'qr_size': qr_size})
             
         else:
-            print("nfc found in database")
+            # print("nfc found in database")
             last_check_in = None
 
             person = nfc_qs.first().person
@@ -55,24 +56,24 @@ def nfc_self_serve(request):
                 event = Event.get_current_event()
                 is_event_requires_registration = False
                 if event:
+                    # print(event)
                     if event.get_registration_link():
                         is_event_requires_registration = True
 
 
             is_last_check_in_date_today = False
             if last_check_in:
-                print("found prior check-in")
-                print(last_check_in.check_in_time)
-                print(last_check_in.check_in_time.date())
-                print(datetime.date.today())
+                # print("found prior check-in")
+                # print(last_check_in.check_in_time.astimezone(tz=pytz.timezone(TIME_ZONE)))
+                # print(datetime.datetime.now(tz=pytz.timezone(TIME_ZONE)).date())
                 if last_check_in.event:
                     if last_check_in.event.start.date() == datetime.datetime.now(tz=pytz.timezone(TIME_ZONE)).date():
-                        print("last event check in was today")
+                        # print("last event check in was today")
                         is_last_check_in_date_today = True
                 elif last_check_in.check_in_time.astimezone(tz=pytz.timezone(TIME_ZONE)).date() == datetime.datetime.now(tz=pytz.timezone(TIME_ZONE)).date():
-                    print("last ad hoc check in was today")
+                    # print("last ad hoc check in was today")
                     is_last_check_in_date_today = True
-            print(f"is_last_check_in_date_today: {is_last_check_in_date_today}")
+            # print(f"is_last_check_in_date_today: {is_last_check_in_date_today}")
 
             if person and not nfc_qs.first().is_active:
                 Log.new(logging_level=logging.INFO, description="NFC - token not activated", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
@@ -147,7 +148,7 @@ def nfc_self_serve(request):
                     headers={'line1': 'Welcome', 'line2': 'Back!'})
 
     else:
-        print("unauthorized terminal")
+        # print("unauthorized terminal")
         response = HttpResponse(status=401, headers={'line1': 'Unknown', 'line2': 'Terminal'})
 
     # print(response.headers)
