@@ -43,7 +43,7 @@ def nfc_self_serve(request):
                 content=bmp, 
                 content_type="text/bitmap",
                 status=200,
-                headers={'line1': 'Register', 'line2': 'NFC', 'qr_size': qr_size})
+                headers={'line1': 'Register', 'line2': 'w/ QR code', 'qr_size': qr_size})
             
         else:
             print("nfc found in database")
