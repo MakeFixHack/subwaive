@@ -37,11 +37,11 @@ admin.site.register(DocusealTemplate, DocusealTemplate_Admin)
 
 
 """
-Person
+NFC
 """
 
 class NFC_Admin(admin.ModelAdmin):
-    list_display = ('person', 'is_active', 'uid',)
+    list_display = ('uid', 'person', 'is_active',)
 admin.site.register(NFC, NFC_Admin)
 
 class Person_Admin(admin.ModelAdmin):
