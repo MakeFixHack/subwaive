@@ -991,6 +991,13 @@ class NFC(models.Model):
     activation_id = models.CharField(max_length=32, help_text="What is the URL secret used to activate this NFC token?")
     is_active = models.BooleanField(default=False, help_text="Has this NFC token been activated?")
 
+    class Meta:
+        ordering = ('person', 'uid', 'is_active',)
+
+    def __str__(self):
+        return f"""{ self.person } / { self.uid } / { self.is_active }"""
+    
+
 class NFCTerminal(models.Model):
     """ An NFC check-in terminal """
     token = models.CharField(max_length=128, unique=True, help_text="What is the secret token uniquely identifying this terminal?")
