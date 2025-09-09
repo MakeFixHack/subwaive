@@ -991,6 +991,18 @@ class NFC(models.Model):
     activation_id = models.CharField(max_length=32, help_text="What is the URL secret used to activate this NFC token?")
     is_active = models.BooleanField(default=False, help_text="Has this NFC token been activated?")
 
+class NFCTerminal(models.Model):
+    """ An NFC check-in terminal """
+    token = models.CharField(max_length=128, unique=True, help_text="What is the secret token uniquely identifying this terminal?")
+    location = models.CharField(max_length=128, help_text="Where is this terminal located? What are uses this terminal for check-ins?")
+    #!!! future change here could include FK to separate location model to link check-ins with locations/filter fetched events for check-ins to locations...
+
+    class Meta:
+        ordering = ('location', 'token',)
+
+    def __str__(self):
+        return f"""{ self.location } / { self.token }"""
+
 
 class QRCategory(models.Model):
     """ Categories for organizing QR codes """

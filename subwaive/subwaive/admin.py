@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from subwaive.models import DocusealField,DocusealFieldStore,DocusealSubmission,DocusealSubmitter,DocusealSubmitterSubmission,DocusealTemplate
 from subwaive.models import CalendarEvent,Event
-from subwaive.models import Log,QRCategory,QRCustom,NFC
+from subwaive.models import Log,QRCategory,QRCustom,NFC,NFCTerminal
 from subwaive.models import Person,PersonDocuseal,PersonEmail,PersonEvent,PersonStripe
 from subwaive.models import StripeCustomer,StripeOneTimePayment,StripePaymentLink,StripePaymentLinkPrice,StripePrice,StripeProduct,StripeSubscription,StripeSubscriptionItem
 
@@ -43,6 +43,15 @@ NFC
 class NFC_Admin(admin.ModelAdmin):
     list_display = ('uid', 'person', 'is_active',)
 admin.site.register(NFC, NFC_Admin)
+
+class NFCTerminal_Admin(admin.ModelAdmin):
+    list_display = ('location', 'token',)
+admin.site.register(NFCTerminal, NFCTerminal_Admin)
+
+
+"""
+Person
+"""
 
 class Person_Admin(admin.ModelAdmin):
     list_display = ('name', 'preferred_email',)

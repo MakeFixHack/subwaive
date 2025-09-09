@@ -7,22 +7,22 @@ from django.views.decorators.csrf import csrf_exempt
 
 from subwaive.models import DocusealTemplate
 from subwaive.models import Event
-from subwaive.models import NFC
 from subwaive.models import Person, PersonEmail, PersonEvent
+from subwaive.models import NFC,NFCTerminal
 from subwaive.utils import generate_qr_bitmap, send_email, url_secret
 
-SELF_SERVE_TOKEN = os.environ.get("SELF_SERVE_TOKEN")
 TIME_ZONE = os.environ.get("TIME_ZONE")
 
 @csrf_exempt
 def nfc_self_serve(request):
     """ self-serve terminal interface for NFC check-in and self-serve sign-up """
     response = HttpResponse(status=401)
-
+    token = request.headers.get('X-Self-Serve-Token')
+    terminal = NFCTerminal.objects.filter(token=token).first()
     # print(f"token: {request.headers.get('X-Self-Serve-Token')}")
     # print(f"http-payload: {request.POST}")
 
-    if request.headers.get('X-Self-Serve-Token') == SELF_SERVE_TOKEN:
+    if terminal:
         uid = request.POST.get("uid", None)
         # print(f"uid: {uid}")
         nfc_qs = NFC.objects.filter(uid=uid)
@@ -143,8 +143,8 @@ def nfc_self_serve(request):
                     headers={'bgColor': 'green', 'line1': 'Welcome', 'line2': 'Back!'})
 
     else:
-        print("unauthorized")
-        response = HttpResponse(status=401)
+        print("unauthorized terminal")
+        response = HttpResponse(status=401, headers={'line1': 'Unknown', 'line2': 'Terminal'})
 
     # print(response.headers)
     return response
