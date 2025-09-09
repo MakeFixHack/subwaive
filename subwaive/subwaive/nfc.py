@@ -1,5 +1,6 @@
 import datetime
 import os
+import logging
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -8,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from subwaive.models import DocusealTemplate
 from subwaive.models import Event
 from subwaive.models import Person, PersonEmail, PersonEvent
+from subwaive.models import Log
 from subwaive.models import NFC,NFCTerminal
 from subwaive.utils import generate_qr_bitmap, send_email, url_secret
 
@@ -28,6 +30,7 @@ def nfc_self_serve(request):
         nfc_qs = NFC.objects.filter(uid=uid)
 
         if not nfc_qs.exists():
+            Log.new(logging_level=logging.INFO, description="NFC - new token", json={'uid': uid, 'terminal': terminal.id})
             print("nfc not in database")
             # store NFC
             nfc = NFC.objects.create(uid=uid, nfc_id=url_secret(), activation_id=url_secret())
@@ -71,13 +74,13 @@ def nfc_self_serve(request):
             print(f"is_last_check_in_date_today: {is_last_check_in_date_today}")
 
             if person and not nfc_qs.first().is_active:
-                print("uid is attached to person but not activated")
+                Log.new(logging_level=logging.INFO, description="NFC - token not activated", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 response = HttpResponse(
                     status=200,
                     headers={'line1': 'Check', 'line2': 'Email', 'line3': 'Activate', 'line4': 'NFC'})
 
             elif not person:
-                print("uid not connected with a person")
+                Log.new(logging_level=logging.INFO, description="NFC - token not registered", json={'uid': uid, 'terminal': terminal.id})
                 NFC.objects.filter(uid=uid).delete()
                 nfc = NFC.objects.create(uid=uid, nfc_id=url_secret(), activation_id=url_secret())
                 url = request.build_absolute_uri(redirect('register_nfc', nfc.nfc_id).url)
@@ -89,7 +92,7 @@ def nfc_self_serve(request):
                     headers={'line1': 'Register', 'line2': 'NFC', 'qr_size': qr_size})
 
             elif not person.check_waiver_status():
-                print("needs waiver")
+                Log.new(logging_level=logging.INFO, description="NFC - waiver needed", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 url = DocusealTemplate.objects.filter(folder_name='Waivers').first().get_url()
                 (bmp,qr_size) = generate_qr_bitmap(url)
                 response = HttpResponse(
@@ -99,7 +102,7 @@ def nfc_self_serve(request):
                     headers={'line1': 'Sign', 'line2': 'Waiver', 'qr_size': qr_size})
 
             elif is_event_requires_registration and not event.start.date in [e.date for e in person.get_events()]:
-                print("needs registration")
+                Log.new(logging_level=logging.INFO, description="NFC - event requires registration", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 url = event.get_registration_link()
                 (bmp,qr_size)=generate_qr_bitmap(url)
                 response = HttpResponse(
@@ -109,7 +112,7 @@ def nfc_self_serve(request):
                     headers={'line1': 'Register', 'line2': 'for Event', 'qr_size': qr_size})
 
             elif not person.check_membership_status() and not person.get_events():
-                print("needs membership")
+                Log.new(logging_level=logging.INFO, description="NFC - membership not found", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 url = "https://www.makefixhack.org/p/membership-and-donation.html"
                 (bmp,qr_size) = generate_qr_bitmap(url)
                 response = HttpResponse(
@@ -119,19 +122,19 @@ def nfc_self_serve(request):
                     headers={'line1': 'Membership', 'line2': 'Needed', 'qr_size': qr_size})
 
             elif is_last_check_in_date_today and person.is_nfc_admin: #!!! check is in staff group
-                print("admin-debrief")
+                Log.new(logging_level=logging.INFO, description="NFC - terminal config requested", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 response = HttpResponse(
                     status=200,
                     headers={'message': 'admin-debrief'})
                 
             elif is_last_check_in_date_today:
-                print("already checked-in")
+                Log.new(logging_level=logging.INFO, description="NFC - duplicate check-in request", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 response = HttpResponse(
                     status=200,
                     headers={'line1': 'Welcome', 'line2': 'Back!'})
             
             else:
-                print("check-in succeeded")
+                Log.new(logging_level=logging.INFO, description="NFC - check-in success", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 if event:
                     check_in = person.check_in(event.id)
                 else:
