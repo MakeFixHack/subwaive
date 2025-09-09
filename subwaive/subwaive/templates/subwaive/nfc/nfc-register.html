@@ -16,7 +16,11 @@
         <div class="card-body">
             {% if action == "nfc_not_found" %}
             <h5 class="card-title">NFC not found</h5>
-            <p>The NFC token you requested is not in the system. Please tap it on the NFC reader to load it into the system.</p>
+            <p>The NFC token you are trying to activate is not in the system.</p>
+            
+            <p>Please tap it on the NFC reader to restart the registration process.</p>
+
+            <p>A new link will be provided by the terminal as a QR code.</p>
 
             {% elif action == "direct_sign_up" %}
             <h5 class="card-title">Email not found</h5>
