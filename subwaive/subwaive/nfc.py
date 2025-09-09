@@ -128,7 +128,7 @@ def nfc_self_serve(request):
                 print("already checked-in")
                 response = HttpResponse(
                     status=200,
-                    headers={'bgColor': 'green', 'line1': 'Welcome', 'line2': 'Back!'})
+                    headers={'line1': 'Welcome', 'line2': 'Back!'})
             
             else:
                 print("check-in succeeded")
@@ -140,7 +140,7 @@ def nfc_self_serve(request):
                 print(check_in)
                 response = HttpResponse(
                     status=200,
-                    headers={'bgColor': 'green', 'line1': 'Welcome', 'line2': 'Back!'})
+                    headers={'line1': 'Welcome', 'line2': 'Back!'})
 
     else:
         print("unauthorized terminal")
