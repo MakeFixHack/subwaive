@@ -9,9 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from subwaive.models import DocusealTemplate
 from subwaive.models import Event
-from subwaive.models import Person, PersonEmail, PersonEvent
 from subwaive.models import Log
 from subwaive.models import NFC,NFCTerminal
+from subwaive.models import PersonEmail
 from subwaive.utils import generate_qr_bitmap, send_email, url_secret
 
 TIME_ZONE = os.environ.get("TIME_ZONE")
