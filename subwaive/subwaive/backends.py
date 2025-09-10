@@ -24,6 +24,14 @@ class AADB2CAuthenticationBackend(OIDCAuthenticationBackend):
 
         # custom admin console permissions to add to everybody in OIDC
         codenames = [
+            'add_nfc',
+            'change_nfc',
+            'delete_nfc',
+            'view_nfc',
+            'add_nfcterminal',
+            'change_nfcterminal',
+            'delete_nfcterminal',
+            'view_nfcterminal',
             'add_person',
             'change_person',
             'delete_person',

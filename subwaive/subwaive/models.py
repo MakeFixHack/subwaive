@@ -4,6 +4,7 @@ import os
 import pytz #!!! your sometimes adding local and sometimes adding utc, if they are tz-aware does it mater?
 import caldav
 
+from django.contrib.auth.models import Permission, User
 from django.db import models
 from django.db.models import Q
 
@@ -680,8 +681,6 @@ class Person(models.Model):
     """ A dummy model for linking records together """
     name = models.CharField(max_length=128, help_text="What is the preferred name for ths person?")
     preferred_email = models.ForeignKey("subwaive.PersonEmail", related_name="+", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
-    is_nfc_admin = models.BooleanField(default=False, help_text="Is this person allowed to see NFC terminal config debrief?")
-    #!!! extract nfc_admin to group?
      
     class Meta:
         ordering = ('name', 'preferred_email__email',)
@@ -850,6 +849,16 @@ class Person(models.Model):
                         for item in subscription_item
                     ]
         return subscriptions
+    
+    def get_user(self):
+        """ return the name of a django User with an email associated with this Person """
+        user = None
+        for pe in PersonEmail.objects.filter(person=self):
+            user_qs = User.objects.filter(email=pe.email)
+            if user_qs.exists():
+                user = user_qs.first()
+                continue
+        return user
 
     def merge(self, merge_child_id):
         """ Merge the associations from merge_child into self and delete merge_child """

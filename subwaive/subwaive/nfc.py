@@ -59,6 +59,10 @@ def nfc_self_serve(request):
                     # print(event)
                     if event.get_registration_link():
                         is_event_requires_registration = True
+                is_staff = False
+                if person.get_user():
+                    is_staff = person.get_user().is_staff
+
 
 
             is_last_check_in_date_today = False
@@ -123,7 +127,7 @@ def nfc_self_serve(request):
                     status=200,
                     headers={'line1': 'Membership', 'line2': 'Needed', 'qr_size': qr_size})
 
-            elif is_last_check_in_date_today and person.is_nfc_admin: #!!! check is in staff group
+            elif is_last_check_in_date_today and is_staff:
                 Log.new(logging_level=logging.INFO, description="NFC - terminal config requested", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 response = HttpResponse(
                     status=200,
