@@ -131,7 +131,7 @@ def nfc_self_serve(request):
                 Log.new(logging_level=logging.INFO, description="NFC - terminal config requested", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
                 response = HttpResponse(
                     status=200,
-                    headers={'message': 'admin-debrief'})
+                    headers={'message': 'admin-debrief', 'terminal': terminal.location})
                 
             elif is_last_check_in_date_today:
                 Log.new(logging_level=logging.INFO, description="NFC - duplicate check-in request", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
