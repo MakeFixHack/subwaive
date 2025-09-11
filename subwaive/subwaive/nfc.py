@@ -213,7 +213,7 @@ def register_nfc(request, registration_id):
             context['action'] = 'nfc_not_found'
 
     else:
-        context['message'] = "This NFC link is not in the database."
+        context['message'] = "This NFC registration link is not in the database."
     
     return render(request, f'subwaive/nfc/nfc-register.html', context)
 
