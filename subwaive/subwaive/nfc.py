@@ -180,7 +180,7 @@ def register_nfc(request, registration_id):
             if person_qs.exists():
                 context['action'] = 'direct_activate'
                 nfc.person = person_qs.first().person
-                nfc.confirmation_id = url_secret()
+                nfc.activation_id = url_secret()
                 nfc.save()
                 
                 url = request.build_absolute_uri(redirect('activate_nfc', nfc.activation_id).url)
