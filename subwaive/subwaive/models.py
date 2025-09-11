@@ -987,7 +987,7 @@ class Phone(models.Model):
     """ A phone number for a person """
     phone_number = models.CharField(max_length=10, help_text="What is your phone number?")
     person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, blank=True, null=True, help_text="Who is the person associated with this phone number?")
-    phone_id = models.CharField(max_length=32, help_text="What is the URL secret for registering this phone number?")
+    registration_id = models.CharField(max_length=32, help_text="What is the URL secret for registering this phone number?")
     activation_id = models.CharField(max_length=32, help_text="What is the URL secret used to activate this phone number?")
     is_active = models.BooleanField(default=False, help_text="Has this phone number been activated?")
 
@@ -996,7 +996,7 @@ class NFC(models.Model):
     """ An NFC token for a person """
     uid = models.CharField(max_length=32, help_text="UID identifying this NFC")
     person = models.ForeignKey("subwaive.Person", on_delete=models.CASCADE, blank=True, null=True, help_text="Person associated with this NFC token?")
-    nfc_id = models.CharField(max_length=32, help_text="What is the URL secret used to register this NFC token?")
+    registration_id = models.CharField(max_length=32, help_text="What is the URL secret used to register this NFC token?")
     activation_id = models.CharField(max_length=32, help_text="What is the URL secret used to activate this NFC token?")
     is_active = models.BooleanField(default=False, help_text="Has this NFC token been activated?")
 

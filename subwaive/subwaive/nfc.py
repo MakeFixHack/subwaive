@@ -35,9 +35,9 @@ def nfc_self_serve(request):
             Log.new(logging_level=logging.INFO, description="NFC - new token", json={'uid': uid, 'terminal': terminal.id})
             # print("nfc not in database")
             # store NFC
-            nfc = NFC.objects.create(uid=uid, nfc_id=url_secret(), activation_id=url_secret())
+            nfc = NFC.objects.create(uid=uid, registration_id=url_secret(), activation_id=url_secret())
             # create link to register NFC
-            url = request.build_absolute_uri(redirect('register_nfc', nfc.nfc_id).url)
+            url = request.build_absolute_uri(redirect('register_nfc', nfc.registration_id).url)
             (bmp,qr_size) = generate_qr_bitmap(url)
             # print(bmp)
             response = HttpResponse(
@@ -88,8 +88,8 @@ def nfc_self_serve(request):
             elif not person:
                 Log.new(logging_level=logging.INFO, description="NFC - token not registered", json={'uid': uid, 'terminal': terminal.id})
                 NFC.objects.filter(uid=uid).delete()
-                nfc = NFC.objects.create(uid=uid, nfc_id=url_secret(), activation_id=url_secret())
-                url = request.build_absolute_uri(redirect('register_nfc', nfc.nfc_id).url)
+                nfc = NFC.objects.create(uid=uid, registration_id=url_secret(), activation_id=url_secret())
+                url = request.build_absolute_uri(redirect('register_nfc', nfc.registration_id).url)
                 (bmp,qr_size) = generate_qr_bitmap(url)
                 response = HttpResponse(
                     content=bmp, 
@@ -158,11 +158,11 @@ def nfc_self_serve(request):
     # print(response.headers)
     return response
     
-def register_nfc(request, nfc_id):
+def register_nfc(request, registration_id):
     """ register an NFC UID to a person """
     context = {}
     email = request.POST.get("email", None)
-    nfc_qs = NFC.objects.filter(nfc_id=nfc_id)
+    nfc_qs = NFC.objects.filter(registration_id=registration_id)
 
     # https://docs.djangoproject.com/en/5.2/topics/email/
 
