@@ -79,24 +79,27 @@ class DocusealFieldStore(models.Model):
 
     def refresh(max_existing_submission_id=None):
         """ clear out existing records and repopulate them from the API """
-        if max_existing_submission_id:
-            submissions = DocusealSubmission.objects.filter(submission_id__gt=max_existing_submission_id)
-        else:
-            submissions = DocusealSubmission.objects.all()
-            Log.new(logging_level=logging.INFO, description="Refresh DocusealFieldStore")
-            DocusealFieldStore.objects.all().delete()
+        try:
+            if max_existing_submission_id:
+                submissions = DocusealSubmission.objects.filter(submission_id__gt=max_existing_submission_id)
+            else:
+                submissions = DocusealSubmission.objects.all()
+                Log.new(logging_level=logging.INFO, description="Refresh DocusealFieldStore")
+                DocusealFieldStore.objects.all().delete()
 
-        important_fields = DocusealField.objects.all()
+            important_fields = DocusealField.objects.all()
 
-        for submission in submissions:
-            s = docuseal.get_submission(submission.submission_id)
-            for field in important_fields:
-                for form_field in s['submitters'][0]['values']:
-                    if form_field['field'].lower().strip() == field.field.lower().strip():
-                        if form_field['value']:
-                            DocusealFieldStore.objects.create(submission=submission, field=field, value=form_field['value'])
-                            if 'name' in field.field.lower():
-                                submission._auto_name(form_field['value'])
+            for submission in submissions:
+                s = docuseal.get_submission(submission.submission_id)
+                for field in important_fields:
+                    for form_field in s['submitters'][0]['values']:
+                        if form_field['field'].lower().strip() == field.field.lower().strip():
+                            if form_field['value']:
+                                DocusealFieldStore.objects.create(submission=submission, field=field, value=form_field['value'])
+                                if 'name' in field.field.lower():
+                                    submission._auto_name(form_field['value'])
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Docuseal - FieldStore refresh error', other_info=e)
 
 
 class DocusealSubmission(models.Model):
@@ -170,38 +173,42 @@ class DocusealSubmission(models.Model):
 
     def refresh(new_only=True):
         """ clear out existing records and repopulate them from the API """
-        if new_only:
-            Log.new(logging_level=logging.INFO, description="Fetch New DocusealSubmission")
-            # capture changes to submission status/dates
-            for submission in DocusealSubmission.objects.filter(completed_at__isnull=True).order_by('-created_at')[:20]:
-                DocusealSubmission.create_or_update(submission.submission_id)
-            last_submission_id = DocusealSubmission.objects.all().order_by('-submission_id').first().submission_id
-        else:
-            Log.new(logging_level=logging.INFO, description="Refresh DocusealSubmission")
-            DocusealSubmission.objects.all().delete()
-            last_submission_id = None
+        try:
+            if new_only:
+                Log.new(logging_level=logging.INFO, description="Fetch New DocusealSubmission")
+                # capture changes to submission status/dates
+                for submission in DocusealSubmission.objects.filter(completed_at__isnull=True).order_by('-created_at')[:20]:
+                    DocusealSubmission.create_or_update(submission.submission_id)
+                last_submission_id = DocusealSubmission.objects.all().order_by('-submission_id').first().submission_id
+            else:
+                Log.new(logging_level=logging.INFO, description="Refresh DocusealSubmission")
+                DocusealSubmission.objects.all().delete()
+                last_submission_id = None
 
-        pagination_next = True
-        while pagination_next:
-            api_dict = {'limit': 100}
-            if last_submission_id:
-                if new_only:
-                    sort_word = 'before'
-                else:
-                    sort_word = 'after'
-                api_dict[sort_word] = last_submission_id
-            
-            submissions = docuseal.list_submissions(api_dict)
-            
-            last_submission_id = submissions['pagination']['next']
-            if not last_submission_id:
-                pagination_next = False
+            pagination_next = True
+            while pagination_next:
+                api_dict = {'limit': 100}
+                if last_submission_id:
+                    if new_only:
+                        sort_word = 'before'
+                    else:
+                        sort_word = 'after'
+                    api_dict[sort_word] = last_submission_id
+                
+                submissions = docuseal.list_submissions(api_dict)
+                
+                last_submission_id = submissions['pagination']['next']
+                if not last_submission_id:
+                    pagination_next = False
 
-            for submission in submissions['data']:
-                if submission['status'] == 'completed':
-                    submitters = [{'submitter_id': s['id'], 'status': s['status'], 'role': s['role']} for s in submission['submitters']]
-                    if DocusealTemplate.objects.filter(template_id=submission['template']['id']).exists():
-                        DocusealSubmission.new(submission['id'], submission['slug'], submission['status'], submission['created_at'], submission['completed_at'], submission['archived_at'], submission['template']['id'], submitters)
+                for submission in submissions['data']:
+                    if submission['status'] == 'completed':
+                        submitters = [{'submitter_id': s['id'], 'status': s['status'], 'role': s['role']} for s in submission['submitters']]
+                        if DocusealTemplate.objects.filter(template_id=submission['template']['id']).exists():
+                            DocusealSubmission.new(submission['id'], submission['slug'], submission['status'], submission['created_at'], submission['completed_at'], submission['archived_at'], submission['template']['id'], submitters)
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Docuseal - Submission refresh error', other_info=e)
+
 
     def get_url(self):
         """ URL for a hyperlink """
@@ -288,32 +295,35 @@ class DocusealSubmitter(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        if new_only:
-            Log.new(logging_level=logging.INFO, description="Fetch New DocusealSubmitter")
-            last_submitter_id = DocusealSubmitter.objects.all().order_by('-submitter_id').first().submitter_id
-        else:
-            Log.new(logging_level=logging.INFO, description="Refresh DocusealSubmitter")
-            DocusealSubmitter.objects.all().delete()
-            last_submitter_id = None
+        try:
+            if new_only:
+                Log.new(logging_level=logging.INFO, description="Fetch New DocusealSubmitter")
+                last_submitter_id = DocusealSubmitter.objects.all().order_by('-submitter_id').first().submitter_id
+            else:
+                Log.new(logging_level=logging.INFO, description="Refresh DocusealSubmitter")
+                DocusealSubmitter.objects.all().delete()
+                last_submitter_id = None
 
-        pagination_next = True
-        while pagination_next:
-            api_dict = {'limit': 100}
-            if last_submitter_id:
-                if new_only:
-                    sort_word = 'before'
-                else:
-                    sort_word = 'after'
-                api_dict[sort_word] = last_submitter_id
-            
-            submitters = docuseal.list_submitters(api_dict)
-            
-            last_submitter_id = submitters['pagination']['next']
-            if not last_submitter_id:
-                pagination_next = False
+            pagination_next = True
+            while pagination_next:
+                api_dict = {'limit': 100}
+                if last_submitter_id:
+                    if new_only:
+                        sort_word = 'before'
+                    else:
+                        sort_word = 'after'
+                    api_dict[sort_word] = last_submitter_id
+                
+                submitters = docuseal.list_submitters(api_dict)
+                
+                last_submitter_id = submitters['pagination']['next']
+                if not last_submitter_id:
+                    pagination_next = False
 
-            for submitter in submitters['data']:
-                DocusealSubmitter.new(submitter['id'], submitter['email'], submitter['slug'])
+                for submitter in submitters['data']:
+                    DocusealSubmitter.new(submitter['id'], submitter['email'], submitter['slug'])
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Docuseal - Submitter refresh error', other_info=e)
 
 
 class DocusealSubmitterSubmission(models.Model):
@@ -365,32 +375,36 @@ class DocusealTemplate(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        if new_only:
-            Log.new(logging_level=logging.INFO, description="Fetch New DocusealTemplate")
-            last_template_id = DocusealTemplate.objects.all().order_by('-template_id').first().template_id
-        else:
-            Log.new(logging_level=logging.INFO, description="Refresh DocusealTemplate")
-            last_template_id = None
-            DocusealTemplate.objects.all().delete()
+        try:
+            if new_only:
+                Log.new(logging_level=logging.INFO, description="Fetch New DocusealTemplate")
+                last_template_id = DocusealTemplate.objects.all().order_by('-template_id').first().template_id
+            else:
+                Log.new(logging_level=logging.INFO, description="Refresh DocusealTemplate")
+                last_template_id = None
+                DocusealTemplate.objects.all().delete()
 
-        pagination_next = True
-        while pagination_next:
-            api_dict = {'limit': 100}
-            if last_template_id:
-                if new_only:
-                    sort_word = 'before'
-                else:
-                    sort_word = 'after'
-                api_dict[sort_word] = last_template_id
-            
-            templates = docuseal.list_templates(api_dict)
-            
-            last_template_id = templates['pagination']['next']
-            if not last_template_id:
-                pagination_next = False
+            pagination_next = True
+            while pagination_next:
+                api_dict = {'limit': 100}
+                if last_template_id:
+                    if new_only:
+                        sort_word = 'before'
+                    else:
+                        sort_word = 'after'
+                    api_dict[sort_word] = last_template_id
+                
+                templates = docuseal.list_templates(api_dict)
+                
+                last_template_id = templates['pagination']['next']
+                if not last_template_id:
+                    pagination_next = False
 
-            for template in templates['data']:
-                DocusealTemplate.create_or_update(template)
+                for template in templates['data']:
+                    DocusealTemplate.create_or_update(template)
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Docuseal - Template refresh error', other_info=e)
+
 
     def get_url(self):
         """ URL for a hyperlink """
@@ -466,68 +480,38 @@ class CalendarEvent(models.Model):
 
     def refresh(request):
         """ Refresh events from ical URL """
-        lbound = None
-        ubound = None
-        json = {'type': 'full'}
-        if request.POST:
-            lbound = request.POST.get("lbound")
-            lbound = datetime.datetime.strptime(lbound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
-            ubound = request.POST.get("ubound")
-            ubound = datetime.datetime.strptime(ubound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
-            json = {'type': 'time-bounded', 'lbound': lbound.isoformat(), 'ubound': ubound.isoformat()}
+        try:
+            lbound = None
+            ubound = None
+            json = {'type': 'full'}
+            if request.POST:
+                lbound = request.POST.get("lbound")
+                lbound = datetime.datetime.strptime(lbound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
+                ubound = request.POST.get("ubound")
+                ubound = datetime.datetime.strptime(ubound, "%Y-%m-%d").astimezone(pytz.timezone(TIME_ZONE))
+                json = {'type': 'time-bounded', 'lbound': lbound.isoformat(), 'ubound': ubound.isoformat()}
 
-        events = CalendarEvent.get_event_list_from_calendar_url(CALENDAR_URL, lbound, ubound)
-        CalendarEvent.objects.all().delete()
-        Event.clear_future_unused()
-        
-        uid_count = {}
-        for e in events:
-            uid = e.get("UID")
+            events = CalendarEvent.get_event_list_from_calendar_url(CALENDAR_URL, lbound, ubound)
+            CalendarEvent.objects.all().delete()
+            Event.clear_future_unused()
+            
+            uid_count = {}
+            for e in events:
+                uid = e.get("UID")
 
-            if uid in uid_count.keys():
-                uid_count[uid] += 1
-            else:
-                uid_count[uid] = 1
-
-            is_process = True
-            if lbound and ubound:
-                is_process = False
-                if e.start.astimezone(pytz.timezone(TIME_ZONE)) >= lbound \
-                    and e.start.astimezone(pytz.timezone(TIME_ZONE)) <= ubound:
-                    is_process = True
-            if is_process:
-                recurrence_order = uid_count[uid]
-                event_values = {
-                    'uid': uid,
-                    'summary': e.get("SUMMARY").__str__().strip(),
-                    'description': e.get("DESCRIPTION").__str__().strip()[:2048],
-                    'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
-                    'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
-                    'recurrence_order': recurrence_order,
-                }
-
-                event_qs = CalendarEvent.objects.filter(UID=uid, recurrence_order=recurrence_order)
-                
-                if event_qs.exists():
-                    # print("update")
-                    CalendarEvent.update_event(event_qs.first(), event_values)
-
+                if uid in uid_count.keys():
+                    uid_count[uid] += 1
                 else:
-                    # print("create")
-                    CalendarEvent.create(event_values, lbound)
+                    uid_count[uid] = 1
 
-        if uid_count:
-            Log.new(logging_level=logging.INFO, description="Refresh Event", json=json)
-
-    def refresh_event(self):
-        """ Refresh a single event """
-        events = CalendarEvent.get_event_list_from_calendar_url(CALENDAR_URL)
-        recurrence_order = 0
-        for e in events:
-            uid = e.get("UID")
-            if uid==str(self.UID):
-                recurrence_order += 1
-                if recurrence_order == self.recurrence_order:
+                is_process = True
+                if lbound and ubound:
+                    is_process = False
+                    if e.start.astimezone(pytz.timezone(TIME_ZONE)) >= lbound \
+                        and e.start.astimezone(pytz.timezone(TIME_ZONE)) <= ubound:
+                        is_process = True
+                if is_process:
+                    recurrence_order = uid_count[uid]
                     event_values = {
                         'uid': uid,
                         'summary': e.get("SUMMARY").__str__().strip(),
@@ -536,8 +520,46 @@ class CalendarEvent(models.Model):
                         'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
                         'recurrence_order': recurrence_order,
                     }
-                    CalendarEvent.update_event(self, event_values)
-                    break
+
+                    event_qs = CalendarEvent.objects.filter(UID=uid, recurrence_order=recurrence_order)
+                    
+                    if event_qs.exists():
+                        # print("update")
+                        CalendarEvent.update_event(event_qs.first(), event_values)
+
+                    else:
+                        # print("create")
+                        CalendarEvent.create(event_values, lbound)
+
+            if uid_count:
+                Log.new(logging_level=logging.INFO, description="Refresh Event", json=json)
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='CalendarEvent refresh error', other_info=e)
+
+
+    def refresh_event(self):
+        """ Refresh a single event """
+        try:
+            events = CalendarEvent.get_event_list_from_calendar_url(CALENDAR_URL)
+            recurrence_order = 0
+            for e in events:
+                uid = e.get("UID")
+                if uid==str(self.UID):
+                    recurrence_order += 1
+                    if recurrence_order == self.recurrence_order:
+                        event_values = {
+                            'uid': uid,
+                            'summary': e.get("SUMMARY").__str__().strip(),
+                            'description': e.get("DESCRIPTION").__str__().strip()[:2048],
+                            'start': e.start.astimezone(pytz.timezone(TIME_ZONE)),
+                            'end': e.end.astimezone(pytz.timezone(TIME_ZONE)),
+                            'recurrence_order': recurrence_order,
+                        }
+                        CalendarEvent.update_event(self, event_values)
+                        break
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='CalendarEvent refresh error', other_info=e)
+
 
     def update_event(event, event_values):
         """ Update an event record """
@@ -1140,13 +1162,16 @@ class StripeCustomer(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.new(logging_level=logging.INFO, description="Refresh StripeCustomer")
-        StripeCustomer.objects.all().delete()
-        for customer in stripe.Customer.list().auto_paging_iter():
-            stripe_id = customer['id']
-            name = customer['name'][:128]
-            email = customer['email'][:128]
-            StripeCustomer.new(stripe_id=stripe_id, name=name, email=email)
+        try:
+            Log.new(logging_level=logging.INFO, description="Refresh StripeCustomer")
+            StripeCustomer.objects.all().delete()
+            for customer in stripe.Customer.list().auto_paging_iter():
+                stripe_id = customer['id']
+                name = customer['name'][:128]
+                email = customer['email'][:128]
+                StripeCustomer.new(stripe_id=stripe_id, name=name, email=email)
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - Customer refresh error', other_info=e)
 
 
 class StripeOneTimePayment(models.Model):
@@ -1210,11 +1235,14 @@ class StripeOneTimePayment(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.new(logging_level=logging.INFO, description="Refresh StripeOneTimePayment")
-        StripeOneTimePayment.objects.all().delete()
-        for plp in StripePaymentLinkPrice.objects.filter(payment_link__is_recurring=False):
-            for cs in stripe.checkout.Session.list(payment_link=plp.payment_link.stripe_id):
-                StripeOneTimePayment.create_if_needed(cs)
+        try:
+            Log.new(logging_level=logging.INFO, description="Refresh StripeOneTimePayment")
+            StripeOneTimePayment.objects.all().delete()
+            for plp in StripePaymentLinkPrice.objects.filter(payment_link__is_recurring=False):
+                for cs in stripe.checkout.Session.list(payment_link=plp.payment_link.stripe_id):
+                    StripeOneTimePayment.create_if_needed(cs)
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - OneTimePayment refresh error', other_info=e)
 
 
 class StripePaymentLink(models.Model):
@@ -1256,19 +1284,22 @@ class StripePaymentLink(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.new(logging_level=logging.INFO, description="Refresh StripePaymentLink")
-        StripePaymentLink.objects.all().delete()
-        for payment_link in stripe.PaymentLink.list().auto_paging_iter():
-            if payment_link.subscription_data:
-                is_recurring = True
-            else:
-                is_recurring = False
-            if "event_date" in payment_link.metadata.keys():
-                event_date = datetime.datetime.strptime(payment_link.metadata.get("event_date"), "%Y-%m-%d")
-            else:
-                event_date = None
-            StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url, is_recurring=is_recurring, date=event_date)
-            Log.new(logging_level=logging.DEBUG, description="Create StripePaymentLink", json={'stripe_id': payment_link.id})
+        try:
+            Log.new(logging_level=logging.INFO, description="Refresh StripePaymentLink")
+            StripePaymentLink.objects.all().delete()
+            for payment_link in stripe.PaymentLink.list().auto_paging_iter():
+                if payment_link.subscription_data:
+                    is_recurring = True
+                else:
+                    is_recurring = False
+                if "event_date" in payment_link.metadata.keys():
+                    event_date = datetime.datetime.strptime(payment_link.metadata.get("event_date"), "%Y-%m-%d")
+                else:
+                    event_date = None
+                StripePaymentLink.objects.create(stripe_id=payment_link.id, url=payment_link.url, is_recurring=is_recurring, date=event_date)
+                Log.new(logging_level=logging.DEBUG, description="Create StripePaymentLink", json={'stripe_id': payment_link.id})
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - PaymentLink refresh error', other_info=e)
 
 
 
@@ -1290,13 +1321,16 @@ class StripePaymentLinkPrice(models.Model):
             Log.new(logging_level=logging.DEBUG, description="Create StripePaymentLinkPrice")
     
     def refresh():
-        Log.new(logging_level=logging.INFO, description="Refresh StripePaymentLinkPrice")
-        StripePaymentLinkPrice.objects.all().delete()
-        for payment_link in StripePaymentLink.objects.all():
-            for line_item in stripe.PaymentLink.list_line_items(payment_link.stripe_id).auto_paging_iter():
-                stripe_id = line_item.price.id
-                price = StripePrice.create_and_or_return(stripe_id=stripe_id)
-                StripePaymentLinkPrice.objects.create(payment_link=payment_link, price=price)
+        try:
+            Log.new(logging_level=logging.INFO, description="Refresh StripePaymentLinkPrice")
+            StripePaymentLinkPrice.objects.all().delete()
+            for payment_link in StripePaymentLink.objects.all():
+                for line_item in stripe.PaymentLink.list_line_items(payment_link.stripe_id).auto_paging_iter():
+                    stripe_id = line_item.price.id
+                    price = StripePrice.create_and_or_return(stripe_id=stripe_id)
+                    StripePaymentLinkPrice.objects.create(payment_link=payment_link, price=price)
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - PaymentLinkPrice refresh error', other_info=e)
 
 
 class StripePrice(models.Model):
@@ -1383,15 +1417,18 @@ class StripePrice(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.new(logging_level=logging.INFO, description="Refresh StripePrice")
-        StripePrice.objects.all().delete()
-        for price in stripe.Price.list(active=True).auto_paging_iter():
-            # print(price.product)
-            if stripe.Product.retrieve(price.product).active:
-                product = StripeProduct.objects.get(stripe_id=price.product)
-                api_prc = StripePrice.dict_from_api(price)
-                StripePrice.objects.create(stripe_id=api_prc['stripe_id'], product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
-                Log.new(logging_level=logging.DEBUG, description="Create StripePrice", json={'stripe_id': api_prc['stripe_id']})
+        try:
+            Log.new(logging_level=logging.INFO, description="Refresh StripePrice")
+            StripePrice.objects.all().delete()
+            for price in stripe.Price.list(active=True).auto_paging_iter():
+                # print(price.product)
+                if stripe.Product.retrieve(price.product).active:
+                    product = StripeProduct.objects.get(stripe_id=price.product)
+                    api_prc = StripePrice.dict_from_api(price)
+                    StripePrice.objects.create(stripe_id=api_prc['stripe_id'], product=product, name=api_prc['name'], interval=api_prc['interval'], price=api_prc['price_amount'])
+                    Log.new(logging_level=logging.DEBUG, description="Create StripePrice", json={'stripe_id': api_prc['stripe_id']})
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - Price refresh error', other_info=e)
 
 
 class StripeProduct(models.Model):
@@ -1442,11 +1479,14 @@ class StripeProduct(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.new(logging_level=logging.INFO, description="Refresh StripeProduct")
-        StripeProduct.objects.all().delete()
-        for product in stripe.Product.list(active=True).auto_paging_iter():
-            StripeProduct.objects.create(stripe_id=product.id, name=product.name, description=product.description)
-            Log.new(logging_level=logging.DEBUG, description="Create StripeProduct", json={'stripe_id': product.id})
+        try:
+            Log.new(logging_level=logging.INFO, description="Refresh StripeProduct")
+            StripeProduct.objects.all().delete()
+            for product in stripe.Product.list(active=True).auto_paging_iter():
+                StripeProduct.objects.create(stripe_id=product.id, name=product.name, description=product.description)
+                Log.new(logging_level=logging.DEBUG, description="Create StripeProduct", json={'stripe_id': product.id})
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - Product refresh error', other_info=e)
 
 
 class StripeSubscription(models.Model):
@@ -1527,23 +1567,27 @@ class StripeSubscription(models.Model):
 
     def refresh(new_only=False):
         """ clear out existing records and repopulate them from the API """
-        Log.new(logging_level=logging.INFO, description="Refresh StripeSubscription")
-        StripeSubscription.objects.all().delete()
-        for subscription in stripe.Subscription.search(query='-status:"canceled"').auto_paging_iter():
-            customer = StripeCustomer.objects.get(stripe_id=subscription.customer)
+        try:
+            Log.new(logging_level=logging.INFO, description="Refresh StripeSubscription")
+            StripeSubscription.objects.all().delete()
+            for subscription in stripe.Subscription.search(query='-status:"canceled"').auto_paging_iter():
+                customer = StripeCustomer.objects.get(stripe_id=subscription.customer)
 
-            stripe_id = subscription['id']
-            name = StripeSubscription.get_api_name(stripe_id)
+                stripe_id = subscription['id']
+                name = StripeSubscription.get_api_name(stripe_id)
 
-            created = fromtimestamp(subscription.created)
-            current_period_end = fromtimestamp(subscription.current_period_end)
-            status = subscription.status
+                created = fromtimestamp(subscription.created)
+                current_period_end = fromtimestamp(subscription.current_period_end)
+                status = subscription.status
 
-            subscription_qs = StripeSubscription.objects.filter(stripe_id=stripe_id)
-            if subscription_qs:
-                subscription_qs.first().update(created, current_period_end, status)
-            else:
-                StripeSubscription.new(stripe_id, customer, name, created, current_period_end, status, subscription)
+                subscription_qs = StripeSubscription.objects.filter(stripe_id=stripe_id)
+                if subscription_qs:
+                    subscription_qs.first().update(created, current_period_end, status)
+                else:
+                    StripeSubscription.new(stripe_id, customer, name, created, current_period_end, status, subscription)
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - Subscription refresh error', other_info=e)
+
 
     def update(self, created, current_period_end, status):
         """ Update an existing Stripe subscription """
