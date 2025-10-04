@@ -139,9 +139,15 @@ def refresh_stripe_by_token(request):
 
     if request.headers.get('X-Refresh-Token') == DATA_REFRESH_TOKEN:
         print(datetime.datetime.now(), "Refreshing Stripe products and prices by token")
-        refresh_all_product_and_price()
+        try:
+            refresh_all_product_and_price()
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - Product & Price error', other_info=e)
         print(datetime.datetime.now(), "Refreshing Stripe subscriptions and customers by token")
-        refresh_all_subscription_and_customer()
+        try:
+            refresh_all_subscription_and_customer()
+        except Exception as e:
+            Log.new(logging_level=logging.ERROR, description='Stripe - Subscription & Customer error', other_info=e)
 
         return HttpResponse(status=200)
     else:
