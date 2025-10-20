@@ -46,15 +46,15 @@
 
                 <div><em>Check-in for an event</em></div>
                 
-                {% for event in check_in_events %}
+                <!-- for event in check_in_events -->
                 <div>
-                    {% if event.id in last_check_in_event_id_list %}
-                    <button class="btn btn-outline-success" disabled onclick="window.location='{% url 'member_check_in' person_id=person.id event_id=event.id  %}'; return false;">{{ event.summary }}</button>
+                    {% if check_in_events.id in last_check_in_event_id_list %}
+                    <button class="btn btn-outline-success" disabled onclick="window.location='{% url 'member_check_in' person_id=person.id event_id=check_in_events.id  %}'; return false;">{{ check_in_events.summary }}</button>
                     {% else %}
-                    <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person_id=person.id event_id=event.id  %}'; return false;">{{ event.summary }}</button>
+                    <button class="btn btn-success" onclick="window.location='{% url 'member_check_in' person_id=person.id event_id=check_in_events.id  %}'; return false;">{{ check_in_events.summary }}</button>
                     {% endif %}
                 </div>
-                {% endfor %}
+                <!-- endfor -->
             </div>
         </div>
         {% endif %}
