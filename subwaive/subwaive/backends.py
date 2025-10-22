@@ -1,7 +1,15 @@
 from django.contrib.auth.models import Permission, User
+import logging
+import os
+
+from django.contrib.auth.models import Permission, User, Group
     
+from subwaive.models import Log
+
 # Classes to override default OIDCAuthenticationBackend (Keycloak authentication)
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+
+DJANGO_GROUP_STAFF_PERMISSION = os.environ.get("DJANGO_GROUP_STAFF_PERMISSION")
 
 class AADB2CAuthenticationBackend(OIDCAuthenticationBackend):
 
