@@ -99,13 +99,15 @@ def nfc_self_serve(request):
 
             elif not person.check_waiver_status():
                 Log.new(logging_level=logging.INFO, description="NFC - waiver needed", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
-                url = DocusealTemplate.objects.filter(folder_name='Waivers').first().get_url()
-                (bmp,qr_size) = generate_qr_bitmap(url)
-                response = HttpResponse(
-                    content=bmp, 
-                    content_type="text/bitmap",
-                    status=200,
-                    headers={'line1': 'Sign', 'line2': 'Waiver', 'qr_size': qr_size})
+                url_qs = DocusealTemplate.objects.filter(folder_name='Waivers')
+                if url_qs.exists():
+                    url = url_qs.first().get_url()
+                    (bmp,qr_size) = generate_qr_bitmap(url)
+                    response = HttpResponse(
+                        content=bmp, 
+                        content_type="text/bitmap",
+                        status=200,
+                        headers={'line1': 'Sign', 'line2': 'Waiver', 'qr_size': qr_size})
 
             elif is_event_requires_registration and not event.start.date in [e.date for e in person.get_events()]:
                 Log.new(logging_level=logging.INFO, description="NFC - event requires registration", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
