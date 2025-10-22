@@ -6,6 +6,7 @@
         <div>Last 5 check-ins: </div>
         {% now "Y" as current_year %}
         {% for check_in in last_check_ins %}
+            {% if check_in.event %}
         <div>
             <a href="{% url 'event_details' check_in.event.id %}">
                 {% if check_in.event.start|date:"Y" == current_year %}
@@ -16,6 +17,16 @@
                 / {{ check_in.event.summary }}
             </a>
         </div>
+            {% else %}
+        <div>
+            Ad Hoc {{ check_in.check_in_time }}
+            {% if check_in.check_in_time|date:"Y" == current_year %}
+            {{ check_in.check_in_time|date:"M j" }}
+            {% else %}
+            {{ check_in.check_in_time|date:"M j, Y" }}
+            {% endif %}
+        </div>
+            {% endif %}
         {% endfor %}
         {% else %}
         <div>Never checked in</div>

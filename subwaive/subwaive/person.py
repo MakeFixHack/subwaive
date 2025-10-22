@@ -191,7 +191,7 @@ def person_card(request, person_id):
         'membership_status': membership_status,
         'memberships': memberships,
         'last_check_ins': last_check_ins,
-        'last_check_in_event_id_list': [ci.event.id for ci in last_check_ins],
+        'last_check_in_event_id_list': [ci.event.id for ci in last_check_ins if ci.event],
         'check_in_events': check_in_events,
     }
 
