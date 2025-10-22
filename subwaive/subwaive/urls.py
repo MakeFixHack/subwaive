@@ -51,7 +51,7 @@ urlpatterns.extend([
 # NFC
 urlpatterns.extend([
     path('nfc/check-in/', nfc.nfc_self_serve, name="nfc_self_serve"),
-    path('nfc/register/<nfc_id>/', nfc.register_nfc, name="register_nfc"),
+    path('nfc/register/<registration_id>/', nfc.register_nfc, name="register_nfc"),
     path('nfc/activate/<activation_id>/', nfc.activate_nfc, name="activate_nfc"),
 ])
 
