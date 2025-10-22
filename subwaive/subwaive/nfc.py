@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
+from subwaive import docuseal
 from subwaive.models import DocusealTemplate
 from subwaive.models import Event
 from subwaive.models import Log
@@ -108,6 +109,11 @@ def nfc_self_serve(request):
                         content_type="text/bitmap",
                         status=200,
                         headers={'line1': 'Sign', 'line2': 'Waiver', 'qr_size': qr_size})
+                else:
+                    docuseal.refresh_all()
+                    response = HttpResponse(
+                        status=200,
+                        headers={'line1': 'Refreshing', 'line2': 'Waivers'})
 
             elif is_event_requires_registration and not event.start.date in [e.date for e in person.get_events()]:
                 Log.new(logging_level=logging.INFO, description="NFC - event requires registration", json={'uid': uid, 'terminal': terminal.id, 'person': person.id})
