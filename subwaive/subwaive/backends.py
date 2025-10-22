@@ -26,43 +26,23 @@ class AADB2CAuthenticationBackend(OIDCAuthenticationBackend):
         user.email = claims['email']
         user.username = claims['preferred_username']
 
-        # allow admin console use
-        user.is_staff = True
+        keycloak_roles = claims.get('groups',[])
 
-        # custom admin console permissions to add to everybody in OIDC
-        codenames = [
-            'add_nfc',
-            'change_nfc',
-            'delete_nfc',
-            'view_nfc',
-            'add_nfcterminal',
-            'change_nfcterminal',
-            'delete_nfcterminal',
-            'view_nfcterminal',
-            'add_person',
-            'change_person',
-            'delete_person',
-            'view_person',
-            'add_personemail',
-            'change_personemail',
-            'delete_personemail',
-            'view_personemail',
-            'add_qrcustom',
-            'change_qrcustom',
-            'delete_qrcustom',
-            'view_qrcustom',
-            'add_qrcategory',
-            'change_qrcategory',
-            'delete_qrcategory',
-            'view_qrcategory',
-            ]
-
-        for codename in codenames:
-            permission = Permission.objects.get(codename=codename)
-            user.user_permissions.add(permission)
-
+        # allow admin console use if a role is defined for the user
+        if keycloak_roles:
+            user.is_staff = True
+    
         user.save()
+        
+        # add new user to groups defined by OIDC provider
+        for r in keycloak_roles:
+            group,was_created = Group.objects.get_or_create(name=r)
+            group.user_set.add(user)
+
+            AADB2CAuthenticationBackend.set_group_permissions_from_env(group)
+
         return user
+
 
     def filter_users_by_claims(self, claims):
         """ Return all users matching the specified email.
@@ -81,6 +61,7 @@ class AADB2CAuthenticationBackend(OIDCAuthenticationBackend):
                 return self.UserModel.objects.none()
             users = self.UserModel.objects.filter(username__iexact=preferred_username)
         return users
+
 
     def update_user(self, user, claims):
         # print(f"claims::update_user: {claims}")
