@@ -172,7 +172,7 @@ def person_card(request, person_id):
     membership_status = person.check_membership_status()
     memberships = person.get_memberships()
     
-    last_check_ins = PersonEvent.objects.filter(person=person).order_by('-event__end')[:5]
+    last_check_ins = PersonEvent.objects.filter(person=person).order_by('-check_in_time')[:5]
     check_in_events = Event.get_current_event()
 
     button_dict = [
