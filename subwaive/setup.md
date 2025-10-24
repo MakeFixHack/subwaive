@@ -138,10 +138,10 @@ The initial data loaded creates a super user called `admin` with a password of `
 
 ## Single Sign On with OIDC
 
-SubWaive has optional support for two forms of authentication:
+SubWaive has optional support for OIDC authentication.
 
-1. Django's built-in auth system (always enabled)
-2. OIDC
+Django's built-in auth system is always enabled.
+
 
 ### Configuration
 
@@ -189,16 +189,6 @@ By default, SubWaive is designed to work with [Keycloak](https://www.keycloak.or
 
 For other providers you may need to modify `subwaive/subwaive/backends.py` to provide different keys for the dictionary `claims`, which is used to populate meaningful user information.
 
-### User privileges
-
-When SubWaive creates a local user for a new SSO login, it provides that user access to the `Admin Console`. The `Admin Console` allows them to perform certain tasks that are not exposed by SubWaive's web interface. To that end, SubWaive provides the new user with privileges so they can view, add, remove, and change a select number of database models:
-
-* Person - name updates and additions
-* PersonEmail - email address management
-* QRCategory - managing custom QR code categories
-* QRCustom - managing custom QR codes
-
-The `admin` user can modify these permissions once established. To change the set of privileges provided to new users, modify the list `codenames` in `subwaive/subwaive/backends.py`.
 
 ### Logging in
 
@@ -207,6 +197,62 @@ When SSO is enabled, a different log-in page is used. The custom log-in page pro
 ### Logging out
 
 Logout is handled by the `Admin Console` regardless of authentication method.
+
+
+## Groups
+
+The suggested way to provide elevated access within SubWaive is to create groups with specific privileges based on the roles within your organization. Once groups are established, users should be assign to groups (potentially more than one of them).
+
+### Group Membership
+
+For OIDC, user groups are defined within the OIDC provider and must be passed in the ```groups``` claim. SubWaive will assign group membership to any groups in the claims when the user is created. If a group in the OIDC claim does not exist, SubWaive will create it (locally). As a consequence, if you change your group structure after users have been created, you will need to manually manage the change for existing users or delete the existing users.
+
+For non-OIDC, groups creation and membership is manual.
+
+### Group privileges
+
+Permissions for groups are defined in the ```.env``` file using keys formatted as follows:
+
+```DJANGO_GROUP_PERMISSION_SUBWAIVE_[GROUPNAME]```=comma-separated-codename-list
+
+Here, ```[GROUPNAME]``` needs to be replaced with the group's name, capitalized, with hyphens replaced by underscores (to match the convention in the rest of the key).
+
+If the key for a group is absent, no action is taken for that group.
+
+If a key for a group, such as an admin group, contains only an asterisk, then all permissions are granted to the group. 
+
+Permissions are updated each time the SubWaive container is restarted.
+
+If you wish to construct and manage group permissions manually, do not include these keys in your ```env``` file, as they will add permissions whnever the container is restarted.
+
+
+#### Codenames
+
+To get a complete list of codenames:
+ 
+First open a Django/Python shell:
+
+```sh
+docker exec -t subwaive python manage.py shell
+```
+
+Then run the following Python:
+
+```python
+from django.contrib.auth.models import Permission
+
+for p in Permission.objects.all():
+    print(p.codename)
+```
+
+#### Suggested staff permissions
+
+For users tasked with hosting events, the following are the suggested permissions to assign to their group:
+
+```
+view_log,add_nfc,change_nfc,delete_nfc,view_nfc,add_nfcterminal,change_nfcterminal,delete_nfcterminal,view_nfcterminal,add_person,change_person,delete_person,view_person,add_personemail,change_personemail,delete_personemail,view_personemail,add_qrcustom,change_qrcustom,delete_qrcustom,view_qrcustom,add_qrcategory,change_qrcategory,delete_qrcategory,view_qrcategory
+```
+
 
 ## Docuseal integration
 
