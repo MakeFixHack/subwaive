@@ -45,6 +45,9 @@ COPY . .
 RUN python3 manage.py collectstatic --noinput
 RUN python3 manage.py migrate
 
+ADD ./start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Switch to the non-privileged user to run the application.
 USER appuser
 
@@ -52,4 +55,4 @@ USER appuser
 EXPOSE 8000
 
 # Run the application.
-ENTRYPOINT [ "gunicorn", "subwaive.wsgi", "--bind=0.0.0.0:8000"]
+CMD ["/app/start.sh"]
