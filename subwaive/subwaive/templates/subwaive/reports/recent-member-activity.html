@@ -1,0 +1,96 @@
+{% extends 'subwaive/base.html' %}
+{% load static %}
+{% block content %}
+
+{% include 'subwaive/templates/determination-of-confidentiality.html' %}
+
+<div class="container-fluid">
+    <h1>Recent Check-ins</h1>
+</div>
+
+{% include 'subwaive/templates/buttons.html' %}
+{% include 'subwaive/templates/messages.html' %}
+
+<div class="row-container">
+    <div class="row justify-content-evenly row-cols-lg-4 row-cols-md-3 row-cols-1 g-lg-4 g-md-3 g-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">By Person</h5>
+                
+                <div style="margin: 0.5rem">
+                    <table>
+                        <tr>
+                            <th>Name</th>
+                            <th>Check-ins</th>
+                        </tr>
+
+                    {% for p in totals %}
+                        <tr>
+                            <th>{{ p.0 }}</th>
+                            <td>{{ p.1 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="card-title">By Day of Week</h5>
+                            
+                <div style="margin: 0.5rem">
+                    <table>
+                        <tr>
+                            <th>Day</th>
+                            <th>Check-ins</th>
+                        </tr>
+
+                    {% for p in dow.items %}
+                        <tr>
+                            <th>{{ p.0 }}</th>
+                            <td>{{ p.1 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-auto text-center">
+            <div class="card-body">
+                <h5 class="card-title">By Person~Day of Week</h5>
+                            
+                <div style="margin: 0.5rem">
+                    <table>
+                        <tr>
+                            <th>Name</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+
+                    {% for p in grid %}
+                        <tr>
+                            <th>{{ p.0 }}</th>
+                            <td>{{ p.1 }}</td>
+                            <td>{{ p.2 }}</td>
+                            <td>{{ p.3 }}</td>
+                            <td>{{ p.4 }}</td>
+                            <td>{{ p.5 }}</td>
+                            <td>{{ p.6 }}</td>
+                            <td>{{ p.7 }}</td>
+                        </tr>
+                    {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

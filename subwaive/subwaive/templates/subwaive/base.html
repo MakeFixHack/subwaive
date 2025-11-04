@@ -55,6 +55,7 @@
                             <li><a class="nav-item nav-link" href="{% url 'docuseal_refresh' %}">Docuseal</a></li>
                             <li><a class="nav-item nav-link" href="{% url 'event_refresh' %}">Event</a></li>
                             <li><a class="nav-item nav-link" href="{% url 'stripe_refresh' %}">Stripe</a></li>
+                            <li><a class="nav-item nav-link" href="{% url 'recent_member_activity' 60 %}">Recent Check-ins</a></li>
                             <li><a class="nav-item nav-link" href="/admin/">Admin Console</a></li>
                         </ul>
                     </li>
@@ -95,6 +96,7 @@
                             <button class="btn btn-margin btn-warning" type="button" onclick="window.location='{% url 'event_refresh' %}'">Events</button>
                             <button class="btn btn-margin btn-warning" type="button" onclick="window.location='{% url 'stripe_refresh' %}'">Stripe</button>
                         </p>
+                        <button class="btn btn-margin btn-danger" type="button" onclick="window.location='{% url 'recent_member_activity' 60 %}'">Recent Check-ins</button>
                         <button class="btn btn-margin btn-secondary" type="button" onclick="window.location='/admin/'">Admin</button>
                     </div>
                 </div>
