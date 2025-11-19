@@ -25,7 +25,7 @@ DATA_REFRESH_TOKEN = os.environ.get("DATA_REFRESH_TOKEN")
 PAGINATOR_SHORT = 8
 
 @login_required
-def member_check_in(request, person_id, event_id, override_checks=False):
+def member_check_in(request, person_id, event_id, override_checks=False, redirect_name='event_details'):
     """ A method logging a member was in the space. """
     waiver_check = Person.check_waiver_status_by_person_id(person_id)
     # print(waiver_check)
@@ -33,6 +33,7 @@ def member_check_in(request, person_id, event_id, override_checks=False):
     # print(membership_status)
     has_prior_check_in = PersonEvent.check_prior_check_in(person_id, event_id)
     # print(has_prior_check_in)
+    person = Person.objects.get(id=person_id)
 
     clean_checks = False
     if override_checks:
@@ -43,9 +44,13 @@ def member_check_in(request, person_id, event_id, override_checks=False):
     if clean_checks:
         check_results = {'waiver_check': waiver_check, 'membership_status': membership_status, 'has_prior_check_in': has_prior_check_in, 'override_checks': override_checks}
         check_in = Person.objects.get(id=person_id).check_in(event_id)
-        messages.success(request, f"Checked-in for { check_in.event.summary }")
+        messages.success(request, f"Checked-in {person.name} for { check_in.event.summary }")
 
-        return redirect('event_details', event_id)
+        if redirect_name in ['person_list', 'member_list']:
+            redirect_location = redirect(redirect_name)
+        else:
+            redirect_location = redirect(redirect_name, event_id)
+        return redirect_location
     else:
         # print('check-in checks failed')
         return check_in_remediation(request=request, person_id=person_id, event_id=event_id, waiver_check=waiver_check, membership_status=membership_status, has_prior_check_in=has_prior_check_in)

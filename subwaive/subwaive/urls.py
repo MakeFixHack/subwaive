@@ -39,6 +39,7 @@ urlpatterns.extend([
     path('person/<int:person_id>/check-in/<int:event_id>/delete/', event.delete_member_check_in, name='delete_member_check_in'),
     path('person/<int:person_id>/event/<int:event_id>/check-in/', event.member_check_in, name='member_check_in'),
     path('person/<int:person_id>/event/<int:event_id>/check-in/force/', event.force_member_check_in, name='force_member_check_in'),
+    path('person/<int:person_id>/event/<int:event_id>/check-in/<redirect_name>/', event.member_check_in, name='member_check_in'),
     path('person/<int:person_id>/check-in/remediate/', event.check_in_remediation, name='check_in_remediation'),
 ])
 

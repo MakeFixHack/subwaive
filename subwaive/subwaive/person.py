@@ -43,6 +43,7 @@ def person_list(request):
         'persons': persons,
         'buttons': button_dict,
         'check_in_events': check_in_events,
+        'redirect_name': 'person_list',
     }
 
     return render(request, f'subwaive/person/person-list.html', context)
@@ -79,6 +80,7 @@ def member_list(request):
         'persons': persons,
         'buttons': button_dict,
         'check_in_events': check_in_events,
+        'redirect_name': 'member_list',
     }
 
     return render(request, f'subwaive/person/person-list.html', context)
