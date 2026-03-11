@@ -209,9 +209,8 @@ def register_nfc(request, registration_id):
                 context['message'] = "This NFC token has been associated with your email address. Check that email for a confirmation link."
             
             else:
+                docuseal.send_waiver(email)
                 context['action'] = 'direct_sign_up'
-                context['message'] = "The email address provided wasn't found in the database. Sign-up and try again."
-                context['link'] = redirect('self_check_in_email').url
         
         elif nfc:
             # elif no-email-provided, prompt for email address

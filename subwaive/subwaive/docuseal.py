@@ -9,6 +9,16 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
+from docuseal import docuseal
+
+# https://www.docuseal.com/docs/api
+DOCUSEAL_API_KEY = os.environ.get("DOCUSEAL_API_KEY")
+DOCUSEAL_API_ENDPOINT = os.environ.get("DOCUSEAL_API_ENDPOINT")
+DOCUSEAL_WWW_ENDPOINT = os.environ.get("DOCUSEAL_WWW_ENDPOINT")
+
+docuseal.url = DOCUSEAL_API_ENDPOINT
+docuseal.key = DOCUSEAL_API_KEY
+
 from subwaive.models import DocusealFieldStore, DocusealSubmission, DocusealSubmitter, DocusealTemplate
 from subwaive.models import Log
 from subwaive.utils import generate_qr_svg, refresh, CONFIDENTIALITY_LEVEL_PUBLIC, QR_SMALL, QR_LARGE
@@ -212,8 +222,25 @@ def refresh_all(new_only=False):
     """ refresh data sets in order """
     DocusealTemplate.refresh(new_only)
     DocusealSubmitter.refresh(new_only)
+
     max_existing_submission_id = None
     if new_only:
         max_existing_submission_id = DocusealSubmission.objects.all().order_by('-submission_id').first().submission_id
+    
     DocusealSubmission.refresh(new_only)
     DocusealFieldStore.refresh(max_existing_submission_id)
+
+def send_waiver(email):
+    """ send a waiver to an email address through Docuseal """
+    waiver_template = DocusealTemplate.objects.filter(folder_name="Waivers", name__icontains="waiver").order_by("-name").first()
+    
+    docuseal.create_submission({
+    "template_id": waiver_template.template_id,
+    "send_email": True,
+    "submitters": [
+        {
+        "role": "First Party",
+        "email": email
+        }
+    ]
+    })    
