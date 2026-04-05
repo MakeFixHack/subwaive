@@ -184,7 +184,7 @@ def register_nfc(request, registration_id):
             context['message'] = "This NFC token has already been associated with a person. Check your email for a confirmation link."
         
         elif email:
-            person_qs = PersonEmail.objects.filter(email=email)
+            person_qs = PersonEmail.objects.filter(email__iexact=email)
             if person_qs.exists():
                 context['action'] = 'direct_activate'
                 nfc.person = person_qs.first().person
