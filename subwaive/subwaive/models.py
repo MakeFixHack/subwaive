@@ -703,7 +703,8 @@ class Person(models.Model):
     """ A dummy model for linking records together """
     name = models.CharField(max_length=128, help_text="What is the preferred name for ths person?")
     preferred_email = models.ForeignKey("subwaive.PersonEmail", related_name="+", blank=True, null=True, on_delete=models.CASCADE, help_text="What is this person's preferred email address?")
-     
+    created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         ordering = ('name', 'preferred_email__email',)
 
