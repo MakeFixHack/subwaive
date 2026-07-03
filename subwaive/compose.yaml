@@ -1,12 +1,13 @@
 services:
   subwaive-db:
     image: postgres:17
+    container_name: ${DATABASE_HOST}
     environment:
      POSTGRES_DB: ${DATABASE_NAME}
      POSTGRES_USER: ${DATABASE_USERNAME}
      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5431:5431"
+      - "5432:${DATABASE_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
