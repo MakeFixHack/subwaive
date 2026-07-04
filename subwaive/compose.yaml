@@ -45,6 +45,7 @@ services:
 
   nginx:
      build: ./nginx
+     container_name: subwaive-nginx
      volumes:
        - staticfiles:/app/subwaive/static
      ports:
@@ -59,6 +60,7 @@ services:
   cron:
     init: true
     build: ./cron
+    container_name: subwaive-cron
     environment:
       DATA_REFRESH_TOKEN: ${DATA_REFRESH_TOKEN}
     depends_on:
