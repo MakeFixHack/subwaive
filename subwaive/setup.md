@@ -2,59 +2,26 @@
 
 ## The .env file
 
-SubWaive uses an environment file to define secrets, such as passwords, and configurations, such as timezones.
+SubWaive uses an environment file to define secrets, such as passwords, and configurations, such as timezones. An template of this file has been provided called `.env-TEMPLATE`.
 
-The expected key-value pairs in the `.env` file are:
+To set up your own `.env` file, copy the template to a new file titled just `.env`:
 
-```
-DEBUG=False
-DJANGO_SECRET_KEY=
-DJANGO_LOGLEVEL=info
-DJANGO_ALLOWED_HOSTS=localhost,subwaive
-CSRF_TRUSTED_ORIGINS=http://localhost,http://subwaive
-TIME_ZONE=America/New_York
-
-DATA_REFRESH_TOKEN=
-
-DATABASE_ENGINE=postgresql_psycopg2
-DATABASE_NAME=subwaivedb
-DATABASE_USERNAME=subwaive
-DATABASE_PASSWORD=
-DATABASE_HOST=subwaive-db
-DATABASE_PORT=5432
-
-STRIPE_API_KEY=
-STRIPE_ENDPOINT_SECRET=
-STRIPE_WWW_ENDPOINT=https://dashboard.stripe.com/
-
-DOCUSEAL_API_KEY=
-DOCUSEAL_ENDPOINT_SECRET=
-DOCUSEAL_API_ENDPOINT=
-DOCUSEAL_WWW_ENDPOINT=
-
-CALENDAR_URL=
-CALENDAR_WWW_ENDPOINT=
+```shell
+cp .env-TEMPLATE .env
 ```
 
-Missing values are either secrets you need to collect/establish or setup-specific values, like a time zone or a resource.
-
-SubWaive will not load until the following keys are populated:
-
-* DJANGO_SECRET_KEY
-* DATABASE_PASSWORD
-
-`DJANGO_SECRET_KEY`, `DATABASE_PASSWORD`, and `DOCUSEAL_ENDPOINT_SECRET` can be generated with the following Python:
+This template file contains secret keys that need to be generated in your development environment. If you look at the `.env` file now, you will see several instances of `## GENERATE A KEY HERE ##` (specifically `DJANGO_SECRET_KEY` and `DATABASE_PASSWORD`). For each of these instances (and other secrets, if needed), you can generate a key with the following python code:
 
 ```python
 from django.core.management.utils import get_random_secret_key
 
-print(f"""DJANGO_SECRET_KEY={ get_random_secret_key() }\n
-DATABASE_PASSWORD={ get_random_secret_key() }\n
-DOCUSEAL_ENDPOINT_SECRET={ get_random_secret_key() }\n
-DATA_REFRESH_TOKEN={ get_random_secret_key() }""")
+print(f"""DJANGO_SECRET_KEY="{ get_random_secret_key() }"\n
+DATABASE_PASSWORD="{ get_random_secret_key() }"\n
+DOCUSEAL_ENDPOINT_SECRET="{ get_random_secret_key() }"\n
+DATA_REFRESH_TOKEN="{ get_random_secret_key() }" """)
 ```
 
-You must update the `DJANGO_ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` keys for the frontend to not fail security checks. The Docker network for communicating between containers requires the hostname for SubWaive an element in these lists.
+Note that each secret is encapsulated in double quotes. This is to avoid octothorpes (`#`) from breaking strings since they will be read as comments otherwise!
 
 ## Docker network connections
 

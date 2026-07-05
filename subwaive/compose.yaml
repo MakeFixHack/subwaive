@@ -1,12 +1,13 @@
 services:
   subwaive-db:
     image: postgres:17
+    container_name: ${DATABASE_HOST}
     environment:
      POSTGRES_DB: ${DATABASE_NAME}
      POSTGRES_USER: ${DATABASE_USERNAME}
      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
-      - "5431:5431"
+      - "${HOST_DATABASE_PORT}:${DATABASE_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
@@ -31,7 +32,7 @@ services:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: ${DATABASE_PORT}
     ports:
-      - "8000:8000"
+      - "${HOST_APP_PORT}:8000"
     depends_on:
       - subwaive-db
     env_file:
@@ -44,10 +45,11 @@ services:
 
   nginx:
      build: ./nginx
+     container_name: subwaive-nginx
      volumes:
        - staticfiles:/app/subwaive/static
      ports:
-       - 80:80
+       - "${HOST_WEB_PORT}:80"
      image: nginx:django
      depends_on:
        - subwaive
@@ -58,6 +60,7 @@ services:
   cron:
     init: true
     build: ./cron
+    container_name: subwaive-cron
     environment:
       DATA_REFRESH_TOKEN: ${DATA_REFRESH_TOKEN}
     depends_on:
