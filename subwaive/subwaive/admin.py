@@ -54,7 +54,7 @@ Person
 """
 
 class Person_Admin(admin.ModelAdmin):
-    list_display = ('name', 'preferred_email',)
+    list_display = ('name', 'preferred_email', 'created_at',)
 admin.site.register(Person, Person_Admin)
 
 class PersonDocuseal_Admin(admin.ModelAdmin):

@@ -13,6 +13,7 @@
 
 <div class="section section-heading">
     <h5 class="card-title">{{ person.name }}</h5>
+    <div>Person record created: {{ person.created_at }}</div>
                 
     <div style="margin: 0.5rem">Signed a waiver: 
         {% if has_waiver %}<span style="padding: 0.25rem" class="alert alert-success">{{ has_waiver }} <img src="{% static 'img/check-circle.svg' %}"></span>
